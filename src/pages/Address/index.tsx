@@ -162,7 +162,7 @@ const Address: React.FC = () => {
             <ArrowLeftOutlined style={{ fontSize: 32 }} />
           </Button>
           <Typography.Title style={{ marginBottom: -5 }}>
-            Address {address}
+            Address
           </Typography.Title>
         </div>
         {isLoading || isError ? (

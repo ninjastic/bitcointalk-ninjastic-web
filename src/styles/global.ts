@@ -12,9 +12,10 @@ const GlobalStyle = createGlobalStyle`
         box-sizing: inherit;
     }
     
-    #root {
-        height: 100%;
-        width: 100%;
+    body {
+        height: auto;
+        width: auto;
+        background-color: #1D1D1D;
     }
 
 
@@ -70,7 +71,7 @@ const GlobalStyle = createGlobalStyle`
         max-width: 100%;
     }
 
-    .post .ant-card-body a {
+    .post, .post .ant-card-body a {
         word-wrap: break-word;
     }
 

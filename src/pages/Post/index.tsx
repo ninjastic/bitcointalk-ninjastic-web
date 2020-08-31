@@ -266,7 +266,28 @@ const Post: React.FC = () => {
                       {dataAddresses.map(address => (
                         <Collapse key={address.address}>
                           <Collapse.Panel
-                            header={`${address.address} [${address.coin}] (${address.posts_id.length})`}
+                            header={
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  wordWrap: 'break-word',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                <Link
+                                  to={`/address/${address.address}`}
+                                  style={{
+                                    fontWeight: 500,
+                                    wordWrap: 'break-word',
+                                    maxWidth: '90%',
+                                  }}
+                                >
+                                  {address.address} [{address.coin}] (
+                                  {address.posts_id.length})
+                                </Link>
+                              </div>
+                            }
                             key={address.address}
                           >
                             <PostData postsId={address.posts_id} />

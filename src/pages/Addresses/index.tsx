@@ -255,7 +255,7 @@ const Addresses: React.FC = () => {
                         Do your search on the card on the side
                       </Typography.Text>
                       <Typography.Text>or</Typography.Text>
-                      <Typography.Text>
+                      <Typography.Text style={{ textAlign: 'center' }}>
                         Just click the button and get a few random addresses.
                       </Typography.Text>
                     </div>
@@ -282,6 +282,8 @@ const Addresses: React.FC = () => {
                               style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
+                                wordWrap: 'break-word',
+                                maxWidth: '100%',
                               }}
                             >
                               <Link
@@ -289,11 +291,13 @@ const Addresses: React.FC = () => {
                                 style={{
                                   fontWeight: 500,
                                   wordWrap: 'break-word',
+                                  maxWidth: '90%',
                                 }}
                               >
                                 {address.address} [{address.coin}] (
                                 {address.posts_id.length})
                               </Link>
+
                               <div>
                                 (#
                                 {index + 1})
