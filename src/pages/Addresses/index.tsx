@@ -182,6 +182,7 @@ const Addresses: React.FC = () => {
                       <Input
                         placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
                         onKeyDown={handleKeyDown}
+                        defaultValue={searchQuery.address}
                         onChange={e =>
                           setValue('address', e.target.value.trim())
                         }
@@ -231,8 +232,11 @@ const Addresses: React.FC = () => {
                       }}
                     >
                       <Typography.Text>
-                        Do your search on the card on the side OR get 50 random
-                        addresses.
+                        Do your search on the card on the side
+                      </Typography.Text>
+                      <Typography.Text>or</Typography.Text>
+                      <Typography.Text>
+                        Just click the button and get a few random addresses.
                       </Typography.Text>
                     </div>
                   </Card>
@@ -242,15 +246,12 @@ const Addresses: React.FC = () => {
 
             {data && !isLoading && !isLoadingAddress ? (
               <div>
+                {!data.length ? (
+                  <Typography.Text strong key={1}>
+                    No results...
+                  </Typography.Text>
+                ) : null}
                 {data.map((address, index) => {
-                  if (!data.length) {
-                    return (
-                      <Typography.Text strong key={1}>
-                        No results...
-                      </Typography.Text>
-                    );
-                  }
-
                   return (
                     <div style={{ marginBottom: 15 }} key={address.address}>
                       <Collapse>

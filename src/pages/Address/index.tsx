@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, Link } from 'react-router-dom';
 import { Typography, Card, Tooltip, Collapse, Button } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { format } from 'date-fns';
@@ -99,8 +99,8 @@ const PostData: React.FC<PostMatchParams> = ({ id }) => {
               </span>
             </div>
             <div style={{ textAlign: 'right' }}>
+              <Link to={`/post/${id}`}>{id}</Link>
               <div>{lastBoard}</div>
-              <div>{id}</div>
             </div>
           </div>
         }

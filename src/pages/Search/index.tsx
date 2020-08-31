@@ -114,6 +114,7 @@ const Search: React.FC = () => {
                     <Form.Item label="Author">
                       <Input
                         placeholder="TryNinja"
+                        defaultValue={searchQuery.author}
                         onKeyDown={handleKeyDown}
                         onChange={e =>
                           setValue('author', e.target.value.trim())
@@ -125,6 +126,7 @@ const Search: React.FC = () => {
                     <Form.Item label="Topic ID">
                       <Input
                         placeholder="5248878"
+                        defaultValue={searchQuery.topic_id}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('topic_id', e.target.value)}
                       />
@@ -135,6 +137,7 @@ const Search: React.FC = () => {
                       <Input
                         placeholder="Bitcoin"
                         maxLength={50}
+                        defaultValue={searchQuery.content}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('content', e.target.value)}
                       />
@@ -183,7 +186,11 @@ const Search: React.FC = () => {
                       }}
                     >
                       <Typography.Text>
-                        Do your search on the card on the side.
+                        Do your search on the card on the side
+                      </Typography.Text>
+                      <Typography.Text>or</Typography.Text>
+                      <Typography.Text>
+                        Just click the button and get the latest posts.
                       </Typography.Text>
                     </div>
                   </Card>
