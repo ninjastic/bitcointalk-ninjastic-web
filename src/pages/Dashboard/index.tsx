@@ -15,7 +15,7 @@ import api from '../../services/api';
 
 import Header from '../../components/Header';
 
-import { PageContainer } from './styles';
+import { PageContent } from './styles';
 
 const Dashboard: React.FC = () => {
   const { data, isLoading, isError } = useQuery(
@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <Header />
-      <PageContainer>
+      <PageContent>
         {isLoading || isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             {isError ? (
@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
                   <XAxis dataKey="day" />
                   <YAxis dataKey="posts" />
                   <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
-                  <Line type="monotone" dataKey="posts" stroke="#82ca9d" />
+                  <Line dataKey="posts" stroke="#82ca9d" />
                 </LineChart>
               </Col>
               <Col md={24} lg={12}>
@@ -75,13 +75,13 @@ const Dashboard: React.FC = () => {
                   <XAxis dataKey="day" />
                   <YAxis dataKey="merits" />
                   <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
-                  <Line type="monotone" dataKey="merits" stroke="#8884d8" />
+                  <Line dataKey="merits" stroke="#8884d8" />
                 </LineChart>
               </Col>
             </Row>
           </div>
         )}
-      </PageContainer>
+      </PageContent>
     </>
   );
 };

@@ -6,9 +6,12 @@ interface SearchStoreState {
     author: string;
     content: string;
     topic_id: string;
+    address: string;
   };
-  loadingSearch: boolean;
-  setLoadingSearch: (value: boolean) => void;
+  isLoadingSearch: boolean;
+  isLoadingAddress: boolean;
+  setIsLoadingSearch: (value: boolean) => void;
+  setIsLoadingAddress: (value: boolean) => void;
   setValue: (type: string, value: any) => void;
 }
 
@@ -22,10 +25,15 @@ const StoreProvider = ({ children }) => {
       author: '',
       content: '',
       topic_id: '',
+      address: '',
     },
-    loadingSearch: false,
-    setLoadingSearch: value => {
-      store.loadingSearch = value;
+    isLoadingSearch: false,
+    isLoadingAddress: false,
+    setIsLoadingSearch: value => {
+      store.isLoadingSearch = value;
+    },
+    setIsLoadingAddress: value => {
+      store.isLoadingAddress = value;
     },
     setValue: (type, value) => {
       store.searchQuery[type] = value;

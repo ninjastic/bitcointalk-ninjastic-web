@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -21,12 +21,11 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 
 import api from '../../services/api';
+import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
 
-import { PageContainer } from './styles';
-
-import { useSearchStore } from '../../stores/SearchStore';
+import { PageContent } from './styles';
 
 interface Post {
   post_id: number;
@@ -42,8 +41,9 @@ interface Post {
 
 const Search: React.FC = () => {
   const store = useSearchStore();
+  const [postsColumnType] = useState(false);
 
-  const { setValue, searchQuery, loadingSearch, setLoadingSearch } = store;
+  const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
 
   const {
     isLoading,
@@ -58,10 +58,10 @@ const Search: React.FC = () => {
       const { author, content, topic_id } = searchQuery;
 
       const { data: responseData } = await api.get(
-        `posts/search?author=${author}&content=${content}&topic_id=${topic_id}&last=${lastId}&limit=100`,
+        `posts?author=${author}&content=${content}&topic_id=${topic_id}&last=${lastId}&limit=100`,
       );
 
-      setLoadingSearch(false);
+      setIsLoadingSearch(false);
 
       return responseData;
     },
@@ -77,13 +77,13 @@ const Search: React.FC = () => {
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
-      setLoadingSearch(true);
+      setIsLoadingSearch(true);
       refetch();
     }
   };
 
   useBottomScrollListener(() => {
-    if (!canFetchMore) return;
+    if (!canFetchMore || isFetching) return;
 
     fetchMore();
   }, 500);
@@ -104,7 +104,7 @@ const Search: React.FC = () => {
   return (
     <div>
       <Header />
-      <PageContainer>
+      <PageContent>
         <Row gutter={[24, 24]}>
           <Col xs={24} md={24} lg={8}>
             <Card title="Search params" type="inner">
@@ -146,15 +146,15 @@ const Search: React.FC = () => {
                       <Button
                         type="primary"
                         icon={
-                          isFetching || isLoading || loadingSearch ? (
+                          isFetching || isLoading || isLoadingSearch ? (
                             <LoadingOutlined />
                           ) : (
                             <SearchOutlined />
                           )
                         }
-                        disabled={isFetching || isLoading || loadingSearch}
+                        disabled={isFetching || isLoading || isLoadingSearch}
                         onClick={() => {
-                          setLoadingSearch(true);
+                          setIsLoadingSearch(true);
                           refetch();
                         }}
                       >
@@ -169,10 +169,10 @@ const Search: React.FC = () => {
           <Col xs={24} md={24} lg={16}>
             <Observer>
               {() => {
-                return !data || isLoading || loadingSearch ? (
+                return !data || isLoading || isLoadingSearch ? (
                   <Card
                     title="What do you want to find today?"
-                    loading={isLoading || isFetching || loadingSearch}
+                    loading={isLoading || isFetching || isLoadingSearch}
                     type="inner"
                   >
                     <div
@@ -191,7 +191,7 @@ const Search: React.FC = () => {
               }}
             </Observer>
 
-            {data && !isLoading && !loadingSearch ? (
+            {data && !isLoading && !isLoadingSearch ? (
               <div>
                 {data.map((group, groupIndex) => {
                   if (!group.length) {
@@ -210,28 +210,67 @@ const Search: React.FC = () => {
 
                     const lastBoard = post.boards[post.boards.length - 1];
 
-                    return (
+                    return postsColumnType ? (
+                      <div style={{ marginBottom: 15 }} key={post.post_id}>
+                        <Card>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <a
+                              href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
+                              style={{
+                                fontWeight: 500,
+                                wordWrap: 'break-word',
+                              }}
+                            >
+                              {post.title}
+                            </a>
+
+                            <div style={{ textAlign: 'right' }}>
+                              <Link to={`/post/${post.post_id}`}>
+                                {post.post_id}
+                              </Link>{' '}
+                              (#
+                              {groupIndex * 100 + i + 1})
+                            </div>
+                          </div>
+
+                          <div>
+                            Posted by{' '}
+                            <a
+                              style={{ fontWeight: 500 }}
+                              href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
+                            >
+                              {post.author}
+                            </a>
+                            {post.archive ? ' and scrapped on ' : ' on '}
+                            <span style={{ fontWeight: 500 }}>
+                              {formattedDate}
+                            </span>
+                          </div>
+                        </Card>
+                      </div>
+                    ) : (
                       <div style={{ marginBottom: 30 }} key={post.post_id}>
                         <Card
                           className="post"
                           title={
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                              }}
-                            >
-                              <a
-                                href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                                style={{
-                                  fontWeight: 500,
-                                  fontSize: 16,
-                                  maxWidth: '50%',
-                                  wordWrap: 'break-word',
-                                }}
-                              >
-                                {post.title}
-                              </a>
+                            <div>
+                              <div>
+                                <a
+                                  href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
+                                  style={{
+                                    fontWeight: 500,
+                                    fontSize: 16,
+                                    wordWrap: 'break-word',
+                                  }}
+                                >
+                                  {post.title}
+                                </a>
+                              </div>
                               <span style={{ fontWeight: 400 }}>
                                 posted by{' '}
                                 <a
@@ -282,7 +321,10 @@ const Search: React.FC = () => {
                           {parse(DOMPurity.sanitize(post.content))}
                         </Card>
                         {i === array.length - 1 ? (
-                          <LoadingMoreCard groupIndex={groupIndex} />
+                          <>
+                            <Divider />
+                            <LoadingMoreCard groupIndex={groupIndex} />
+                          </>
                         ) : (
                           <Divider />
                         )}
@@ -295,7 +337,7 @@ const Search: React.FC = () => {
           </Col>
         </Row>
         <BackTop />
-      </PageContainer>
+      </PageContent>
     </div>
   );
 };

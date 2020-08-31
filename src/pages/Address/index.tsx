@@ -13,10 +13,14 @@ import { PageContent } from './styles';
 import api from '../../services/api';
 
 interface MatchParams {
+  address: string;
+}
+
+interface PostMatchParams {
   id: number;
 }
 
-const PostData: React.FC<MatchParams> = ({ id }) => {
+const PostData: React.FC<PostMatchParams> = ({ id }) => {
   const { data, isLoading, isError } = useQuery(
     `addressesPostsData:${id}`,
     async () => {
@@ -102,45 +106,25 @@ const PostData: React.FC<MatchParams> = ({ id }) => {
         }
         key={id}
       >
-        <div>{parse(DOMPurity.sanitize(data.content))}</div>
+        <div className="post">{parse(DOMPurity.sanitize(data.content))}</div>
       </Collapse.Panel>
     </Collapse>
   );
 };
 
-const Post: React.FC = () => {
+const Address: React.FC = () => {
   const history = useHistory();
-  const { id } = useRouteMatch().params as MatchParams;
+  const { address } = useRouteMatch().params as MatchParams;
 
   const { data, isLoading, isError } = useQuery(
-    `post:${id}`,
+    `address:${address}`,
     async () => {
-      const { data: responseData } = await api.get(`posts/${id}`);
+      const { data: responseData } = await api.get(`addresses/${address}`);
 
       return responseData;
     },
     { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
   );
-
-  const {
-    data: dataAddresses,
-    isLoading: isLoadingAddresses,
-    isError: isErrorAddresses,
-  } = useQuery(
-    `addressesPost:${id}`,
-    async () => {
-      const { data: responseData } = await api.get(`addresses/post/${id}`);
-
-      return responseData;
-    },
-    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
-  );
-
-  const formattedDate = data
-    ? format(new Date(data.date), 'dd/MM/yyy hh:MM:ss')
-    : null;
-
-  const lastBoard = data ? data.boards[data.boards.length - 1] : null;
 
   return (
     <>
@@ -158,14 +142,14 @@ const Post: React.FC = () => {
             <ArrowLeftOutlined style={{ fontSize: 32 }} />
           </Button>
           <Typography.Title style={{ marginBottom: -5 }}>
-            Post {id}
+            Address {address}
           </Typography.Title>
         </div>
         {isLoading || isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             {isError ? (
               <Typography.Text>
-                This post could not be found in our database.
+                This address could not be found in our database.
               </Typography.Text>
             ) : (
               <LoadingOutlined style={{ fontSize: 50 }} />
@@ -174,7 +158,6 @@ const Post: React.FC = () => {
         ) : (
           <div>
             <Card
-              className="post"
               title={
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between' }}
@@ -186,75 +169,24 @@ const Post: React.FC = () => {
                     }}
                   >
                     <div>
-                      <a
-                        href={`https://bitcointalk.org/index.php?topic=${data.topic_id}.msg${data.post_id}#msg${data.post_id}`}
+                      <span
                         style={{
                           fontWeight: 500,
                           fontSize: 16,
                           wordWrap: 'break-word',
                         }}
                       >
-                        {data.title}
-                      </a>
+                        {data.address}
+                      </span>
                     </div>
-                    <span style={{ fontWeight: 400 }}>
-                      posted by{' '}
-                      <a
-                        style={{ fontWeight: 500 }}
-                        href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
-                      >
-                        {data.author}
-                      </a>
-                      {data.archive ? ' and scrapped on ' : ' on '}
-                      <span style={{ fontWeight: 500 }}>{formattedDate} </span>
-                      {data.archive ? (
-                        <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                          <span
-                            style={{
-                              borderBottom: '1px dotted white',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            (archived)
-                          </span>
-                        </Tooltip>
-                      ) : null}
-                    </span>
                   </div>
-                  <div>{lastBoard}</div>
                 </div>
               }
               type="inner"
             >
-              {parse(DOMPurity.sanitize(data.content))}
-            </Card>
-            <Card style={{ marginTop: 15, marginBottom: 20 }} title="Addresses">
-              {isLoadingAddresses ? (
-                <LoadingOutlined style={{ fontSize: 50 }} />
-              ) : (
-                <div>
-                  {isErrorAddresses ? (
-                    <Typography.Text>
-                      No addresses were found on this post.
-                    </Typography.Text>
-                  ) : (
-                    <div>
-                      {dataAddresses.map(address => (
-                        <Collapse key={address.address}>
-                          <Collapse.Panel
-                            header={`${address.address} [${address.coin}] (${address.posts_id.length})`}
-                            key={address.address}
-                          >
-                            {address.posts_id.map(post_id => (
-                              <PostData id={post_id} key={post_id} />
-                            ))}
-                          </Collapse.Panel>
-                        </Collapse>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              {data.posts_id.map(post_id => (
+                <PostData id={post_id} />
+              ))}
             </Card>
           </div>
         )}
@@ -263,4 +195,4 @@ const Post: React.FC = () => {
   );
 };
 
-export default Post;
+export default Address;

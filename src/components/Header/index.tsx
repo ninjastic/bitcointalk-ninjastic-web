@@ -19,6 +19,9 @@ const Header: React.FC = () => {
       <Menu.Item key="/search">
         <Link to="/search">Search</Link>
       </Menu.Item>
+      <Menu.Item key="/addresses">
+        <Link to="/addresses">Addresses</Link>
+      </Menu.Item>
     </Menu>
   );
 };
