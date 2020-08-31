@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, Link } from 'react-router-dom';
 import { Typography, Card, Tooltip, Collapse, Button } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { format } from 'date-fns';
@@ -16,11 +16,29 @@ interface MatchParams {
   id: number;
 }
 
-const PostData: React.FC<MatchParams> = ({ id }) => {
+interface PostMatchParams {
+  postsId: number[];
+}
+
+const PostData: React.FC<PostMatchParams> = ({ postsId }) => {
+  const ids = postsId.reduce((prev, current, i, array) => {
+    if (i === 0) {
+      return current;
+    }
+    if (i === array.length - 1) {
+      return `${prev},${current}`;
+    }
+    return `${prev},${current}`;
+  }, '');
+
   const { data, isLoading, isError } = useQuery(
-    `addressesPostsData:${id}`,
+    `addressesPostsData:${ids}`,
     async () => {
-      const { data: responseData } = await api.get(`posts/${id}`);
+      const { data: responseData } = await api.get(`posts/${ids}`);
+
+      if (responseData.post_id) {
+        return [responseData];
+      }
 
       return responseData;
     },
@@ -30,7 +48,7 @@ const PostData: React.FC<MatchParams> = ({ id }) => {
   if (isLoading) {
     return (
       <Collapse>
-        <Collapse.Panel header={<LoadingOutlined />} key={id} />
+        <Collapse.Panel header={<LoadingOutlined />} key={ids} />
       </Collapse>
     );
   }
@@ -38,74 +56,80 @@ const PostData: React.FC<MatchParams> = ({ id }) => {
   if (isError) {
     return (
       <Collapse>
-        <Collapse.Panel header={`Error loading post ${id}`} key={id} disabled />
+        <Collapse.Panel
+          header={`Error loading posts ${ids}`}
+          key={ids}
+          disabled
+        />
       </Collapse>
     );
   }
 
-  const formattedDate = data
-    ? format(new Date(data.date), 'dd/MM/yyy hh:MM:ss')
-    : null;
+  return data.map(post => {
+    const formattedDate = post
+      ? format(new Date(post.date), 'dd/MM/yyy hh:MM:ss')
+      : null;
 
-  const lastBoard = data ? data.boards[data.boards.length - 1] : null;
+    const lastBoard = post.boards[post.boards.length - 1];
 
-  return (
-    <Collapse>
-      <Collapse.Panel
-        header={
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <a
-                href={`https://bitcointalk.org/index.php?topic=${data.topic_id}.msg${data.post_id}#msg${data.post_id}`}
-                style={{
-                  fontWeight: 500,
-                  wordWrap: 'break-word',
-                }}
-              >
-                {data.title}
-              </a>
-              <span style={{ fontWeight: 400 }}>
-                posted by{' '}
+    return (
+      <Collapse key={post.post_id}>
+        <Collapse.Panel
+          header={
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <a
-                  style={{ fontWeight: 500 }}
-                  href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
+                  href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
+                  style={{
+                    fontWeight: 500,
+                    wordWrap: 'break-word',
+                  }}
                 >
-                  {data.author}
+                  {post.title}
                 </a>
-                {data.archive ? ' and scrapped on ' : ' on '}
-                <span style={{ fontWeight: 500 }}>{formattedDate} </span>
-                {data.archive ? (
-                  <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                    <span
-                      style={{
-                        borderBottom: '1px dotted white',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      (archived)
-                    </span>
-                  </Tooltip>
-                ) : null}
-              </span>
+                <span style={{ fontWeight: 400 }}>
+                  posted by{' '}
+                  <a
+                    style={{ fontWeight: 500 }}
+                    href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
+                  >
+                    {post.author}
+                  </a>
+                  {post.archive ? ' and scrapped on ' : ' on '}
+                  <span style={{ fontWeight: 500 }}>{formattedDate} </span>
+                  {post.archive ? (
+                    <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
+                      <span
+                        style={{
+                          borderBottom: '1px dotted white',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        (archived)
+                      </span>
+                    </Tooltip>
+                  ) : null}
+                </span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <Link to={`/post/${post.post_id}`}>{post.post_id}</Link>
+                <div>{lastBoard}</div>
+              </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div>{lastBoard}</div>
-              <div>{id}</div>
-            </div>
-          </div>
-        }
-        key={id}
-      >
-        <div>{parse(DOMPurity.sanitize(data.content))}</div>
-      </Collapse.Panel>
-    </Collapse>
-  );
+          }
+          key={post.id}
+        >
+          <div className="post">{parse(DOMPurity.sanitize(post.content))}</div>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  });
 };
 
 const Post: React.FC = () => {
@@ -245,9 +269,7 @@ const Post: React.FC = () => {
                             header={`${address.address} [${address.coin}] (${address.posts_id.length})`}
                             key={address.address}
                           >
-                            {address.posts_id.map(post_id => (
-                              <PostData id={post_id} key={post_id} />
-                            ))}
+                            <PostData postsId={address.posts_id} />
                           </Collapse.Panel>
                         </Collapse>
                       ))}
