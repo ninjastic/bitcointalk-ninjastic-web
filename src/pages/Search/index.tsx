@@ -212,7 +212,7 @@ const Search: React.FC = () => {
                   return group.map((post, i, array) => {
                     const formattedDate = format(
                       new Date(post.date),
-                      'dd/MM/yyy hh:MM:ss',
+                      'dd/MM/yyyy hh:mm:ss',
                     );
 
                     const lastBoard = post.boards[post.boards.length - 1];

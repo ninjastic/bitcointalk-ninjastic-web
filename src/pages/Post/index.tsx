@@ -67,7 +67,7 @@ const PostData: React.FC<PostMatchParams> = ({ postsId }) => {
 
   return data.map(post => {
     const formattedDate = post
-      ? format(new Date(post.date), 'dd/MM/yyy hh:MM:ss')
+      ? format(new Date(post.date), 'dd/MM/yyyy hh:mm:ss')
       : null;
 
     const lastBoard = post.boards[post.boards.length - 1];
@@ -161,7 +161,7 @@ const Post: React.FC = () => {
   );
 
   const formattedDate = data
-    ? format(new Date(data.date), 'dd/MM/yyy hh:MM:ss')
+    ? format(new Date(data.date), 'dd/MM/yyyy hh:mm:ss')
     : null;
 
   const lastBoard = data ? data.boards[data.boards.length - 1] : null;
