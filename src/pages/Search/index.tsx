@@ -12,6 +12,7 @@ import {
   Tooltip,
   Divider,
   BackTop,
+  ConfigProvider,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import parse from 'html-react-parser';
@@ -21,6 +22,7 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 
 import api from '../../services/api';
+import direction from '../../services/direction';
 import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
@@ -215,6 +217,8 @@ const Search: React.FC = () => {
                       'dd/MM/yyyy hh:mm:ss',
                     );
 
+                    const postDirection = direction(post.content);
+
                     const lastBoard = post.boards[post.boards.length - 1];
 
                     return postsColumnType ? (
@@ -262,71 +266,73 @@ const Search: React.FC = () => {
                       </div>
                     ) : (
                       <div style={{ marginBottom: 30 }} key={post.post_id}>
-                        <Card
-                          className="post"
-                          title={
-                            <div>
+                        <ConfigProvider direction={postDirection}>
+                          <Card
+                            className="post"
+                            title={
                               <div>
-                                <a
-                                  href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                                  style={{
-                                    fontWeight: 500,
-                                    fontSize: 16,
-                                    wordWrap: 'break-word',
-                                  }}
-                                >
-                                  {post.title}
-                                </a>
-                              </div>
-                              <span style={{ fontWeight: 400 }}>
-                                posted by{' '}
-                                <a
-                                  style={{ fontWeight: 500 }}
-                                  href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                                >
-                                  {post.author}
-                                </a>
-                                {post.archive ? ' and scrapped on ' : ' on '}
-                                <span style={{ fontWeight: 500 }}>
-                                  {formattedDate}{' '}
+                                <div>
+                                  <a
+                                    href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
+                                    style={{
+                                      fontWeight: 500,
+                                      fontSize: 16,
+                                      wordWrap: 'break-word',
+                                    }}
+                                  >
+                                    {post.title}
+                                  </a>
+                                </div>
+                                <span style={{ fontWeight: 400 }}>
+                                  posted by{' '}
+                                  <a
+                                    style={{ fontWeight: 500 }}
+                                    href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
+                                  >
+                                    {post.author}
+                                  </a>
+                                  {post.archive ? ' and scrapped on ' : ' on '}
+                                  <span style={{ fontWeight: 500 }}>
+                                    {formattedDate}{' '}
+                                  </span>
+                                  {post.archive ? (
+                                    <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
+                                      <span
+                                        style={{
+                                          borderBottom: '1px dotted white',
+                                          cursor: 'pointer',
+                                        }}
+                                      >
+                                        (archived)
+                                      </span>
+                                    </Tooltip>
+                                  ) : null}
                                 </span>
-                                {post.archive ? (
-                                  <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                                    <span
-                                      style={{
-                                        borderBottom: '1px dotted white',
-                                        cursor: 'pointer',
-                                      }}
-                                    >
-                                      (archived)
-                                    </span>
-                                  </Tooltip>
-                                ) : null}
-                              </span>
-                            </div>
-                          }
-                          extra={
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-end',
-                              }}
-                            >
-                              <div>
-                                <Link to={`/post/${post.post_id}`}>
-                                  {post.post_id}
-                                </Link>{' '}
-                                (#
-                                {groupIndex * 100 + i + 1})
                               </div>
-                              <div>{lastBoard}</div>
-                            </div>
-                          }
-                          type="inner"
-                        >
-                          {parse(DOMPurity.sanitize(post.content))}
-                        </Card>
+                            }
+                            extra={
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'flex-end',
+                                }}
+                              >
+                                <div>
+                                  <Link to={`/post/${post.post_id}`}>
+                                    {post.post_id}
+                                  </Link>{' '}
+                                  (#
+                                  {groupIndex * 100 + i + 1})
+                                </div>
+                                <div>{lastBoard}</div>
+                              </div>
+                            }
+                            type="inner"
+                          >
+                            {parse(DOMPurity.sanitize(post.content))}
+                          </Card>
+                        </ConfigProvider>
                         {i === array.length - 1 ? (
                           <>
                             <Divider />

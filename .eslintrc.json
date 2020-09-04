@@ -38,7 +38,8 @@
          ],
          "react/prop-types": "off",
          "camelcase": "off",
-         "import/prefer-default-export": "off"
+         "import/prefer-default-export": "off",
+         "no-bitwise": "off"
     },
     "settings": {
         "import/resolver": {

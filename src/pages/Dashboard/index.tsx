@@ -9,6 +9,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
 
 import api from '../../services/api';
@@ -52,31 +53,26 @@ const Dashboard: React.FC = () => {
             <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
               <Col md={24} lg={12}>
                 <Typography.Title level={3}>Scraped Posts</Typography.Title>
-                <LineChart
-                  width={Math.min(window.innerWidth - 30, 500)}
-                  height={300}
-                  data={reportsGraphData}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis dataKey="posts" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
-                  <Line dataKey="posts" stroke="#82ca9d" />
-                </LineChart>
+                <ResponsiveContainer width="100%" aspect={4.0 / 2.0}>
+                  <LineChart data={reportsGraphData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <YAxis dataKey="posts" />
+                    <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
+                    <Line dataKey="posts" stroke="#82ca9d" type="monotone" />
+                  </LineChart>
+                </ResponsiveContainer>
               </Col>
               <Col md={24} lg={12}>
                 <Typography.Title level={3}>Scraped Merits</Typography.Title>
-                <LineChart
-                  width={Math.min(window.innerWidth - 30, 500)}
-                  height={300}
-                  data={reportsGraphData}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis dataKey="merits" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
-                  <Line dataKey="merits" stroke="#8884d8" />
-                </LineChart>
+                <ResponsiveContainer width="100%" aspect={4.0 / 2.0}>
+                  <LineChart data={reportsGraphData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis dataKey="merits" />
+                    <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
+                    <Line dataKey="merits" stroke="#8884d8" type="monotone" />
+                  </LineChart>
+                </ResponsiveContainer>
               </Col>
             </Row>
           </div>
