@@ -56,6 +56,7 @@ const Dashboard: React.FC = () => {
                 <ResponsiveContainer width="100%" aspect={4.0 / 2.0}>
                   <LineChart data={reportsGraphData}>
                     <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
                     <YAxis dataKey="posts" />
                     <Tooltip contentStyle={{ backgroundColor: '#1D1D1D' }} />
                     <Line dataKey="posts" stroke="#82ca9d" type="monotone" />
