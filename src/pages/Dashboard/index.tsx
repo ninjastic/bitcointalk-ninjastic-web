@@ -51,9 +51,9 @@ const Dashboard: React.FC = () => {
           <div>
             <Typography.Title level={2}>Work in progress...</Typography.Title>
             <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
-              <Col md={24} lg={12}>
+              <Col xs={24} lg={12}>
                 <Typography.Title level={3}>Scraped Posts</Typography.Title>
-                <ResponsiveContainer width="100%" aspect={4.0 / 2.0}>
+                <ResponsiveContainer width="100%" aspect={2 / 1}>
                   <LineChart data={reportsGraphData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
@@ -63,9 +63,9 @@ const Dashboard: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </Col>
-              <Col md={24} lg={12}>
+              <Col xs={24} lg={12}>
                 <Typography.Title level={3}>Scraped Merits</Typography.Title>
-                <ResponsiveContainer width="100%" aspect={4.0 / 2.0}>
+                <ResponsiveContainer width="100%" aspect={2 / 1}>
                   <LineChart data={reportsGraphData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />

@@ -283,7 +283,7 @@ const Search: React.FC = () => {
                                     {post.title}
                                   </a>
                                 </div>
-                                <span style={{ fontWeight: 400 }}>
+                                <div style={{ fontWeight: 400 }}>
                                   posted by{' '}
                                   <a
                                     style={{ fontWeight: 500 }}
@@ -307,7 +307,7 @@ const Search: React.FC = () => {
                                       </span>
                                     </Tooltip>
                                   ) : null}
-                                </span>
+                                </div>
                               </div>
                             }
                             extra={
