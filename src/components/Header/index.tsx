@@ -7,7 +7,13 @@ const Header: React.FC = () => {
   const { pathname } = useLocation();
   const history = useHistory();
 
-  const handleSearch = (e: string) => {
+  const handleTopicSearch = (e: string) => {
+    if (e) {
+      history.push(`/topic/${e}`);
+    }
+  };
+
+  const handlePostSearch = (e: string) => {
     if (e) {
       history.push(`/post/${e}`);
     }
@@ -38,13 +44,28 @@ const Header: React.FC = () => {
           <Link to="/addresses">Addresses</Link>
         </Menu.Item>
         <Menu.Item
-          key="/post/*"
+          key="/topic/*"
           disabled
           style={{ float: isSmallScreen ? 'none' : 'right', cursor: 'default' }}
         >
           <Input.Search
+            placeholder="Topic ID"
+            onSearch={handleTopicSearch}
+            style={{ height: 30 }}
+          />
+        </Menu.Item>
+        <Menu.Item
+          key="/post/*"
+          disabled
+          style={{
+            float: isSmallScreen ? 'none' : 'right',
+            cursor: 'default',
+            marginRight: 0,
+          }}
+        >
+          <Input.Search
             placeholder="Post ID"
-            onSearch={handleSearch}
+            onSearch={handlePostSearch}
             style={{ height: 30 }}
           />
         </Menu.Item>

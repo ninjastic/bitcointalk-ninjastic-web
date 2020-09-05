@@ -318,14 +318,14 @@ const Search: React.FC = () => {
                                   alignItems: 'flex-end',
                                 }}
                               >
-                                <div>
+                                <div style={{ textAlign: 'right' }}>
                                   <Link to={`/post/${post.post_id}`}>
                                     {post.post_id}
                                   </Link>{' '}
                                   (#
                                   {groupIndex * 100 + i + 1})
+                                  <div>{lastBoard}</div>
                                 </div>
-                                <div>{lastBoard}</div>
                               </div>
                             }
                             type="inner"

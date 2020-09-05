@@ -78,6 +78,14 @@ const GlobalStyle = createGlobalStyle`
     .post .ant-card-body b, .post .ant-card-body span {
         color: #177ddc !important;
     }
+
+    .ant-card-head-title {
+        white-space: pre-wrap;
+    }
+
+    .ant-card-extra {
+        max-width: 30%;
+    }
 `;
 
 export default GlobalStyle;
