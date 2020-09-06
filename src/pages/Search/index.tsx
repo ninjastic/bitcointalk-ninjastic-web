@@ -68,7 +68,7 @@ const Search: React.FC = () => {
       } = searchQuery;
 
       const { data: responseData } = await api.get(
-        `posts?author=${author}&content=${content}&topic_id=${topic_id}after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
+        `posts?author=${author}&content=${content}&topic_id=${topic_id}&after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
       );
 
       setIsLoadingSearch(false);
