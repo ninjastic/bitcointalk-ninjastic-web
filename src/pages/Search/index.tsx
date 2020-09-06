@@ -13,11 +13,13 @@ import {
   Divider,
   BackTop,
   ConfigProvider,
+  DatePicker,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
 import { format } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 
@@ -57,10 +59,16 @@ const Search: React.FC = () => {
   } = useInfiniteQuery<Post[]>(
     'posts',
     async (key, lastId = 0) => {
-      const { author, content, topic_id } = searchQuery;
+      const {
+        author,
+        content,
+        topic_id,
+        after_date,
+        before_date,
+      } = searchQuery;
 
       const { data: responseData } = await api.get(
-        `posts?author=${author}&content=${content}&topic_id=${topic_id}&last=${lastId}&limit=100`,
+        `posts?author=${author}&content=${content}&topic_id=${topic_id}after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
       );
 
       setIsLoadingSearch(false);
@@ -82,6 +90,14 @@ const Search: React.FC = () => {
       setIsLoadingSearch(true);
       refetch();
     }
+  };
+
+  const handleChangeDateRange = e => {
+    const from = e ? zonedTimeToUtc(new Date(e[0]), 'UTC').toISOString() : '';
+    const to = e ? zonedTimeToUtc(new Date(e[1]), 'UTC').toISOString() : '';
+
+    setValue('after_date', from);
+    setValue('before_date', to);
   };
 
   useBottomScrollListener(() => {
@@ -142,6 +158,15 @@ const Search: React.FC = () => {
                         defaultValue={searchQuery.content}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('content', e.target.value)}
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col span={24}>
+                    <Form.Item label="Date Range (UTC)">
+                      <DatePicker.RangePicker
+                        showTime
+                        onChange={handleChangeDateRange}
                       />
                     </Form.Item>
                   </Col>

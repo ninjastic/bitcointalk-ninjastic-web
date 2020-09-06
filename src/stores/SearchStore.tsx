@@ -7,6 +7,8 @@ interface SearchStoreState {
     content: string;
     topic_id: string;
     address: string;
+    after_date: string;
+    before_date: string;
   };
   isLoadingSearch: boolean;
   isLoadingAddress: boolean;
@@ -26,6 +28,8 @@ const StoreProvider = ({ children }) => {
       content: '',
       topic_id: '',
       address: '',
+      after_date: '',
+      before_date: '',
     },
     isLoadingSearch: false,
     isLoadingAddress: false,
