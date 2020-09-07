@@ -49,8 +49,6 @@ const PostHistoryCard: React.FC<Props> = ({
       new Date(post_date),
     );
 
-    console.log(diffMinutesPostMade);
-
     if (diffMinutesPostMade < 5) {
       return (
         <Card title="Post Edit History">
