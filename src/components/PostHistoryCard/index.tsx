@@ -4,7 +4,12 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
-import { differenceInSeconds } from 'date-fns';
+import {
+  differenceInSeconds,
+  add,
+  formatDistanceToNow,
+  formatDistance,
+} from 'date-fns';
 
 import api from '../../services/api';
 
@@ -49,6 +54,11 @@ const PostHistoryCard: React.FC<Props> = ({
       new Date(post_date),
     );
 
+    const nextCheck = formatDistanceToNow(
+      add(new Date(post_date), { minutes: 5, seconds: 10 }),
+      { addSuffix: true, includeSeconds: true },
+    );
+
     if (diffSecondsPostMade <= 310) {
       return (
         <Card title="Post Edit History">
@@ -61,8 +71,7 @@ const PostHistoryCard: React.FC<Props> = ({
 
           <div style={{ marginTop: 10 }}>
             <Typography.Text style={{ fontWeight: 500 }}>
-              Next check in ~{`${5 - diffSecondsPostMade} `}
-              minutes.
+              Next check: {nextCheck}
             </Typography.Text>
           </div>
         </Card>
@@ -71,7 +80,9 @@ const PostHistoryCard: React.FC<Props> = ({
 
     return (
       <Card title="Post Edit History">
-        <Typography.Text>No history was found for this post.</Typography.Text>
+        <Typography.Text>
+          No edit history was found for this post.
+        </Typography.Text>
       </Card>
     );
   }
@@ -79,6 +90,10 @@ const PostHistoryCard: React.FC<Props> = ({
   const titleChanged = post_title !== data.title;
   const contentChanged = post_content !== data.content;
   const secondsEditDifference = differenceInSeconds(
+    new Date(post_date),
+    new Date(data.date),
+  );
+  const formatEditDifference = formatDistance(
     new Date(post_date),
     new Date(data.date),
   );
@@ -96,7 +111,7 @@ const PostHistoryCard: React.FC<Props> = ({
               <Typography.Text>
                 {secondsEditDifference === 0
                   ? ' after less than 5 minutes.'
-                  : ` after ${secondsEditDifference * 60} minutes.`}
+                  : ` after ${formatEditDifference}.`}
               </Typography.Text>
             </div>
           </Timeline.Item>
@@ -108,7 +123,7 @@ const PostHistoryCard: React.FC<Props> = ({
                 Post content was edited
                 {secondsEditDifference === 0
                   ? ' after less than 5 minutes.'
-                  : ` after ${secondsEditDifference * 60} minutes.`}
+                  : ` after ${formatEditDifference}.`}
               </Typography.Text>
             </div>
             <Collapse key="edited">
