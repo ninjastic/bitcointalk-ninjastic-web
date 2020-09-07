@@ -4,7 +4,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
-import { differenceInMinutes } from 'date-fns';
+import { differenceInSeconds } from 'date-fns';
 
 import api from '../../services/api';
 
@@ -44,12 +44,12 @@ const PostHistoryCard: React.FC<Props> = ({
   }
 
   if (isError) {
-    const diffMinutesPostMade = differenceInMinutes(
+    const diffSecondsPostMade = differenceInSeconds(
       new Date(),
       new Date(post_date),
     );
 
-    if (diffMinutesPostMade < 5) {
+    if (diffSecondsPostMade <= 310) {
       return (
         <Card title="Post Edit History">
           <div>
@@ -61,7 +61,7 @@ const PostHistoryCard: React.FC<Props> = ({
 
           <div style={{ marginTop: 10 }}>
             <Typography.Text style={{ fontWeight: 500 }}>
-              Next check in ~{`${5 - diffMinutesPostMade} `}
+              Next check in ~{`${5 - diffSecondsPostMade} `}
               minutes.
             </Typography.Text>
           </div>
@@ -78,7 +78,7 @@ const PostHistoryCard: React.FC<Props> = ({
 
   const titleChanged = post_title !== data.title;
   const contentChanged = post_content !== data.content;
-  const minutesEditDifference = differenceInMinutes(
+  const secondsEditDifference = differenceInSeconds(
     new Date(post_date),
     new Date(data.date),
   );
@@ -94,9 +94,9 @@ const PostHistoryCard: React.FC<Props> = ({
               <Typography.Text> to </Typography.Text>
               <Typography.Text code>{data.title}</Typography.Text>
               <Typography.Text>
-                {minutesEditDifference === 0
-                  ? ' In less than 5 minutes.'
-                  : ` After ${minutesEditDifference} minutes.`}
+                {secondsEditDifference === 0
+                  ? ' after less than 5 minutes.'
+                  : ` after ${secondsEditDifference * 60} minutes.`}
               </Typography.Text>
             </div>
           </Timeline.Item>
@@ -106,9 +106,9 @@ const PostHistoryCard: React.FC<Props> = ({
             <div style={{ marginBottom: 10 }}>
               <Typography.Text>
                 Post content was edited
-                {minutesEditDifference === 0
-                  ? ' in less than 5 minutes.'
-                  : ` after ${minutesEditDifference} minutes.`}
+                {secondsEditDifference === 0
+                  ? ' after less than 5 minutes.'
+                  : ` after ${secondsEditDifference * 60} minutes.`}
               </Typography.Text>
             </div>
             <Collapse key="edited">
