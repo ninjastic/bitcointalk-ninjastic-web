@@ -76,7 +76,7 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
 
   return data.map(post => {
     const formattedDate = post
-      ? format(new Date(post.date), 'dd/MM/yyyy hh:mm:ss')
+      ? format(new Date(post.date), 'dd/MM/yyyy HH:mm:ss')
       : null;
 
     const lastBoard = post.boards[post.boards.length - 1];

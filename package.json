@@ -34,6 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^3.9.0",
     "antd": "^4.6.0",
     "axios": "^0.20.0",
+    "configcat-js": "^4.0.5",
     "date-fns": "^2.15.0",
     "date-fns-tz": "^1.0.10",
     "direction": "^1.0.4",

@@ -57,7 +57,7 @@ const Post: React.FC = () => {
   );
 
   const formattedDate = data
-    ? format(new Date(data.date), 'dd/MM/yyyy hh:mm:ss')
+    ? format(new Date(data.date), 'dd/MM/yyyy HH:mm:ss')
     : null;
 
   const lastBoard = data ? data.boards[data.boards.length - 1] : null;

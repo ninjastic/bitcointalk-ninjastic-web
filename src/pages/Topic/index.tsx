@@ -72,7 +72,7 @@ const Topic: React.FC = () => {
           <>
             {data.map((post, i, array) => {
               const formattedDate = data
-                ? format(new Date(post.date), 'dd/MM/yyyy hh:mm:ss')
+                ? format(new Date(post.date), 'dd/MM/yyyy HH:mm:ss')
                 : null;
 
               const lastBoard = post
