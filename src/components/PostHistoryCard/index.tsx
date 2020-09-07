@@ -44,6 +44,33 @@ const PostHistoryCard: React.FC<Props> = ({
   }
 
   if (isError) {
+    const diffMinutesPostMade = differenceInMinutes(
+      new Date(),
+      new Date(post_date),
+    );
+
+    console.log(diffMinutesPostMade);
+
+    if (diffMinutesPostMade < 5) {
+      return (
+        <Card title="Post Edit History">
+          <div>
+            <Typography.Text>
+              This post was made less than 5 minutes ago, so it was not checked
+              for edits.
+            </Typography.Text>
+          </div>
+
+          <div style={{ marginTop: 10 }}>
+            <Typography.Text style={{ fontWeight: 500 }}>
+              Next check in ~{`${5 - diffMinutesPostMade} `}
+              minutes.
+            </Typography.Text>
+          </div>
+        </Card>
+      );
+    }
+
     return (
       <Card title="Post Edit History">
         <Typography.Text>No history was found for this post.</Typography.Text>
