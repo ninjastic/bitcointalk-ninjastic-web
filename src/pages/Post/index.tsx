@@ -22,6 +22,7 @@ import api from '../../services/api';
 import direction from '../../services/direction';
 
 import { PageContent } from './styles';
+import PostHistoryCard from '../../components/PostHistoryCard';
 
 interface MatchParams {
   id: number;
@@ -128,12 +129,12 @@ const Post: React.FC = () => {
                         >
                           {data.author}
                         </a>
-                        {data.archive ? ' and scrapped on ' : ' on '}
+                        {data.archive ? ' and scraped on ' : ' on '}
                         <span style={{ fontWeight: 500 }}>
                           {formattedDate}{' '}
                         </span>
                         {data.archive ? (
-                          <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
+                          <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
                             <span
                               style={{
                                 borderBottom: '1px dotted white',
@@ -154,7 +155,7 @@ const Post: React.FC = () => {
                 {parse(DOMPurity.sanitize(data.content))}
               </Card>
             </ConfigProvider>
-            <Card style={{ marginTop: 15, marginBottom: 20 }} title="Addresses">
+            <Card style={{ marginTop: 15, marginBottom: 10 }} title="Addresses">
               {isLoadingAddresses ? (
                 <LoadingOutlined style={{ fontSize: 50 }} />
               ) : (
@@ -204,6 +205,12 @@ const Post: React.FC = () => {
                 </div>
               )}
             </Card>
+            <PostHistoryCard
+              id={data.post_id}
+              post_title={data.title}
+              post_content={data.content}
+              post_date={data.date}
+            />
           </>
         )}
       </PageContent>

@@ -75,12 +75,27 @@ const GlobalStyle = createGlobalStyle`
         word-wrap: break-word;
     }
 
-    .post .ant-card-body b, .post .ant-card-body span {
-        color: #177ddc !important;
-    }
-
     .ant-card-head-title {
         white-space: pre-wrap;
+    }
+
+    a {
+        color: #258ae8;
+        text-decoration: none;
+        background-color: transparent;
+        outline: none;
+        cursor: pointer;
+        -webkit-transition: color .3s;
+        transition: color .3s;
+        -webkit-text-decoration-skip: objects;
+    }
+
+    post b, post b a, span, a.ul {
+        color: unset;
+    }
+
+    post .quoteheader b {
+        color: #258ae8;
     }
 
     .ant-card-extra {

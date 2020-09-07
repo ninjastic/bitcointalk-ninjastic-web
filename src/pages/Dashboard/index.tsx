@@ -24,9 +24,11 @@ const Dashboard: React.FC = () => {
     async () => {
       const { data: responseData } = await api.get('/reports');
 
+      responseData.pop();
+
       return responseData;
     },
-    { staleTime: 3000 },
+    { staleTime: 5000 },
   );
 
   const reportsGraphData = data?.map(day => {

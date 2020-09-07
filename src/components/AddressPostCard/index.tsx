@@ -117,10 +117,10 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
                     >
                       {post.author}
                     </a>
-                    {post.archive ? ' and scrapped on ' : ' on '}
+                    {post.archive ? ' and scraped on ' : ' on '}
                     <span style={{ fontWeight: 500 }}>{formattedDate} </span>
                     {post.archive ? (
-                      <Tooltip title="This post was scrapped by Loyce at this date. This may or may not represent the time and date the post was made.">
+                      <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
                         <span
                           style={{
                             borderBottom: '1px dotted white',
