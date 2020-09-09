@@ -52,11 +52,7 @@ const Search: React.FC = () => {
 
   useEffect(() => {
     configCatClient.getValueAsync('postSearchEnabled', false).then(value => {
-      if (value) {
-        setPostsSearchEnabled(true);
-      } else {
-        setPostsSearchEnabled(false);
-      }
+      setPostsSearchEnabled(value);
     });
   });
 
