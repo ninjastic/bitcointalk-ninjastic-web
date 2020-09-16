@@ -1,25 +1,44 @@
 import React from 'react';
-import { useQuery } from 'react-query';
-import { useRouteMatch, useHistory, Link } from 'react-router-dom';
-import {
-  Typography,
-  Card,
-  Tooltip,
-  Divider,
-  Button,
-  ConfigProvider,
-} from 'antd';
+import { useInfiniteQuery } from 'react-query';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import { Typography, Divider, Button, Card } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { format } from 'date-fns';
-import parse from 'html-react-parser';
-import DOMPurity from 'dompurify';
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 import Header from '../../components/Header';
 
 import api from '../../services/api';
-import direction from '../../services/direction';
 
 import { PageContent } from './styles';
+import PostCard from '../../components/PostCard';
+
+interface Post {
+  post_id: number;
+  topic_id: number;
+  title: string;
+  author: string;
+  author_uid: number;
+  content: string;
+  date: Date;
+  boards: string[];
+  board_id: number;
+  archive: boolean;
+}
+
+interface ApiResponseHitsData {
+  _id: string;
+  _source: Post;
+}
+
+interface ApiResponseHits {
+  hits: ApiResponseHitsData[];
+}
+
+interface ApiResponse {
+  took: number;
+  timed_out: boolean;
+  hits: ApiResponseHits;
+}
 
 interface MatchParams {
   id: number;
@@ -29,15 +48,52 @@ const Topic: React.FC = () => {
   const history = useHistory();
   const { id } = useRouteMatch().params as MatchParams;
 
-  const { data, isLoading, isError } = useQuery(
-    `topic:${id}`,
-    async () => {
-      const { data: responseData } = await api.get(`posts/topic/${id}`);
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    fetchMore,
+    canFetchMore,
+    data,
+  } = useInfiniteQuery<ApiResponse>(
+    'posts',
+    async (key, lastId = 0) => {
+      const { data: responseData } = await api.get(
+        `posts?topic_id=${id}&last=${lastId}&limit=100`,
+      );
 
       return responseData;
     },
-    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+    {
+      retry: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      getFetchMore: lastGroup => {
+        if (lastGroup.hits.hits.length < 100) return false;
+
+        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._id;
+      },
+    },
   );
+
+  useBottomScrollListener(() => {
+    if (!canFetchMore || isFetching) return;
+
+    fetchMore();
+  }, 500);
+
+  const LoadingMoreCard = ({ groupIndex }) => {
+    if (groupIndex === data.length - 1) {
+      return canFetchMore ? (
+        <Card loading style={{ marginTop: 30 }} />
+      ) : (
+        <div style={{ textAlign: 'center', marginTop: 25 }}>
+          <Typography.Text>You reached the end!</Typography.Text>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -58,105 +114,57 @@ const Topic: React.FC = () => {
             Topic {id}
           </Typography.Title>
         </div>
-        {isLoading || isError ? (
+        {isLoading && !data && !isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            {isError ? (
-              <Typography.Text>
-                This topic could not be found in our database.
-              </Typography.Text>
-            ) : (
-              <LoadingOutlined style={{ fontSize: 50 }} />
-            )}
+            <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
           </div>
-        ) : (
-          <>
-            {data.map((post, i, array) => {
-              const formattedDate = data
-                ? format(new Date(post.date), 'dd/MM/yyyy HH:mm:ss')
-                : null;
-
-              const lastBoard = post
-                ? post.boards[post.boards.length - 1]
-                : null;
-
-              const postDirection =
-                direction(post.content) === 'rtl' ? 'rtl' : 'ltr';
-
-              return (
-                <div key={post.post_id}>
-                  <ConfigProvider direction={postDirection}>
-                    <Card
-                      className="post"
-                      title={
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                            }}
-                          >
-                            <div>
-                              <a
-                                href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                                style={{
-                                  fontWeight: 500,
-                                  fontSize: 16,
-                                  wordWrap: 'break-word',
-                                }}
-                              >
-                                {post.title}
-                              </a>
-                            </div>
-                            <span style={{ fontWeight: 400 }}>
-                              posted by{' '}
-                              <a
-                                style={{ fontWeight: 500 }}
-                                href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                              >
-                                {post.author}
-                              </a>
-                              {post.archive ? ' and scraped on ' : ' on '}
-                              <span style={{ fontWeight: 500 }}>
-                                {formattedDate}{' '}
-                              </span>
-                              {post.archive ? (
-                                <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                                  <span
-                                    style={{
-                                      borderBottom: '1px dotted white',
-                                      cursor: 'pointer',
-                                    }}
-                                  >
-                                    (archived)
-                                  </span>
-                                </Tooltip>
-                              ) : null}
-                            </span>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <Link to={`/post/${post.post_id}`}>
-                              {post.post_id}
-                            </Link>
-                            <div>{lastBoard}</div>
-                          </div>
-                        </div>
-                      }
-                      type="inner"
+        ) : null}
+        {isError ? (
+          <div>
+            <Typography.Text strong key={1}>
+              Something went wrong...
+            </Typography.Text>
+          </div>
+        ) : null}
+        {data && !isLoading && !isError ? (
+          <div>
+            {data.map((group, groupIndex) => {
+              if (!group.hits.hits.length) {
+                return (
+                  <div
+                    style={{
+                      width: '100%',
+                      marginTop: 15,
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Typography.Text
+                      type="secondary"
+                      style={{ fontSize: 16 }}
+                      key={1}
                     >
-                      {parse(DOMPurity.sanitize(post.content))}
-                    </Card>
-                  </ConfigProvider>
-                  {i === array.length - 1 ? null : <Divider />}
-                </div>
-              );
+                      No results...
+                    </Typography.Text>
+                  </div>
+                );
+              }
+
+              return group.hits.hits.map((post_raw, i, array) => {
+                const post = post_raw._source;
+
+                return (
+                  <div style={{ marginBottom: 30 }} key={post.post_id}>
+                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
+                    <Divider />
+                    {i === array.length - 1 ? (
+                      <LoadingMoreCard groupIndex={groupIndex} />
+                    ) : null}
+                  </div>
+                );
+              });
             })}
-          </>
-        )}
+          </div>
+        ) : null}
       </PageContent>
     </>
   );

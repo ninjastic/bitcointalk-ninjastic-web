@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import {
   Form,
@@ -9,26 +9,23 @@ import {
   Row,
   Col,
   Typography,
-  Tooltip,
   Divider,
   BackTop,
-  ConfigProvider,
   DatePicker,
+  TreeSelect,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
-import parse from 'html-react-parser';
-import DOMPurity from 'dompurify';
-import { format } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 
 import api from '../../services/api';
-import direction from '../../services/direction';
 import configCatClient from '../../services/configcat';
 import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
+import PostCard from '../../components/PostCard';
 
 import { PageContent } from './styles';
 
@@ -41,8 +38,86 @@ interface Post {
   content: string;
   date: Date;
   boards: string[];
+  board_id: number;
   archive: boolean;
 }
+
+interface ApiResponseHitsData {
+  _id: string;
+  _source: Post;
+}
+
+interface ApiResponseHits {
+  hits: ApiResponseHitsData[];
+}
+
+interface ApiResponse {
+  took: number;
+  timed_out: boolean;
+  hits: ApiResponseHits;
+}
+
+const SelectorBoards: React.FC = () => {
+  const [search, setSearch] = useState('');
+  const [boardTitle, setBoardTitle] = useState('');
+
+  const { setValue, setBoards } = useSearchStore();
+
+  const { data, isLoading } = useQuery(
+    'boards',
+    async () => {
+      const { data: responseData } = await api.get('/boards');
+
+      return responseData;
+    },
+    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  useQuery(
+    'boardsRaw',
+    async () => {
+      const { data: responseData } = await api.get('/boards/?raw=1');
+
+      if (responseData && responseData.length) {
+        setBoards(responseData);
+      }
+
+      return responseData;
+    },
+    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  const boardTestMatch = (searchText: string, board): boolean => {
+    const { title } = board;
+    if (title.toLowerCase().startsWith(searchText.toLowerCase())) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleOnChange = (selectedValue: string, selectedTitle) => {
+    setBoardTitle(selectedTitle[0]);
+    setValue('board', selectedValue || '');
+  };
+
+  return (
+    <TreeSelect
+      treeDefaultExpandAll
+      showSearch
+      allowClear
+      value={boardTitle || null}
+      searchValue={search}
+      onChange={handleOnChange}
+      onSearch={setSearch}
+      filterTreeNode={boardTestMatch}
+      treeData={data}
+      loading={isLoading}
+      placeholder="Bounties (Altcoins)"
+    />
+  );
+};
+
 const Search: React.FC = () => {
   const store = useSearchStore();
   const [postsColumnType] = useState(false);
@@ -64,7 +139,7 @@ const Search: React.FC = () => {
     fetchMore,
     canFetchMore,
     data,
-  } = useInfiniteQuery<Post[]>(
+  } = useInfiniteQuery<ApiResponse>(
     'posts',
     async (key, lastId = 0) => {
       const {
@@ -73,14 +148,14 @@ const Search: React.FC = () => {
         topic_id,
         after_date,
         before_date,
+        board,
       } = searchQuery;
 
       const { data: responseData } = await api.get(
-        `posts?author=${author}&content=${content}&topic_id=${topic_id}&after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
+        `posts?author=${author}&content=${content}&topic_id=${topic_id}&board=${board}&after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
       );
 
       setIsLoadingSearch(false);
-
       return responseData;
     },
     {
@@ -89,9 +164,9 @@ const Search: React.FC = () => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.length < 100) return false;
+        if (lastGroup.hits.hits.length < 100) return false;
 
-        return lastGroup[lastGroup.length - 1].post_id;
+        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._id;
       },
     },
   );
@@ -187,18 +262,30 @@ const Search: React.FC = () => {
                       </Form.Item>
                     </Col>
 
+                    <Col span={24}>
+                      <Form.Item label="Board">
+                        <SelectorBoards />
+                      </Form.Item>
+                    </Col>
+
                     <Col span={24} style={{ textAlign: 'right' }}>
                       <Form.Item>
                         <Button
                           type="primary"
                           icon={
-                            isFetching || isLoading || isLoadingSearch ? (
-                              <LoadingOutlined />
+                            isFetching ||
+                            isLoading ||
+                            (isLoadingSearch && !isError) ? (
+                              <LoadingOutlined style={{ color: '#fff' }} />
                             ) : (
                               <SearchOutlined />
                             )
                           }
-                          disabled={isFetching || isLoading || isLoadingSearch}
+                          disabled={
+                            isFetching ||
+                            isLoading ||
+                            (isLoadingSearch && !isError)
+                          }
                           onClick={() => {
                             setIsLoadingSearch(true);
                             refetch();
@@ -243,14 +330,14 @@ const Search: React.FC = () => {
               {isError ? (
                 <div>
                   <Typography.Text strong key={1}>
-                    Something went wrong... did I timed out?
+                    Something went wrong...
                   </Typography.Text>
                 </div>
               ) : null}
               {data && !isLoading && !isLoadingSearch && !isError ? (
                 <div>
                   {data.map((group, groupIndex) => {
-                    if (!group.length) {
+                    if (!group.hits.hits.length) {
                       return (
                         <Typography.Text strong key={1}>
                           No results...
@@ -258,15 +345,15 @@ const Search: React.FC = () => {
                       );
                     }
 
-                    return group.map((post, i, array) => {
+                    return group.hits.hits.map((post_raw, i, array) => {
+                      const post = post_raw._source;
+
+                      const date = new Date(post.date);
+
                       const formattedDate = format(
-                        new Date(post.date),
-                        'dd/MM/yyyy HH:mm:ss',
+                        addMinutes(date, date.getTimezoneOffset()),
+                        'yyyy-MM-dd HH:mm:ss',
                       );
-
-                      const postDirection = direction(post.content);
-
-                      const lastBoard = post.boards[post.boards.length - 1];
 
                       return postsColumnType ? (
                         <div style={{ marginBottom: 15 }} key={post.post_id}>
@@ -313,81 +400,14 @@ const Search: React.FC = () => {
                         </div>
                       ) : (
                         <div style={{ marginBottom: 30 }} key={post.post_id}>
-                          <ConfigProvider direction={postDirection}>
-                            <Card
-                              className="post"
-                              title={
-                                <div>
-                                  <div>
-                                    <a
-                                      href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                                      style={{
-                                        fontWeight: 500,
-                                        fontSize: 16,
-                                        wordWrap: 'break-word',
-                                      }}
-                                    >
-                                      {post.title}
-                                    </a>
-                                  </div>
-                                  <div style={{ fontWeight: 400 }}>
-                                    posted by{' '}
-                                    <a
-                                      style={{ fontWeight: 500 }}
-                                      href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                                    >
-                                      {post.author}
-                                    </a>
-                                    {post.archive ? ' and scraped on ' : ' on '}
-                                    <span style={{ fontWeight: 500 }}>
-                                      {formattedDate}{' '}
-                                    </span>
-                                    {post.archive ? (
-                                      <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                                        <span
-                                          style={{
-                                            borderBottom: '1px dotted white',
-                                            cursor: 'pointer',
-                                          }}
-                                        >
-                                          (archived)
-                                        </span>
-                                      </Tooltip>
-                                    ) : null}
-                                  </div>
-                                </div>
-                              }
-                              extra={
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-end',
-                                  }}
-                                >
-                                  <div style={{ textAlign: 'right' }}>
-                                    <Link to={`/post/${post.post_id}`}>
-                                      {post.post_id}
-                                    </Link>{' '}
-                                    (#
-                                    {groupIndex * 100 + i + 1})
-                                    <div>{lastBoard}</div>
-                                  </div>
-                                </div>
-                              }
-                              type="inner"
-                            >
-                              {parse(DOMPurity.sanitize(post.content))}
-                            </Card>
-                          </ConfigProvider>
+                          <PostCard
+                            data={post}
+                            number={groupIndex * 100 + i + 1}
+                          />
+                          <Divider />
                           {i === array.length - 1 ? (
-                            <>
-                              <Divider />
-                              <LoadingMoreCard groupIndex={groupIndex} />
-                            </>
-                          ) : (
-                            <Divider />
-                          )}
+                            <LoadingMoreCard groupIndex={groupIndex} />
+                          ) : null}
                         </div>
                       );
                     });

@@ -1,6 +1,5 @@
 import React from 'react';
-import { useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
+import { useInfiniteQuery } from 'react-query';
 import {
   Form,
   Input,
@@ -10,30 +9,27 @@ import {
   Col,
   Typography,
   BackTop,
-  Collapse,
+  Divider,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Observer } from 'mobx-react';
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
-import AddressAuthorsCard from '../../components/AddressAuthorsCard';
-import AddressPostCard from '../../components/AddressPostCard';
+import AddressCard from '../../components/AddressCard';
 
 import { PageContent } from './styles';
 
 interface Address {
+  id: string;
   coin: string;
   address: string;
   posts_id: number[];
   created_at: Date;
   updated_at: Date;
-}
-
-interface PostMatchParams {
-  postsId: number[];
 }
 
 const Addresses: React.FC = () => {
@@ -46,24 +42,50 @@ const Addresses: React.FC = () => {
     setIsLoadingAddress,
   } = store;
 
-  const { isLoading, isFetching, refetch, data } = useQuery<Address[]>(
-    'addresses',
-    async () => {
-      const { address } = searchQuery;
+  const {
+    isLoading,
+    isFetching,
+    refetch,
+    fetchMore,
+    canFetchMore,
+    data,
+    isError,
+  } = useInfiniteQuery<Address[]>(
+    `addresses`,
+    async (key, last = '') => {
+      const { address, address_author } = searchQuery;
 
-      const { data: responseData } = await api.get(
-        `addresses?address=${address}&limit=50`,
-      );
+      let results;
+
+      if (!address_author) {
+        const { data: responseData } = await api.get(
+          `addresses?address=${address}&last=${last}&limit=50`,
+        );
+
+        results = responseData;
+      } else if (address_author && !address) {
+        const { data: responseData } = await api.get(
+          `users/${address_author}/addresses?last=${last}&limit=50`,
+        );
+
+        results = responseData;
+      }
 
       setIsLoadingAddress(false);
 
-      return responseData;
+      return results;
     },
     {
       enabled: false,
       retry: false,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
+      getFetchMore: lastGroup => {
+        if (lastGroup.length < 50) return false;
+
+        const last = lastGroup[lastGroup.length - 1];
+        return `${last.address},${last.created_at},${last.id}`;
+      },
     },
   );
 
@@ -72,6 +94,25 @@ const Addresses: React.FC = () => {
       setIsLoadingAddress(true);
       refetch();
     }
+  };
+
+  useBottomScrollListener(() => {
+    if (!canFetchMore || isFetching) return;
+
+    fetchMore();
+  }, 500);
+
+  const LoadingMoreCard = ({ groupIndex }) => {
+    if (groupIndex === data.length - 1) {
+      return canFetchMore ? (
+        <Card loading style={{ marginTop: 15 }} />
+      ) : (
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
+          <Typography.Text>You reached the end!</Typography.Text>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -85,14 +126,40 @@ const Addresses: React.FC = () => {
                 <Row gutter={24}>
                   <Col span={24}>
                     <Form.Item label="Address">
-                      <Input
-                        placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
-                        onKeyDown={handleKeyDown}
-                        defaultValue={searchQuery.address}
-                        onChange={e =>
-                          setValue('address', e.target.value.trim())
-                        }
-                      />
+                      <Observer>
+                        {() => (
+                          <Input
+                            allowClear
+                            placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
+                            onKeyDown={handleKeyDown}
+                            defaultValue={searchQuery.address}
+                            disabled={!!searchQuery.address_author.length}
+                            onChange={e =>
+                              setValue('address', e.target.value.trim())
+                            }
+                          />
+                        )}
+                      </Observer>
+                    </Form.Item>
+                  </Col>
+
+                  <Divider>Or</Divider>
+                  <Col span={24}>
+                    <Form.Item label="Username">
+                      <Observer>
+                        {() => (
+                          <Input
+                            allowClear
+                            placeholder="TryNinja"
+                            onKeyDown={handleKeyDown}
+                            defaultValue={searchQuery.address_author}
+                            disabled={!!searchQuery.address.length}
+                            onChange={e =>
+                              setValue('address_author', e.target.value.trim())
+                            }
+                          />
+                        )}
+                      </Observer>
                     </Form.Item>
                   </Col>
 
@@ -101,13 +168,19 @@ const Addresses: React.FC = () => {
                       <Button
                         type="primary"
                         icon={
-                          isFetching || isLoading || isLoadingAddress ? (
-                            <LoadingOutlined />
+                          isFetching ||
+                          isLoading ||
+                          (isLoadingAddress && !isError) ? (
+                            <LoadingOutlined style={{ color: '#fff' }} />
                           ) : (
                             <SearchOutlined />
                           )
                         }
-                        disabled={isFetching || isLoading || isLoadingAddress}
+                        disabled={
+                          isFetching ||
+                          isLoading ||
+                          (isLoadingAddress && !isError)
+                        }
                         onClick={() => {
                           setIsLoadingAddress(true);
                           refetch();
@@ -124,7 +197,7 @@ const Addresses: React.FC = () => {
           <Col xs={24} md={24} lg={16}>
             <Observer>
               {() => {
-                return !data || isLoading || isLoadingAddress ? (
+                return (!data || isLoading || isLoadingAddress) && !isError ? (
                   <Card
                     title="What do you want to find today?"
                     loading={isLoading || isFetching || isLoadingAddress}
@@ -157,48 +230,27 @@ const Addresses: React.FC = () => {
                     No results...
                   </Typography.Text>
                 ) : null}
-                {data.map((address, index) => {
-                  return (
-                    <div style={{ marginBottom: 15 }} key={address.address}>
-                      <Collapse>
-                        <Collapse.Panel
-                          key={address.address}
-                          header={
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                wordWrap: 'break-word',
-                                maxWidth: '100%',
-                              }}
-                            >
-                              <Link
-                                to={`/address/${address.address}`}
-                                style={{
-                                  fontWeight: 500,
-                                  wordWrap: 'break-word',
-                                  maxWidth: '90%',
-                                }}
-                              >
-                                {address.address} [{address.coin}] (
-                                {address.posts_id.length})
-                              </Link>
-
-                              <div>
-                                (#
-                                {index + 1})
-                              </div>
-                            </div>
-                          }
-                        >
-                          <div style={{ marginBottom: 10 }}>
-                            <AddressAuthorsCard address={address.address} />
-                          </div>
-                          <AddressPostCard postsId={address.posts_id} />
-                        </Collapse.Panel>
-                      </Collapse>
-                    </div>
-                  );
+                {data.map((group, groupIndex) => {
+                  if (!group.length) {
+                    return (
+                      <Typography.Text strong key={1}>
+                        No results...
+                      </Typography.Text>
+                    );
+                  }
+                  return group.map((record, i, array) => {
+                    return (
+                      <div style={{ marginBottom: 15 }} key={record.address}>
+                        <AddressCard
+                          data={record}
+                          number={groupIndex * 50 + i + 1}
+                        />
+                        {i === array.length - 1 ? (
+                          <LoadingMoreCard groupIndex={groupIndex} />
+                        ) : null}
+                      </div>
+                    );
+                  });
                 })}
               </div>
             ) : null}

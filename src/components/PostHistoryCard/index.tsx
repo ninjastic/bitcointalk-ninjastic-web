@@ -43,7 +43,10 @@ const PostHistoryCard: React.FC<Props> = ({
   if (isLoading) {
     return (
       <Collapse>
-        <Collapse.Panel header={<LoadingOutlined />} key={id} />
+        <Collapse.Panel
+          header={<LoadingOutlined style={{ color: '#fff' }} />}
+          key={id}
+        />
       </Collapse>
     );
   }
@@ -101,6 +104,16 @@ const PostHistoryCard: React.FC<Props> = ({
   return (
     <Card title="Post Edit History">
       <Timeline>
+        {data.deleted ? (
+          <Timeline.Item color="red">
+            <Typography.Text>
+              Post was deleted
+              {secondsEditDifference === 0
+                ? ' after less than 5 minutes.'
+                : ` after ${formatEditDifference}.`}
+            </Typography.Text>
+          </Timeline.Item>
+        ) : null}
         {titleChanged ? (
           <Timeline.Item>
             <div style={{ marginBottom: 10 }}>

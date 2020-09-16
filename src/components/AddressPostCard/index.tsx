@@ -1,33 +1,15 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { Collapse, ConfigProvider, Tooltip } from 'antd';
-import { Link } from 'react-router-dom';
+import { Button, Collapse } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import { format } from 'date-fns';
-import parse from 'html-react-parser';
-import DOMPurity from 'dompurify';
 
 import api from '../../services/api';
-import direction from '../../services/direction';
+
+import AddressPostCollapse from '../AddressPostCollapse';
 
 interface Props {
   postsId: number[];
 }
-
-const textToColor = (text: string) => {
-  let hash = 0;
-  if (text.length === 0) return hash;
-  for (let i = 0; i < text.length; i += 1) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash);
-    hash &= hash;
-  }
-  const rgb = [0, 0, 0];
-  for (let i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 255;
-    rgb[i] = value;
-  }
-  return `hsl(${rgb[1]},  100%, 75%)`;
-};
 
 const AddressPostCard: React.FC<Props> = ({ postsId }) => {
   const ids = postsId.reduce((prev, current, i, array) => {
@@ -40,7 +22,7 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
     return `${prev},${current}`;
   }, '');
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading, refetch, isError } = useQuery(
     `addressesPostsData:${ids}`,
     async () => {
       const { data: responseData } = await api.get(`posts/${ids}`);
@@ -57,7 +39,10 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
   if (isLoading) {
     return (
       <Collapse>
-        <Collapse.Panel header={<LoadingOutlined />} key={ids} />
+        <Collapse.Panel
+          header={<LoadingOutlined style={{ color: '#fff', fontSize: 16 }} />}
+          key={ids}
+        />
       </Collapse>
     );
   }
@@ -66,7 +51,25 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
     return (
       <Collapse>
         <Collapse.Panel
-          header={`Error loading posts ${ids}`}
+          header={
+            <div
+              style={{
+                display: 'flex',
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span>Error loading posts {ids}</span>
+              <Button
+                type="ghost"
+                onClick={() => refetch()}
+                style={{ float: 'right', marginLeft: 'auto' }}
+              >
+                Retry
+              </Button>
+            </div>
+          }
           key={ids}
           disabled
         />
@@ -75,78 +78,11 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
   }
 
   return data.map(post => {
-    const formattedDate = post
-      ? format(new Date(post.date), 'dd/MM/yyyy HH:mm:ss')
-      : null;
-
-    const lastBoard = post.boards[post.boards.length - 1];
-    const postDirection = direction(post.content);
-
     return (
-      <ConfigProvider direction={postDirection} key={post.post_id}>
-        <Collapse>
-          <Collapse.Panel
-            header={
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div>
-                    <a
-                      href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                      style={{
-                        fontWeight: 500,
-                        wordWrap: 'break-word',
-                      }}
-                    >
-                      {post.title}
-                    </a>
-                  </div>
-                  <span style={{ fontWeight: 400 }}>
-                    posted by{' '}
-                    <a
-                      style={{
-                        fontWeight: 500,
-                        color: `${textToColor(post.author)}`,
-                      }}
-                      href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                    >
-                      {post.author}
-                    </a>
-                    {post.archive ? ' and scraped on ' : ' on '}
-                    <span style={{ fontWeight: 500 }}>{formattedDate} </span>
-                    {post.archive ? (
-                      <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                        <span
-                          style={{
-                            borderBottom: '1px dotted white',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          (archived)
-                        </span>
-                      </Tooltip>
-                    ) : null}
-                  </span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <Link to={`/post/${post.post_id}`}>{post.post_id}</Link>
-                  <div>{lastBoard}</div>
-                </div>
-              </div>
-            }
-            key={post.id}
-          >
-            <div className="post">
-              {parse(DOMPurity.sanitize(post.content))}
-            </div>
-          </Collapse.Panel>
-        </Collapse>
-      </ConfigProvider>
+      <AddressPostCollapse
+        data={post._source ? post._source : post}
+        key={post._source ? post._source.post_id : post.post_id}
+      />
     );
   });
 };

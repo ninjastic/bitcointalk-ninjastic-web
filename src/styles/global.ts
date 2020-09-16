@@ -6,6 +6,7 @@ const GlobalStyle = createGlobalStyle`
     html {
         box-sizing: border-box;
         overflow-y: scroll;
+        background-color: #1D1D1D;
     }
 
     *, *:before, *:after {
@@ -18,6 +19,10 @@ const GlobalStyle = createGlobalStyle`
         background-color: #1D1D1D;
     }
 
+    #root {
+        height: 100vh;
+        background-color: #1D1D1D;
+    }
 
     .quote {
         min-height: 48px;
@@ -71,8 +76,10 @@ const GlobalStyle = createGlobalStyle`
         max-width: 100%;
     }
 
-    .post, .post .ant-card-body a {
-        word-wrap: break-word;
+    .post, .post .ant-card-body a, .post table {
+        max-width: 100%;
+        width: 100% !important;
+        word-break: break-word;
     }
 
     .ant-card-head-title {

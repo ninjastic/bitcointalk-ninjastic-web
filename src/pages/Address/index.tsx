@@ -66,7 +66,7 @@ const Address: React.FC = () => {
                 This address could not be found in our database.
               </Typography.Text>
             ) : (
-              <LoadingOutlined style={{ fontSize: 50 }} />
+              <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
             )}
           </div>
         ) : (

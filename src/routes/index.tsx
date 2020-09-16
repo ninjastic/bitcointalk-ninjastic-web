@@ -8,6 +8,7 @@ import Topic from '../pages/Topic';
 import Addresses from '../pages/Addresses';
 import Address from '../pages/Address';
 import NotFoundPage from '../pages/NotFoundPage';
+import User from '../pages/User';
 
 const Routes: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const Routes: React.FC = () => {
         <Route path="/topic/:id" component={Topic} />
         <Route path="/addresses" component={Addresses} />
         <Route path="/address/:address" component={Address} />
+        <Route path="/user/:username" component={User} />
         <Route path="*" component={NotFoundPage} />
       </Switch>
     </Router>

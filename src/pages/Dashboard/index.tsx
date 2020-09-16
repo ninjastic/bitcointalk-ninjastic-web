@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
                 We are having some trouble contacting the server...
               </Typography.Text>
             ) : (
-              <LoadingOutlined style={{ fontSize: 50 }} />
+              <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
             )}
           </div>
         ) : (
