@@ -25,7 +25,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { format, sub, isValid } from 'date-fns';
+import { format, sub, isValid, addMinutes } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 
 import { LoadingOutlined } from '@ant-design/icons';
@@ -223,10 +223,12 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
       );
     }
 
+    const date = new Date(payload.value);
+
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(new Date(payload.value), 'yyyy/MM/dd')}
+          {format(addMinutes(date, date.getTimezoneOffset()), 'yyyy/MM/dd')}
         </text>
       </g>
     );
@@ -260,13 +262,18 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
           <Tooltip
             contentStyle={{ backgroundColor: '#1D1D1D' }}
             label="{timeTaken}"
-            labelFormatter={value =>
-              `Day: ${
+            labelFormatter={value => {
+              const date = new Date(value);
+
+              return `Day: ${
                 isValid(new Date(value))
-                  ? format(new Date(value), 'yyyy/MM/dd')
+                  ? format(
+                      addMinutes(date, date.getTimezoneOffset()),
+                      'yyyy/MM/dd',
+                    )
                   : null
-              }`
-            }
+              }`;
+            }}
             formatter={value => [value, 'Posts']}
           />
           <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
@@ -312,10 +319,12 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
       );
     }
 
+    const date = new Date(payload.value);
+
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(new Date(payload.value), 'yyyy/MM/dd')}
+          {format(addMinutes(date, date.getTimezoneOffset()), 'yyyy/MM/dd')}
         </text>
       </g>
     );
@@ -500,7 +509,7 @@ const User: React.FC = () => {
               </div>
             </Col>
             <Col xs={12} md={6} lg={6}>
-              <Statistic title="Posts Scrapped" value={data.posts_count} />
+              <Statistic title="Posts Scraped" value={data.posts_count} />
             </Col>
             <Col xs={12} md={8} lg={8}>
               <Statistic title="Favorite Board" value={favoriteBoard} />
