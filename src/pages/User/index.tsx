@@ -92,7 +92,7 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
   );
 };
 
-const KnownAddressesCard: React.FC<{ username: string }> = ({ username }) => {
+const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   const {
     data,
     isLoading,
@@ -129,7 +129,7 @@ const KnownAddressesCard: React.FC<{ username: string }> = ({ username }) => {
   if (isError) {
     return (
       <Collapse defaultActiveKey={1}>
-        <Collapse.Panel header="Known Addresses" key={1} disabled>
+        <Collapse.Panel header="Mentioned Addresses" key={1} disabled>
           <Typography.Text type="secondary">
             No addresses were found in our database.
           </Typography.Text>
@@ -154,7 +154,7 @@ const KnownAddressesCard: React.FC<{ username: string }> = ({ username }) => {
 
   return (
     <Collapse>
-      <Collapse.Panel header="Known Addresses" key={1}>
+      <Collapse.Panel header="Mentioned Addresses" key={1}>
         {data.map((group, groupIndex, array) => {
           return (
             <div>
@@ -357,11 +357,18 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
         <Tooltip
           contentStyle={{ backgroundColor: '#1D1D1D' }}
           label="{timeTaken}"
-          labelFormatter={value =>
-            isValid(new Date(value))
-              ? `Day: ${format(new Date(value), 'yyyy/MM/dd')}`
-              : null
-          }
+          labelFormatter={value => {
+            const date = new Date(value);
+
+            return `Day: ${
+              isValid(new Date(value))
+                ? format(
+                    addMinutes(date, date.getTimezoneOffset()),
+                    'yyyy/MM/dd',
+                  )
+                : null
+            }`;
+          }}
           formatter={value => [value, 'Posts']}
         />
         <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
@@ -544,7 +551,7 @@ const User: React.FC = () => {
               <PostsMonthChart username={data.user.author} />
             </Col>
             <Col span={24}>
-              <KnownAddressesCard username={data.user.author} />
+              <MentionedAddresses username={data.user.author} />
             </Col>
           </Row>
         </PageContent>
