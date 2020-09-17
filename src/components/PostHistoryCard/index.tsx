@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Collapse, Timeline, Typography } from 'antd';
+import { Card, Collapse, Timeline, Typography, Modal } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import parse from 'html-react-parser';
@@ -8,23 +8,24 @@ import {
   differenceInSeconds,
   add,
   formatDistanceToNow,
-  formatDistance,
+  // formatDistance,
 } from 'date-fns';
+import Diff from 'react-stylable-diff';
 
 import api from '../../services/api';
 
 interface Props {
   id: number;
-  post_title: string;
-  post_content: string;
-  post_date: string;
+  postTitle: string;
+  postContent: string;
+  postDate: string;
 }
 
 const PostHistoryCard: React.FC<Props> = ({
   id,
-  post_title,
-  post_content,
-  post_date,
+  postTitle,
+  postContent,
+  postDate,
 }) => {
   const { data, isLoading, isError } = useQuery(
     `postHistory:${id}`,
@@ -54,11 +55,11 @@ const PostHistoryCard: React.FC<Props> = ({
   if (isError) {
     const diffSecondsPostMade = differenceInSeconds(
       new Date(),
-      new Date(post_date),
+      new Date(postDate),
     );
 
     const nextCheck = formatDistanceToNow(
-      add(new Date(post_date), { minutes: 5, seconds: 10 }),
+      add(new Date(postDate), { minutes: 5, seconds: 10 }),
       { addSuffix: true, includeSeconds: true },
     );
 
@@ -90,56 +91,69 @@ const PostHistoryCard: React.FC<Props> = ({
     );
   }
 
-  const titleChanged = post_title !== data.title;
-  const contentChanged = post_content !== data.content;
-  const secondsEditDifference = differenceInSeconds(
-    new Date(post_date),
-    new Date(data.date),
-  );
-  const formatEditDifference = formatDistance(
-    new Date(post_date),
-    new Date(data.date),
-  );
+  const titleChanged = postTitle !== data.title;
+  const contentChanged = postContent !== data.content;
+
+  // const secondsEditDifference = differenceInSeconds(
+  //   new Date(postDate),
+  //   new Date(data.date),
+  // );
+  // const formatEditDifference = formatDistance(
+  //   new Date(postDate),
+  //   new Date(data.date),
+  // );
+
+  const handleOnClickTitleDiff = (oldValue: string, newValue: string) => {
+    Modal.info({
+      title: 'Title difference',
+      content: <Diff inputA={oldValue} inputB={newValue} type="words" />,
+    });
+  };
+
+  const handleOnClickContentDiff = (oldValue: string, newValue: string) => {
+    Modal.info({
+      title: 'Content difference',
+      content: <Diff inputA={oldValue} inputB={newValue} type="words" />,
+      width: 650,
+    });
+  };
 
   return (
     <Card title="Post Edit History">
-      <Timeline>
+      <Timeline mode="left">
         {data.deleted ? (
           <Timeline.Item color="red">
-            <Typography.Text>
-              Post was deleted
-              {secondsEditDifference === 0
-                ? ' after less than 5 minutes.'
-                : ` after ${formatEditDifference}.`}
-            </Typography.Text>
+            <Typography.Text> Post was deleted</Typography.Text>
           </Timeline.Item>
         ) : null}
         {titleChanged ? (
-          <Timeline.Item>
-            <div style={{ marginBottom: 10 }}>
-              <Typography.Text>Title changed from </Typography.Text>
-              <Typography.Text code>{post_title}</Typography.Text>
+          <Timeline.Item color="orange">
+            <Typography.Text>Title changed from </Typography.Text>
+            <Typography.Text code>{postTitle}</Typography.Text>
+            <div>
               <Typography.Text> to </Typography.Text>
               <Typography.Text code>{data.title}</Typography.Text>
-              <Typography.Text>
-                {secondsEditDifference === 0
-                  ? ' after less than 5 minutes.'
-                  : ` after ${formatEditDifference}.`}
-              </Typography.Text>
+              <Typography.Link
+                style={{ marginLeft: 3 }}
+                onClick={() => handleOnClickTitleDiff(postTitle, data.title)}
+              >
+                (check diff)
+              </Typography.Link>
             </div>
           </Timeline.Item>
         ) : null}
         {contentChanged ? (
           <Timeline.Item>
-            <div style={{ marginBottom: 10 }}>
-              <Typography.Text>
-                Post content was edited
-                {secondsEditDifference === 0
-                  ? ' after less than 5 minutes.'
-                  : ` after ${formatEditDifference}.`}
-              </Typography.Text>
-            </div>
-            <Collapse key="edited">
+            <Typography.Text> Post content was edited</Typography.Text>
+            <Typography.Link
+              style={{ marginLeft: 3 }}
+              onClick={() =>
+                handleOnClickContentDiff(postContent, data.content)
+              }
+            >
+              (check diff)
+            </Typography.Link>
+            <Collapse key="edited" style={{ marginTop: 3 }}>
               <Collapse.Panel header="New content" key="edited">
                 {parse(DOMPurity.sanitize(data.content))}
               </Collapse.Panel>

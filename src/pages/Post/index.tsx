@@ -66,9 +66,9 @@ const Post: React.FC = () => {
             <PostAddressesCard id={data.post_id} />
             <PostHistoryCard
               id={data.post_id}
-              post_title={data.title}
-              post_content={data.content}
-              post_date={data.date}
+              postTitle={data.title}
+              postContent={data.content}
+              postDate={data.date}
             />
           </div>
         )}

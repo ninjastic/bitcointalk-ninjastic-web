@@ -53,6 +53,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "react-spring": "^8.0.27",
+    "react-stylable-diff": "^2.0.0",
     "recharts": "^1.8.5",
     "styled-components": "^5.1.1"
   },

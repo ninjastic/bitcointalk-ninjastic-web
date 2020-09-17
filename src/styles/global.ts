@@ -108,6 +108,25 @@ const GlobalStyle = createGlobalStyle`
     .ant-card-extra {
         max-width: 30%;
     }
+
+    .Difference {
+        margin: 0 .2em;
+        padding: .2em .4em .1em;
+        font-size: 85%;
+        background: hsla(0,0%,58.8%,.1);
+        border: 1px solid hsla(0,0%,39.2%,.2);
+        border-radius: 3px;
+    }
+
+    .Difference ins {
+        background-color: rgb(1, 50, 32);
+        text-decoration: none;
+    }
+
+    .Difference del {
+        background-color: rgb(139, 0, 0);
+        text-decoration: none;
+    }
 `;
 
 export default GlobalStyle;

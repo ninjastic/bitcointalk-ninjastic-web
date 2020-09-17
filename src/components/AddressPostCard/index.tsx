@@ -1,7 +1,8 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { Button, Collapse } from 'antd';
+import { Button, Col, Collapse, Row } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 
@@ -56,11 +57,15 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
               style={{
                 display: 'flex',
                 width: '100%',
+                wordBreak: 'break-word',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <span>Error loading posts {ids}</span>
+              <span>
+                Error loading {postsId.length} posts. Showing only unorganized
+                links.
+              </span>
               <Button
                 type="ghost"
                 onClick={() => refetch()}
@@ -71,8 +76,17 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
             </div>
           }
           key={ids}
-          disabled
-        />
+        >
+          <Row gutter={[4, 4]}>
+            {postsId.map(postId => {
+              return (
+                <Col span={4}>
+                  <Link to={`/post/${postId}`}>{postId}</Link>
+                </Col>
+              );
+            })}
+          </Row>
+        </Collapse.Panel>
       </Collapse>
     );
   }

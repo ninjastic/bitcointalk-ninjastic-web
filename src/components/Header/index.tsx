@@ -43,10 +43,13 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
         <Link to="/">Ninjastic.space</Link>
       </Menu.Item>
       <Menu.Item key="/search">
-        <Link to="/search">Search Post</Link>
+        <Link to="/search">Posts</Link>
       </Menu.Item>
       <Menu.Item key="/addresses">
         <Link to="/addresses">Addresses</Link>
+      </Menu.Item>
+      <Menu.Item key="/deleted">
+        <Link to="/deleted">Deleted</Link>
       </Menu.Item>
       <div
         style={{

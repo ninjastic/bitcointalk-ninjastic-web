@@ -516,7 +516,7 @@ const User: React.FC = () => {
               </div>
             </Col>
             <Col xs={12} md={6} lg={6}>
-              <Statistic title="Posts Scraped" value={data.posts_count} />
+              <Statistic title="Scraped Posts" value={data.posts_count} />
             </Col>
             <Col xs={12} md={8} lg={8}>
               <Statistic title="Favorite Board" value={favoriteBoard} />
