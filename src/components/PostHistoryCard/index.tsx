@@ -13,12 +13,14 @@ import {
 import Diff from 'react-stylable-diff';
 
 import api from '../../services/api';
+import { useSearchStore } from '../../stores/SearchStore';
 
 interface Props {
   id: number;
   postTitle: string;
   postContent: string;
   postDate: string;
+  postBoardId: number;
 }
 
 const PostHistoryCard: React.FC<Props> = ({
@@ -26,7 +28,30 @@ const PostHistoryCard: React.FC<Props> = ({
   postTitle,
   postContent,
   postDate,
+  postBoardId,
 }) => {
+  const store = useSearchStore();
+
+  const { boards, setBoards } = store;
+
+  useQuery(
+    'boardsRaw',
+    async () => {
+      const { data: responseData } = await api.get('/boards/?raw=1');
+
+      if (responseData && responseData.length) {
+        setBoards(responseData);
+      }
+
+      return responseData;
+    },
+    {
+      retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  );
+
   const { data, isLoading, isError } = useQuery(
     `postHistory:${id}`,
     async () => {
@@ -93,6 +118,7 @@ const PostHistoryCard: React.FC<Props> = ({
 
   const titleChanged = postTitle !== data.title;
   const contentChanged = postContent !== data.content;
+  const boardIdChanged = postBoardId !== data.board_id;
 
   // const secondsEditDifference = differenceInSeconds(
   //   new Date(postDate),
@@ -140,6 +166,23 @@ const PostHistoryCard: React.FC<Props> = ({
                 (check diff)
               </Typography.Link>
             </div>
+          </Timeline.Item>
+        ) : null}
+        {boardIdChanged ? (
+          <Timeline.Item color="green">
+            <Typography.Text>Post board changed from </Typography.Text>
+            <Typography.Text code>
+              {() => boards.find(b => b.board_id === data.board_id)?.name}
+            </Typography.Text>
+            <Typography.Text> to </Typography.Text>
+            <Typography.Text code>
+              {() => boards.find(b => b.board_id === postBoardId)?.name}
+            </Typography.Text>
+            <Collapse key="edited" style={{ marginTop: 3 }}>
+              <Collapse.Panel header="New content" key="edited">
+                {parse(DOMPurity.sanitize(data.content))}
+              </Collapse.Panel>
+            </Collapse>
           </Timeline.Item>
         ) : null}
         {contentChanged ? (

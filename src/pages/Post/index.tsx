@@ -69,6 +69,7 @@ const Post: React.FC = () => {
               postTitle={data.title}
               postContent={data.content}
               postDate={data.date}
+              postBoardId={data.board_id}
             />
           </div>
         )}
