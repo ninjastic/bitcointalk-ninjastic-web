@@ -32,6 +32,7 @@ const PostHistoryCard: React.FC<Props> = ({
 }) => {
   const store = useSearchStore();
 
+
   const { boards, setBoards } = store;
 
   useQuery(
@@ -149,7 +150,7 @@ const PostHistoryCard: React.FC<Props> = ({
       <Timeline mode="left">
         {data.deleted ? (
           <Timeline.Item color="red">
-            <Typography.Text> Post was deleted</Typography.Text>
+            <Typography.Text>Post was deleted</Typography.Text>
           </Timeline.Item>
         ) : null}
         {titleChanged ? (
@@ -170,24 +171,19 @@ const PostHistoryCard: React.FC<Props> = ({
         ) : null}
         {boardIdChanged ? (
           <Timeline.Item color="green">
-            <Typography.Text>Post board changed from </Typography.Text>
+            <Typography.Text>Board changed from </Typography.Text>
             <Typography.Text code>
-              {() => boards.find(b => b.board_id === data.board_id)?.name}
+              {boards.find(b => b.board_id === data.board_id)?.name}
             </Typography.Text>
             <Typography.Text> to </Typography.Text>
             <Typography.Text code>
-              {() => boards.find(b => b.board_id === postBoardId)?.name}
+              {boards.find(b => b.board_id === postBoardId)?.name}
             </Typography.Text>
-            <Collapse key="edited" style={{ marginTop: 3 }}>
-              <Collapse.Panel header="New content" key="edited">
-                {parse(DOMPurity.sanitize(data.content))}
-              </Collapse.Panel>
-            </Collapse>
           </Timeline.Item>
         ) : null}
         {contentChanged ? (
           <Timeline.Item>
-            <Typography.Text> Post content was edited</Typography.Text>
+            <Typography.Text>Content was edited</Typography.Text>
             <Typography.Link
               style={{ marginLeft: 3 }}
               onClick={() =>

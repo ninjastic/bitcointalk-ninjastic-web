@@ -4,11 +4,8 @@ import { ConfigProvider, Card, Tooltip } from 'antd';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
 import { format, addMinutes } from 'date-fns';
-import { useQuery } from 'react-query';
 
-import api from '../../services/api';
 import direction from '../../services/direction';
-import { useSearchStore } from '../../stores/SearchStore';
 
 interface Post {
   post_id: number;
@@ -18,8 +15,8 @@ interface Post {
   author_uid: number;
   content: string;
   date: Date;
-  boards: string[];
   board_id: number;
+  board_name: string;
   archive: boolean;
 }
 
@@ -29,34 +26,8 @@ interface Props {
 }
 
 const PostCard: React.FC<Props> = ({ data, number }) => {
-  const store = useSearchStore();
-
-  const { boards, setBoards } = store;
-
-  useQuery(
-    'boardsRaw',
-    async () => {
-      const { data: responseData } = await api.get('/boards/?raw=1');
-
-      if (responseData && responseData.length) {
-        setBoards(responseData);
-      }
-
-      return responseData;
-    },
-    {
-      retry: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    },
-  );
 
   const postDirection = direction(data.content);
-
-  const lastBoard =
-    data.board_id && boards.length
-      ? boards.find(board => board.board_id === data.board_id).name
-      : null;
 
   const date = new Date(data.date);
   const formattedDate = format(
@@ -120,7 +91,7 @@ const PostCard: React.FC<Props> = ({ data, number }) => {
             <div style={{ textAlign: 'right' }}>
               <Link to={`/post/${data.post_id}`}>{data.post_id}</Link>
               {postNumber}
-              <div>{lastBoard}</div>
+              <div>{data.board_name}</div>
             </div>
           </div>
         }
