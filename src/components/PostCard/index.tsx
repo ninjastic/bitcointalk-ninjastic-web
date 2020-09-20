@@ -26,7 +26,6 @@ interface Props {
 }
 
 const PostCard: React.FC<Props> = ({ data, number }) => {
-
   const postDirection = direction(data.content);
 
   const date = new Date(data.date);

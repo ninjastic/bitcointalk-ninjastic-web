@@ -85,6 +85,16 @@ const Deleted: React.FC = () => {
               </Typography.Text>
             </div>
             {data.map((group, groupIndex) => {
+              if (!group.hits.hits.length) {
+                return (
+                  <div style={{ textAlign: 'center' }} key="NoResults">
+                    <Typography.Text type="secondary">
+                      No results.
+                    </Typography.Text>
+                  </div>
+                );
+              }
+
               return group.hits.hits.map((postRaw, i, array) => {
                 const post = postRaw._source;
 

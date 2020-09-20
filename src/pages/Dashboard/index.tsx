@@ -37,7 +37,7 @@ const PostsPerHourGraph: React.FC<{ isSmallScreen: boolean }> = ({
 
   if (isLoading) {
     return (
-      <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
+      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
         <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />
       </div>
     );

@@ -127,6 +127,10 @@ const GlobalStyle = createGlobalStyle`
         background-color: rgb(139, 0, 0);
         text-decoration: none;
     }
+
+    .ant-collapse-no-arrow >.ant-collapse-header {
+        cursor: initial !important;
+    }
 `;
 
 export default GlobalStyle;

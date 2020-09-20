@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
-import { Typography, Card, Collapse } from 'antd';
+import { Typography, Collapse } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 import api from '../../services/api';
@@ -21,56 +21,58 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
   );
 
   return (
-    <Card style={{ marginTop: 15, marginBottom: 10 }} title="Addresses">
-      {isLoading ? (
-        <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
-      ) : (
-        <div>
-          {isError ? (
-            <Typography.Text>
-              No BTC/ETH addresses were found on this post.
-            </Typography.Text>
-          ) : (
-            <div>
-              {data.map(address => (
-                <Collapse key={address.address}>
-                  <Collapse.Panel
-                    header={
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          wordWrap: 'break-word',
-                          maxWidth: '100%',
-                        }}
-                      >
-                        <Link
-                          to={`/address/${address.address}`}
+    <Collapse style={{ marginTop: 15, marginBottom: 25 }}>
+      <Collapse.Panel header="Addresses" key={`post-${id}`}>
+        {isLoading ? (
+          <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+        ) : (
+          <div>
+            {isError ? (
+              <Typography.Text>
+                No BTC/ETH addresses were found on this post.
+              </Typography.Text>
+            ) : (
+              <div>
+                {data.map(address => (
+                  <Collapse key={address.address}>
+                    <Collapse.Panel
+                      header={
+                        <div
                           style={{
-                            fontWeight: 500,
+                            display: 'flex',
+                            justifyContent: 'space-between',
                             wordWrap: 'break-word',
-                            maxWidth: '90%',
+                            maxWidth: '100%',
                           }}
                         >
-                          {address.address} [{address.coin}] (
-                          {address.posts_id.length})
-                        </Link>
+                          <Link
+                            to={`/address/${address.address}`}
+                            style={{
+                              fontWeight: 500,
+                              wordWrap: 'break-word',
+                              maxWidth: '90%',
+                            }}
+                          >
+                            {address.address} [{address.coin}] (
+                            {address.posts_id.length})
+                          </Link>
+                        </div>
+                      }
+                      key={address.address}
+                    >
+                      <div style={{ marginBottom: 10 }}>
+                        <AddressAuthorsCard address={address.address} />
                       </div>
-                    }
-                    key={address.address}
-                  >
-                    <div style={{ marginBottom: 10 }}>
-                      <AddressAuthorsCard address={address.address} />
-                    </div>
-                    <AddressPostCard postsId={address.posts_id} />
-                  </Collapse.Panel>
-                </Collapse>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </Card>
+                      <AddressPostCard postsId={address.posts_id} />
+                    </Collapse.Panel>
+                  </Collapse>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Collapse.Panel>
+    </Collapse>
   );
 };
 

@@ -63,7 +63,6 @@ const Post: React.FC = () => {
         ) : (
           <div>
             <PostCard data={data} />
-            <PostAddressesCard id={data.post_id} />
             <PostHistoryCard
               id={data.post_id}
               postTitle={data.title}
@@ -71,6 +70,7 @@ const Post: React.FC = () => {
               postDate={data.date}
               postBoardId={data.board_id}
             />
+            <PostAddressesCard id={data.post_id} />
           </div>
         )}
       </PageContent>

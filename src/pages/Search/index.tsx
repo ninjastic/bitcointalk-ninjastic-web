@@ -21,7 +21,6 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 
 import api from '../../services/api';
-import configCatClient from '../../services/configcat';
 import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
@@ -121,15 +120,8 @@ const SelectorBoards: React.FC = () => {
 const Search: React.FC = () => {
   const store = useSearchStore();
   const [postsColumnType] = useState(false);
-  const [postsSearchEnabled, setPostsSearchEnabled] = useState(true);
 
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
-
-  useEffect(() => {
-    configCatClient.getValueAsync('postSearchEnabled', false).then(value => {
-      setPostsSearchEnabled(value);
-    });
-  });
 
   const {
     isLoading,
@@ -211,220 +203,212 @@ const Search: React.FC = () => {
   return (
     <div>
       <Header />
-      {postsSearchEnabled ? (
-        <PageContent>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={24} lg={8}>
-              <Card title="Search params" type="inner">
-                <Form layout="vertical" size="large">
-                  <Row gutter={24}>
-                    <Col span={12}>
-                      <Form.Item label="Author">
-                        <Input
-                          placeholder="TryNinja"
-                          defaultValue={searchQuery.author}
-                          onKeyDown={handleKeyDown}
-                          onChange={e =>
-                            setValue('author', e.target.value.trim())
-                          }
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item label="Topic ID">
-                        <Input
-                          placeholder="5248878"
-                          defaultValue={searchQuery.topic_id}
-                          onKeyDown={handleKeyDown}
-                          onChange={e => setValue('topic_id', e.target.value)}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item label="Content">
-                        <Input
-                          placeholder="Bitcoin"
-                          maxLength={50}
-                          defaultValue={searchQuery.content}
-                          onKeyDown={handleKeyDown}
-                          onChange={e => setValue('content', e.target.value)}
-                        />
-                      </Form.Item>
-                    </Col>
+      <PageContent>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} md={24} lg={8}>
+            <Card title="Search params" type="inner">
+              <Form layout="vertical" size="large">
+                <Row gutter={24}>
+                  <Col span={12}>
+                    <Form.Item label="Author">
+                      <Input
+                        placeholder="TryNinja"
+                        defaultValue={searchQuery.author}
+                        onKeyDown={handleKeyDown}
+                        onChange={e =>
+                          setValue('author', e.target.value.trim())
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="Topic ID">
+                      <Input
+                        placeholder="5248878"
+                        defaultValue={searchQuery.topic_id}
+                        onKeyDown={handleKeyDown}
+                        onChange={e => setValue('topic_id', e.target.value)}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={24}>
+                    <Form.Item label="Content">
+                      <Input
+                        placeholder="Bitcoin"
+                        maxLength={50}
+                        defaultValue={searchQuery.content}
+                        onKeyDown={handleKeyDown}
+                        onChange={e => setValue('content', e.target.value)}
+                      />
+                    </Form.Item>
+                  </Col>
 
-                    <Col span={24}>
-                      <Form.Item label="Date Range (UTC)">
-                        <DatePicker.RangePicker
-                          showTime
-                          allowEmpty={[true, true]}
-                          onChange={handleChangeDateRange}
-                        />
-                      </Form.Item>
-                    </Col>
+                  <Col span={24}>
+                    <Form.Item label="Date Range (UTC)">
+                      <DatePicker.RangePicker
+                        showTime
+                        allowEmpty={[true, true]}
+                        onChange={handleChangeDateRange}
+                      />
+                    </Form.Item>
+                  </Col>
 
-                    <Col span={24}>
-                      <Form.Item label="Board">
-                        <SelectorBoards />
-                      </Form.Item>
-                    </Col>
+                  <Col span={24}>
+                    <Form.Item label="Board">
+                      <SelectorBoards />
+                    </Form.Item>
+                  </Col>
 
-                    <Col span={24} style={{ textAlign: 'right' }}>
-                      <Form.Item>
-                        <Button
-                          type="primary"
-                          icon={
-                            isFetching ||
-                            isLoading ||
-                            (isLoadingSearch && !isError) ? (
-                              <LoadingOutlined style={{ color: '#fff' }} />
-                            ) : (
-                              <SearchOutlined />
-                            )
-                          }
-                          disabled={
-                            isFetching ||
-                            isLoading ||
-                            (isLoadingSearch && !isError)
-                          }
-                          onClick={() => {
-                            setIsLoadingSearch(true);
-                            refetch();
-                          }}
-                        >
-                          Search
-                        </Button>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form>
-              </Card>
-            </Col>
-            <Col xs={24} md={24} lg={16}>
-              <Observer>
-                {() => {
-                  return (!data || isLoading || isLoadingSearch) && !isError ? (
-                    <Card
-                      title="What do you want to find today?"
-                      loading={isLoading || isFetching || isLoadingSearch}
-                      type="inner"
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
+                  <Col span={24} style={{ textAlign: 'right' }}>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        icon={
+                          isFetching ||
+                          isLoading ||
+                          (isLoadingSearch && !isError) ? (
+                            <LoadingOutlined style={{ color: '#fff' }} />
+                          ) : (
+                            <SearchOutlined />
+                          )
+                        }
+                        disabled={
+                          isFetching ||
+                          isLoading ||
+                          (isLoadingSearch && !isError)
+                        }
+                        onClick={() => {
+                          setIsLoadingSearch(true);
+                          refetch();
                         }}
                       >
-                        <Typography.Text>
-                          Do your search on the card on the side
-                        </Typography.Text>
-                        <Typography.Text>or</Typography.Text>
-                        <Typography.Text>
-                          Just click the button and get the latest posts.
-                        </Typography.Text>
-                      </div>
-                    </Card>
-                  ) : null;
-                }}
-              </Observer>
-              {isError ? (
-                <div>
-                  <Typography.Text strong key={1}>
-                    Something went wrong...
-                  </Typography.Text>
-                </div>
-              ) : null}
-              {data && !isLoading && !isLoadingSearch && !isError ? (
-                <div>
-                  {data.map((group, groupIndex) => {
-                    if (!group.hits.hits.length) {
-                      return (
-                        <Typography.Text strong key={1}>
-                          No results...
-                        </Typography.Text>
-                      );
-                    }
+                        Search
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form>
+            </Card>
+          </Col>
+          <Col xs={24} md={24} lg={16}>
+            <Observer>
+              {() => {
+                return (!data || isLoading || isLoadingSearch) && !isError ? (
+                  <Card
+                    title="What do you want to find today?"
+                    loading={isLoading || isFetching || isLoadingSearch}
+                    type="inner"
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography.Text>
+                        Do your search on the card on the side
+                      </Typography.Text>
+                      <Typography.Text>or</Typography.Text>
+                      <Typography.Text>
+                        Just click the button and get the latest posts.
+                      </Typography.Text>
+                    </div>
+                  </Card>
+                ) : null;
+              }}
+            </Observer>
+            {isError ? (
+              <div>
+                <Typography.Text strong key={1}>
+                  Something went wrong...
+                </Typography.Text>
+              </div>
+            ) : null}
+            {data && !isLoading && !isLoadingSearch && !isError ? (
+              <div>
+                {data.map((group, groupIndex) => {
+                  if (!group.hits.hits.length) {
+                    return (
+                      <Typography.Text strong key={1}>
+                        No results...
+                      </Typography.Text>
+                    );
+                  }
 
-                    return group.hits.hits.map((post_raw, i, array) => {
-                      const post = post_raw._source;
+                  return group.hits.hits.map((post_raw, i, array) => {
+                    const post = post_raw._source;
 
-                      const date = new Date(post.date);
+                    const date = new Date(post.date);
 
-                      const formattedDate = format(
-                        addMinutes(date, date.getTimezoneOffset()),
-                        'yyyy-MM-dd HH:mm:ss',
-                      );
+                    const formattedDate = format(
+                      addMinutes(date, date.getTimezoneOffset()),
+                      'yyyy-MM-dd HH:mm:ss',
+                    );
 
-                      return postsColumnType ? (
-                        <div style={{ marginBottom: 15 }} key={post.post_id}>
-                          <Card>
-                            <div
+                    return postsColumnType ? (
+                      <div style={{ marginBottom: 15 }} key={post.post_id}>
+                        <Card>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <a
+                              href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
                               style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
+                                fontWeight: 500,
+                                wordWrap: 'break-word',
                               }}
                             >
-                              <a
-                                href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                                style={{
-                                  fontWeight: 500,
-                                  wordWrap: 'break-word',
-                                }}
-                              >
-                                {post.title}
-                              </a>
+                              {post.title}
+                            </a>
 
-                              <div style={{ textAlign: 'right' }}>
-                                <Link to={`/post/${post.post_id}`}>
-                                  {post.post_id}
-                                </Link>{' '}
-                                (#
-                                {groupIndex * 100 + i + 1})
-                              </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <Link to={`/post/${post.post_id}`}>
+                                {post.post_id}
+                              </Link>{' '}
+                              (#
+                              {groupIndex * 100 + i + 1})
                             </div>
+                          </div>
 
-                            <div>
-                              Posted by{' '}
-                              <a
-                                style={{ fontWeight: 500 }}
-                                href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                              >
-                                {post.author}
-                              </a>
-                              {post.archive ? ' and scraped on ' : ' on '}
-                              <span style={{ fontWeight: 500 }}>
-                                {formattedDate}
-                              </span>
-                            </div>
-                          </Card>
-                        </div>
-                      ) : (
-                        <div style={{ marginBottom: 30 }} key={post.post_id}>
-                          <PostCard
-                            data={post}
-                            number={groupIndex * 100 + i + 1}
-                          />
-                          <Divider />
-                          {i === array.length - 1 ? (
-                            <LoadingMoreCard groupIndex={groupIndex} />
-                          ) : null}
-                        </div>
-                      );
-                    });
-                  })}
-                </div>
-              ) : null}
-            </Col>
-          </Row>
-          <BackTop />
-        </PageContent>
-      ) : (
-        <PageContent>
-          <Typography.Title level={2}>
-            This page is currently disabled for maintenance.
-          </Typography.Title>
-        </PageContent>
-      )}
+                          <div>
+                            Posted by{' '}
+                            <a
+                              style={{ fontWeight: 500 }}
+                              href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
+                            >
+                              {post.author}
+                            </a>
+                            {post.archive ? ' and scraped on ' : ' on '}
+                            <span style={{ fontWeight: 500 }}>
+                              {formattedDate}
+                            </span>
+                          </div>
+                        </Card>
+                      </div>
+                    ) : (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                        <Divider />
+                        {i === array.length - 1 ? (
+                          <LoadingMoreCard groupIndex={groupIndex} />
+                        ) : null}
+                      </div>
+                    );
+                  });
+                })}
+              </div>
+            ) : null}
+          </Col>
+        </Row>
+        <BackTop />
+      </PageContent>
     </div>
   );
 };

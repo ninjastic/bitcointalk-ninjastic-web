@@ -3634,18 +3634,6 @@ concat-stream@^1.5.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-configcat-common@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/configcat-common/-/configcat-common-3.0.2.tgz#4df0dbcf63ce9d2205ea50004014db7b1efac227"
-  integrity sha512-QAxsWruzezsTqee7sQOkdMhWd0/hBuTBcy4eXhoU7qWeVpG33emG8k9lk0pfK2D51+nKXEvM+zQSdVvCXHkdqw==
-
-configcat-js@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/configcat-js/-/configcat-js-4.0.5.tgz#d042d9e911e5356d5068b51d4b5bc22732a3ea7b"
-  integrity sha512-nDYcscyiD5U6JfvtZB3XAd9agCMkyLtJfKwuDn7m2fT7jHH8ZXPNWISjaGy4QHZBw4GJMBIu+XQ+Z7Xkbwz58g==
-  dependencies:
-    configcat-common "^3.0.2"
-
 confusing-browser-globals@^1.0.9:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-1.0.9.tgz#72bc13b483c0276801681871d4898516f8f54fdd"
