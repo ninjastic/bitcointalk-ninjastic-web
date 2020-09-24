@@ -171,19 +171,6 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
         })`}
         key={1}
       >
-        <Card
-          style={{ marginBottom: 10 }}
-          title="Users with mentioned addresses in common"
-          type="inner"
-        >
-          <Row gutter={[4, 4]}>
-            {uniqueUsers.map(user => (
-              <Col span={4} key={user}>
-                <Link to={`/user/${user}`}>{user}</Link>
-              </Col>
-            ))}
-          </Row>
-        </Card>
         {data.map((group, groupIndex, array) => {
           return (
             <div>
