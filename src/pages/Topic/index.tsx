@@ -59,7 +59,7 @@ const Topic: React.FC = () => {
     'posts',
     async (key, lastId = 0) => {
       const { data: responseData } = await api.get(
-        `posts?topic_id=${id}&last=${lastId}&limit=100`,
+        `posts?topic_id=${id}&last=${lastId}&order=ASC&limit=100`,
       );
 
       return responseData;
