@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useRouteMatch } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Card,
@@ -12,6 +12,7 @@ import {
   Image,
   Collapse,
   Button,
+  Radio,
 } from 'antd';
 import {
   ResponsiveContainer,
@@ -25,7 +26,14 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { format, sub, isValid, addMinutes } from 'date-fns';
+import {
+  format,
+  sub,
+  isValid,
+  addMinutes,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 
 import { LoadingOutlined } from '@ant-design/icons';
@@ -139,14 +147,17 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   }
 
   const uniqueUsers = [];
+  let addressesLength = 0;
 
   data.forEach(group => {
     group.forEach(address => {
-      address.authors_uid.forEach(author_uid => {
-        const exists = uniqueUsers.find(user => user === author_uid);
+      addressesLength += 1;
+
+      address.authors.forEach(author => {
+        const exists = uniqueUsers.find(user => user === author);
 
         if (!exists) {
-          uniqueUsers.push(author_uid);
+          uniqueUsers.push(author);
         }
       });
     });
@@ -154,7 +165,25 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
 
   return (
     <Collapse>
-      <Collapse.Panel header="Mentioned Addresses" key={1}>
+      <Collapse.Panel
+        header={`Mentioned Addresses (${addressesLength}${
+          addressesLength === 20 ? '+' : ''
+        })`}
+        key={1}
+      >
+        <Card
+          style={{ marginBottom: 10 }}
+          title="Users with mentioned addresses in common"
+          type="inner"
+        >
+          <Row gutter={[4, 4]}>
+            {uniqueUsers.map(user => (
+              <Col span={4} key={user}>
+                <Link to={`/user/${user}`}>{user}</Link>
+              </Col>
+            ))}
+          </Row>
+        </Card>
         {data.map((group, groupIndex, array) => {
           return (
             <div>
@@ -237,10 +266,6 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
   if (isLoading) {
     return <LoadingOutlined style={{ color: '#fff' }} />;
   }
-
-  // if (isError) {
-  //   return <Typography.Text type="secondary">No data</Typography.Text>;
-  // }
 
   return (
     <>
@@ -334,10 +359,6 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     return <LoadingOutlined style={{ color: '#fff' }} />;
   }
 
-  // if (isError) {
-  //   return <Typography.Text type="secondary">No data</Typography.Text>;
-  // }
-
   return (
     <ResponsiveContainer width="100%" aspect={2 / 1}>
       <LineChart
@@ -381,7 +402,11 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total }) => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   if (!data || !total) {
-    return <Typography.Text type="secondary">No data</Typography.Text>;
+    return (
+      <div style={{ height: 100, textAlign: 'center', marginTop: 10 }}>
+        <Typography.Text type="secondary">No data</Typography.Text>
+      </div>
+    );
   }
 
   return (
@@ -418,14 +443,13 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total }) => {
 };
 
 const BoardsTable: React.FC<BoardsChartProps> = ({ data, total }) => {
-  if (!data || !total) {
-    return <></>;
-  }
-
-  const tableData = data.map(entry => ({
-    ...entry,
-    percentage: `${((Number(entry.count) / total) * 100).toFixed(0)}%`,
-  }));
+  const tableData =
+    data && total
+      ? data.map(entry => ({
+          ...entry,
+          percentage: `${((Number(entry.count) / total) * 100).toFixed(0)}%`,
+        }))
+      : [];
 
   const columns = [
     {
@@ -453,26 +477,81 @@ const BoardsTable: React.FC<BoardsChartProps> = ({ data, total }) => {
       pagination={false}
       size="small"
       bordered
+      locale={{ emptyText: 'No data...' }}
     />
   );
 };
 
 const User: React.FC = () => {
+  const [boardsActivityTime, setBoardsActivityTime] = useState('all-time');
+  const [loadingBoardsActivity, setLoadingBoardsActivity] = useState(false);
+  const [userData, setUserData] = useState(
+    null as {
+      user: { author: string; author_uid: number };
+      posts_count: number;
+      boards: Array<{ name: string; count: number }>;
+    },
+  );
+
   const { username } = useRouteMatch().params as MatchParams;
 
   const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading, refetch, isError } = useQuery(
     `user:${username}`,
     async () => {
-      const { data: responseData } = await api.get(`/users/${username}`);
+      setLoadingBoardsActivity(true);
+
+      let from = '';
+      let to = '';
+
+      const currentDate = new Date();
+      const currentDateUTC = addMinutes(
+        currentDate,
+        currentDate.getTimezoneOffset(),
+      );
+
+      switch (boardsActivityTime) {
+        case 'all-time':
+          from = '';
+          to = '';
+          break;
+        case '30-days':
+          from = sub(startOfDay(currentDateUTC), { months: 1 }).toISOString();
+          to = endOfDay(currentDateUTC).toISOString();
+          break;
+        case '7-days':
+          from = sub(startOfDay(currentDateUTC), { weeks: 1 }).toISOString();
+          to = endOfDay(currentDateUTC).toISOString();
+          break;
+        default:
+          break;
+      }
+
+      const { data: responseData } = await api.get(
+        `/users/${username}?from=${from}&to=${to}`,
+      );
+
+      if (responseData.user) {
+        setUserData(responseData);
+      }
+
+      setLoadingBoardsActivity(false);
 
       return responseData;
     },
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  const favoriteBoard = data && data.boards[0] ? data.boards[0].name : '?';
+  useEffect(() => {
+    refetch();
+  }, [boardsActivityTime]);
+
+  const handleChangeBoardsActivityTime = e => {
+    setBoardsActivityTime(e.target.value);
+  };
+
+  const favoriteBoard = userData?.boards[0] ? userData.boards[0].name : '?';
 
   return (
     <>
@@ -497,18 +576,18 @@ const User: React.FC = () => {
                   justifyContent: isSmallScreen ? 'center' : 'initial',
                 }}
               >
-                <UserAvatar author_uid={data.user.author_uid} />
+                <UserAvatar author_uid={userData.user.author_uid} />
                 <Card.Meta
                   title={
                     <div>
                       <Typography.Title level={3} style={{ margin: 0 }}>
-                        {data.user.author}
+                        {userData.user.author}
                       </Typography.Title>
                       <Typography.Link
                         style={{ fontSize: 16 }}
-                        href={`https://bitcointalk.org/index.php?action=profile;u=${data.user.author_uid}`}
+                        href={`https://bitcointalk.org/index.php?action=profile;u=${userData.user.author_uid}`}
                       >
-                        {data.user.author_uid}
+                        {userData.user.author_uid}
                       </Typography.Link>
                     </div>
                   }
@@ -516,7 +595,7 @@ const User: React.FC = () => {
               </div>
             </Col>
             <Col xs={12} md={6} lg={6}>
-              <Statistic title="Scraped Posts" value={data.posts_count} />
+              <Statistic title="Scraped Posts" value={userData.posts_count} />
             </Col>
             <Col xs={12} md={8} lg={8}>
               <Statistic title="Favorite Board" value={favoriteBoard} />
@@ -524,17 +603,41 @@ const User: React.FC = () => {
           </Row>
           <Divider />
           <Row gutter={[24, 24]} align="stretch">
-            <Col span={24}>
+            <Col
+              span={24}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography.Text style={{ fontSize: 24, fontWeight: 500 }}>
                 Boards Activity
               </Typography.Text>
+              <Radio.Group
+                defaultValue="all-time"
+                value={boardsActivityTime}
+                onChange={handleChangeBoardsActivityTime}
+              >
+                <Radio.Button value="all-time">All time</Radio.Button>
+                <Radio.Button value="30-days">30 days</Radio.Button>
+                <Radio.Button value="7-days">7 days</Radio.Button>
+              </Radio.Group>
             </Col>
-            <Col xs={24} lg={11}>
-              <BoardsChart data={data.boards} total={data.total_boards} />
-            </Col>
-            <Col xs={24} lg={13}>
-              <BoardsTable data={data.boards} total={data.total_boards} />
-            </Col>
+            {loadingBoardsActivity ? (
+              <div style={{ height: 150, width: '100%', textAlign: 'center' }}>
+                <LoadingOutlined />
+              </div>
+            ) : (
+              <>
+                <Col xs={24} lg={11}>
+                  <BoardsChart data={data.boards} total={data.total_boards} />
+                </Col>
+                <Col xs={24} lg={13}>
+                  <BoardsTable data={data.boards} total={data.total_boards} />
+                </Col>
+              </>
+            )}
           </Row>
           <Divider />
           <Row gutter={[24, 24]}>
@@ -542,16 +645,16 @@ const User: React.FC = () => {
               <Typography.Title level={3}>
                 Posts in the last 7 days
               </Typography.Title>
-              <PostsWeekChart username={data.user.author} />
+              <PostsWeekChart username={userData.user.author} />
             </Col>
             <Col xs={24} lg={12}>
               <Typography.Title level={3}>
                 Posts in the last month
               </Typography.Title>
-              <PostsMonthChart username={data.user.author} />
+              <PostsMonthChart username={userData.user.author} />
             </Col>
             <Col span={24}>
-              <MentionedAddresses username={data.user.author} />
+              <MentionedAddresses username={userData.user.author} />
             </Col>
           </Row>
         </PageContent>
