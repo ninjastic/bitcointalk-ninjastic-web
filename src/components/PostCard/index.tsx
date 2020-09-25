@@ -57,7 +57,7 @@ const PostCard: React.FC<Props> = ({ data, number }) => {
 
   const lastBoard =
     data.board_name || (data.board_id && boards.length)
-      ? boards.find(board => board.board_id === data.board_id).name
+      ? boards.find(board => board.board_id === data.board_id)?.name
       : null;
 
   return (
