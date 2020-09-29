@@ -235,7 +235,7 @@ const Search: React.FC = () => {
                     <Form.Item label="Content">
                       <Input
                         placeholder="Bitcoin"
-                        maxLength={50}
+                        maxLength={550}
                         defaultValue={searchQuery.content}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('content', e.target.value)}

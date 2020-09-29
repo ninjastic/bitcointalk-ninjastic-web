@@ -120,7 +120,7 @@ const PostCard: React.FC<Props> = ({ data, number }) => {
         }
         type="inner"
       >
-        {parse(DOMPurity.sanitize(data.content))}
+        <div className="post">{parse(DOMPurity.sanitize(data.content))}</div>
       </Card>
     </ConfigProvider>
   );

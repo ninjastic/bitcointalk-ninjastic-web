@@ -169,7 +169,9 @@ const PostHistoryCard: React.FC<Props> = ({
                 </Typography.Link>
                 <Collapse key="edited" style={{ marginTop: 3 }}>
                   <Collapse.Panel header="NEW CONTENT" key="edited">
-                    {parse(DOMPurity.sanitize(data.content))}
+                    <div className="post">
+                      {parse(DOMPurity.sanitize(data.content))}
+                    </div>
                   </Collapse.Panel>
                 </Collapse>
               </Timeline.Item>

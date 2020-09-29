@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useRouteMatch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Card,
@@ -532,7 +532,7 @@ const User: React.FC = () => {
 
   useEffect(() => {
     refetch();
-  }, [boardsActivityTime]);
+  }, [boardsActivityTime, refetch]);
 
   const handleChangeBoardsActivityTime = e => {
     setBoardsActivityTime(e.target.value);
