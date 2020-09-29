@@ -19,6 +19,7 @@ import { format, addMinutes } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
+import numeral from 'numeral';
 
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
@@ -48,6 +49,9 @@ interface ApiResponseHitsData {
 
 interface ApiResponseHits {
   hits: ApiResponseHitsData[];
+  total: {
+    value: number;
+  };
 }
 
 interface ApiResponse {
@@ -289,6 +293,19 @@ const Search: React.FC = () => {
                 </Row>
               </Form>
             </Card>
+            {data &&
+            data[0].hits.hits.length &&
+            !isLoading &&
+            !isLoadingSearch ? (
+              <div style={{ marginTop: 10, float: 'right' }}>
+                <Typography.Text>
+                  <Typography.Text style={{ fontWeight: 500 }}>
+                    Total results:
+                  </Typography.Text>{' '}
+                  {numeral(data[0].hits.total.value).format('0,0')}
+                </Typography.Text>
+              </div>
+            ) : null}
           </Col>
           <Col xs={24} md={24} lg={16}>
             <Observer>
