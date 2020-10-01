@@ -44,7 +44,7 @@ const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
     <Card type="inner" title="Users">
       <Row gutter={[4, 4]}>
         {data.map(entry => (
-          <Col span={4} key={entry.author}>
+          <Col xs={10} lg={4} key={entry.author}>
             <a
               href={`https://bitcointalk.org/index.php?action=profile;u=${entry.author_uid}`}
               style={{ color: `${textToColor(entry.author)}` }}

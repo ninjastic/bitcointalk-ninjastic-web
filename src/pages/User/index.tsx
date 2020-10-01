@@ -543,9 +543,9 @@ const User: React.FC = () => {
   return (
     <>
       <Header />
-      {isLoading || isError ? (
+      {isLoading || isError || data?.error ? (
         <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-          {isError ? (
+          {isError || data?.error ? (
             <Typography.Text>
               This user could not be found in our database.
             </Typography.Text>
