@@ -13,6 +13,7 @@ import {
   Collapse,
   Button,
   Radio,
+  Tabs,
 } from 'antd';
 import {
   ResponsiveContainer,
@@ -41,6 +42,7 @@ import api from '../../services/api';
 
 import Header from '../../components/Header';
 import AddressCard from '../../components/AddressCard';
+import PostCard from '../../components/PostCard';
 
 import { PageContent } from './styles';
 
@@ -100,6 +102,224 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
   );
 };
 
+const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
+  const {
+    data,
+    isLoading,
+    fetchMore,
+    isFetchingMore,
+    canFetchMore,
+    isError,
+  } = useInfiniteQuery(
+    `userDeletedPosts:${username}`,
+    async (key, last = '') => {
+      const { data: responseData } = await api.get(
+        `posts/history?deleted=true&author=${username}&last=${last}`,
+      );
+
+      return responseData;
+    },
+    {
+      retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      getFetchMore: lastGroup => {
+        if (lastGroup.hits.hits.length < 20) return false;
+
+        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._source
+          .created_at;
+      },
+    },
+  );
+
+  if (isLoading) {
+    return (
+      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+        <LoadingOutlined style={{ color: '#fff' }} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Collapse>
+        <Collapse.Panel header="Deleted Posts" key={1}>
+          <Typography.Text type="secondary">
+            No deleted posts were found in our database.
+          </Typography.Text>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
+
+  let deletedPostsLength = 0;
+
+  data.forEach(group => {
+    deletedPostsLength += group.hits.hits.length;
+  });
+
+  return (
+    <Collapse>
+      <Collapse.Panel
+        header={`Deleted Posts (${deletedPostsLength}${
+          deletedPostsLength === 20 ? '+' : ''
+        })`}
+        key={1}
+      >
+        {data.map((group, groupIndex, array) => {
+          if (!group.hits.hits.length) {
+            return (
+              <div style={{ textAlign: 'center' }} key="NoResults">
+                <Typography.Text type="secondary">No results.</Typography.Text>
+              </div>
+            );
+          }
+
+          return (
+            <div>
+              {group.hits.hits.map((postRaw, i) => {
+                const post = postRaw._source;
+
+                return (
+                  <div style={{ marginBottom: 30 }} key={postRaw._id}>
+                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
+                    <Divider />
+                  </div>
+                );
+              })}
+              {groupIndex === array.length - 1 ? (
+                <div style={{ marginTop: 15, textAlign: 'center' }}>
+                  {canFetchMore ? (
+                    <Button
+                      size="large"
+                      onClick={() => fetchMore()}
+                      disabled={!!isFetchingMore}
+                      style={{ width: 110 }}
+                    >
+                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                    </Button>
+                  ) : (
+                    <Typography.Text>You reached the end!</Typography.Text>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </Collapse.Panel>
+    </Collapse>
+  );
+};
+
+const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
+  const {
+    data,
+    isLoading,
+    fetchMore,
+    isFetchingMore,
+    canFetchMore,
+    isError,
+  } = useInfiniteQuery(
+    `userEditedPosts:${username}`,
+    async (key, last = '') => {
+      const { data: responseData } = await api.get(
+        `posts/history?deleted=false&author=${username}&last=${last}`,
+      );
+
+      return responseData;
+    },
+    {
+      retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      getFetchMore: lastGroup => {
+        if (lastGroup.hits.hits.length < 20) return false;
+
+        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._source
+          .created_at;
+      },
+    },
+  );
+
+  if (isLoading) {
+    return (
+      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+        <LoadingOutlined style={{ color: '#fff' }} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Collapse>
+        <Collapse.Panel header="Edited Posts" key={1}>
+          <Typography.Text type="secondary">
+            No edited posts were found in our database.
+          </Typography.Text>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
+
+  let editedPostsLength = 0;
+
+  data.forEach(group => {
+    editedPostsLength += group.hits.hits.length;
+  });
+
+  return (
+    <Collapse>
+      <Collapse.Panel
+        header={`Edited Posts (${editedPostsLength}${
+          editedPostsLength === 20 ? '+' : ''
+        })`}
+        key={1}
+      >
+        {data.map((group, groupIndex, array) => {
+          if (!group.hits.hits.length) {
+            return (
+              <div style={{ textAlign: 'center' }} key="NoResults">
+                <Typography.Text type="secondary">No results.</Typography.Text>
+              </div>
+            );
+          }
+
+          return (
+            <div key={groupIndex}>
+              {group.hits.hits.map((postRaw, i) => {
+                const post = postRaw._source;
+
+                return (
+                  <div style={{ marginBottom: 30 }} key={postRaw._id}>
+                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
+                    <Divider />
+                  </div>
+                );
+              })}
+              {groupIndex === array.length - 1 ? (
+                <div style={{ marginTop: 15, textAlign: 'center' }}>
+                  {canFetchMore ? (
+                    <Button
+                      size="large"
+                      onClick={() => fetchMore()}
+                      disabled={!!isFetchingMore}
+                      style={{ width: 110 }}
+                    >
+                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                    </Button>
+                  ) : (
+                    <Typography.Text>You reached the end!</Typography.Text>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </Collapse.Panel>
+    </Collapse>
+  );
+};
+
 const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   const {
     data,
@@ -131,13 +351,17 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   );
 
   if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
+    return (
+      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+        <LoadingOutlined style={{ color: '#fff' }} />
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <Collapse defaultActiveKey={1}>
-        <Collapse.Panel header="Mentioned Addresses" key={1} disabled>
+      <Collapse>
+        <Collapse.Panel header="Mentioned Addresses" key={1}>
           <Typography.Text type="secondary">
             No addresses were found in our database.
           </Typography.Text>
@@ -173,7 +397,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
       >
         {data.map((group, groupIndex, array) => {
           return (
-            <div>
+            <div key={groupIndex}>
               {group.map((address, i) => {
                 return (
                   <AddressCard
@@ -251,7 +475,11 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
   };
 
   if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
+    return (
+      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+        <LoadingOutlined style={{ color: '#fff' }} />
+      </div>
+    );
   }
 
   return (
@@ -538,14 +766,13 @@ const User: React.FC = () => {
     setBoardsActivityTime(e.target.value);
   };
 
-  const favoriteBoard = userData?.boards[0] ? userData.boards[0].name : '?';
-
+  const favoriteBoard = data?.boards?.length ? data.boards[0].name : '-';
   return (
     <>
       <Header />
-      {isLoading || isError || data?.error ? (
+      {isLoading || isError || !userData ? (
         <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-          {isError || data?.error ? (
+          {isError || (data?.error && !userData) ? (
             <Typography.Text>
               This user could not be found in our database.
             </Typography.Text>
@@ -640,8 +867,21 @@ const User: React.FC = () => {
               </Typography.Title>
               <PostsMonthChart username={userData.user.author} />
             </Col>
+            <Divider />
             <Col span={24}>
-              <MentionedAddresses username={userData.user.author} />
+              <Card>
+                <Tabs defaultActiveKey="1">
+                  <Tabs.TabPane tab="Mentioned Addresses" key="1">
+                    <MentionedAddresses username={userData.user.author} />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="Deleted Posts" key="2">
+                    <DeletedPosts username={userData.user.author} />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="Edited Posts" key="3">
+                    <EditedPosts username={userData.user.author} />
+                  </Tabs.TabPane>
+                </Tabs>
+              </Card>
             </Col>
           </Row>
         </PageContent>
