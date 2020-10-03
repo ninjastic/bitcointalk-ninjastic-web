@@ -46,6 +46,8 @@ import PostCard from '../../components/PostCard';
 
 import { PageContent } from './styles';
 
+const { Text, Title } = Typography;
+
 interface BoardsData {
   name: string;
   count: number;
@@ -144,9 +146,9 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Deleted Posts" key={1}>
-          <Typography.Text type="secondary">
+          <Text type="secondary">
             No deleted posts were found in our database.
-          </Typography.Text>
+          </Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -170,7 +172,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
           if (!group.hits.hits.length) {
             return (
               <div style={{ textAlign: 'center' }} key="NoResults">
-                <Typography.Text type="secondary">No results.</Typography.Text>
+                <Text type="secondary">No results.</Text>
               </div>
             );
           }
@@ -199,7 +201,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
                       {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                     </Button>
                   ) : (
-                    <Typography.Text>You reached the end!</Typography.Text>
+                    <Text>You reached the end!</Text>
                   )}
                 </div>
               ) : null}
@@ -253,9 +255,9 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Edited Posts" key={1}>
-          <Typography.Text type="secondary">
+          <Text type="secondary">
             No edited posts were found in our database.
-          </Typography.Text>
+          </Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -279,7 +281,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
           if (!group.hits.hits.length) {
             return (
               <div style={{ textAlign: 'center' }} key="NoResults">
-                <Typography.Text type="secondary">No results.</Typography.Text>
+                <Text type="secondary">No results.</Text>
               </div>
             );
           }
@@ -308,7 +310,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
                       {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                     </Button>
                   ) : (
-                    <Typography.Text>You reached the end!</Typography.Text>
+                    <Text>You reached the end!</Text>
                   )}
                 </div>
               ) : null}
@@ -368,9 +370,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Mentioned Addresses" key={1}>
-          <Typography.Text type="secondary">
-            No addresses were found in our database.
-          </Typography.Text>
+          <Text type="secondary">No addresses were found in our database.</Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -425,7 +425,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
                       {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                     </Button>
                   ) : (
-                    <Typography.Text>You reached the end!</Typography.Text>
+                    <Text>You reached the end!</Text>
                   )}
                 </div>
               ) : null}
@@ -625,7 +625,7 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total }) => {
   if (!data || !total) {
     return (
       <div style={{ height: 100, textAlign: 'center', marginTop: 10 }}>
-        <Typography.Text type="secondary">No data</Typography.Text>
+        <Text type="secondary">No data</Text>
       </div>
     );
   }
@@ -779,9 +779,7 @@ const User: React.FC = () => {
       {isLoading || isError || !userData ? (
         <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
           {isError || (data?.error && !userData) ? (
-            <Typography.Text>
-              This user could not be found in our database.
-            </Typography.Text>
+            <Text>This user could not be found in our database.</Text>
           ) : (
             <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
           )}
@@ -800,9 +798,9 @@ const User: React.FC = () => {
                 <Card.Meta
                   title={
                     <div>
-                      <Typography.Title level={3} style={{ margin: 0 }}>
+                      <Title level={3} style={{ margin: 0 }}>
                         {userData.user.author}
-                      </Typography.Title>
+                      </Title>
                       <Typography.Link
                         style={{ fontSize: 16 }}
                         href={`https://bitcointalk.org/index.php?action=profile;u=${userData.user.author_uid}`}
@@ -831,9 +829,9 @@ const User: React.FC = () => {
                 justifyContent: 'space-between',
               }}
             >
-              <Typography.Text style={{ fontSize: 24, fontWeight: 500 }}>
+              <Text style={{ fontSize: 24, fontWeight: 500 }}>
                 Boards Activity
-              </Typography.Text>
+              </Text>
               <Radio.Group
                 defaultValue="all-time"
                 value={boardsActivityTime}
@@ -862,15 +860,11 @@ const User: React.FC = () => {
           <Divider />
           <Row gutter={[24, 24]}>
             <Col xs={24} lg={12}>
-              <Typography.Title level={3}>
-                Posts in the last 7 days
-              </Typography.Title>
+              <Title level={3}>Posts in the last 7 days</Title>
               <PostsWeekChart username={userData.user.author} />
             </Col>
             <Col xs={24} lg={12}>
-              <Typography.Title level={3}>
-                Posts in the last month
-              </Typography.Title>
+              <Title level={3}>Posts in the last month</Title>
               <PostsMonthChart username={userData.user.author} />
             </Col>
             <Divider />

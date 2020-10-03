@@ -13,6 +13,8 @@ import api from '../../services/api';
 
 import { PageContent } from './styles';
 
+const { Text, Title } = Typography;
+
 interface MatchParams {
   id: number;
 }
@@ -46,16 +48,12 @@ const Post: React.FC = () => {
           <Button type="link" onClick={() => history.goBack()}>
             <ArrowLeftOutlined style={{ fontSize: 32 }} />
           </Button>
-          <Typography.Title style={{ marginBottom: -5 }}>
-            Post {id}
-          </Typography.Title>
+          <Title style={{ marginBottom: -5 }}>Post {id}</Title>
         </div>
         {isLoading || isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             {isError ? (
-              <Typography.Text>
-                This post could not be found in our database.
-              </Typography.Text>
+              <Text>This post could not be found in our database.</Text>
             ) : (
               <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
             )}

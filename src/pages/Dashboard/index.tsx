@@ -27,6 +27,8 @@ import Header from '../../components/Header';
 
 import { PageContent } from './styles';
 
+const { Text, Title } = Typography;
+
 const PostsLast24HoursGraph: React.FC<{ isSmallScreen: boolean }> = ({
   isSmallScreen,
 }) => {
@@ -222,9 +224,7 @@ const Dashboard: React.FC = () => {
         {isLoading || isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             {isError ? (
-              <Typography.Text>
-                We are having some trouble contacting the server...
-              </Typography.Text>
+              <Text>We are having some trouble contacting the server...</Text>
             ) : (
               <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
             )}
@@ -237,7 +237,7 @@ const Dashboard: React.FC = () => {
             <Divider />
             <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
               <Col xs={24} lg={12}>
-                <Typography.Title level={3}>Scraped Posts</Typography.Title>
+                <Title level={3}>Scraped Posts</Title>
                 <ResponsiveContainer width="100%" aspect={2 / 1}>
                   <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -276,9 +276,7 @@ const Dashboard: React.FC = () => {
             </Row>
             <Row gutter={[24, 24]}>
               <Col xs={24}>
-                <Typography.Title level={3}>
-                  Posts in the last 24 hours
-                </Typography.Title>
+                <Title level={3}>Posts in the last 24 hours</Title>
                 <PostsLast24HoursGraph isSmallScreen={isSmallScreen} />
               </Col>
             </Row>

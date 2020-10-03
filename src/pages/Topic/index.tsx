@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { Typography, Divider, Button, Card } from 'antd';
+import { Typography, Divider, Button, Card, Radio } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import numeral from 'numeral';
 
 import Header from '../../components/Header';
 
@@ -11,6 +12,10 @@ import api from '../../services/api';
 
 import { PageContent } from './styles';
 import PostCard from '../../components/PostCard';
+import HeaderPostCard from '../../components/HeaderPostCard';
+import CompactPostCard from '../../components/CompactPostCard';
+
+const { Text, Title } = Typography;
 
 interface Post {
   post_id: number;
@@ -32,6 +37,9 @@ interface ApiResponseHitsData {
 
 interface ApiResponseHits {
   hits: ApiResponseHitsData[];
+  total: {
+    value: number;
+  };
 }
 
 interface ApiResponse {
@@ -46,6 +54,8 @@ interface MatchParams {
 
 const Topic: React.FC = () => {
   const history = useHistory();
+  const [postsViewType, setPostsViewType] = useState('normal');
+
   const { id } = useRouteMatch().params as MatchParams;
 
   const {
@@ -87,21 +97,29 @@ const Topic: React.FC = () => {
     fetchMore();
   }, 500);
 
-  const LoadingMoreCard = ({ groupIndex }) => {
+  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
     if (groupIndex === data.length - 1) {
-      return canFetchMore ? (
-        <Card loading style={{ marginTop: 30 }} />
-      ) : (
-        <div style={{ textAlign: 'center', marginTop: 25 }}>
-          <Typography.Text>You reached the end!</Typography.Text>
+      if (!canFetchMore) {
+        return (
+          <div style={{ textAlign: 'center', marginTop: 25 }}>
+            <Text>You reached the end!</Text>
+          </div>
+        );
+      }
+
+      return onlyIcon ? (
+        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+          <LoadingOutlined style={{ fontSize: 30, color: '#fff' }} />
         </div>
+      ) : (
+        <Card loading style={{ marginTop: 30 }} />
       );
     }
     return null;
   };
 
   return (
-    <>
+    <div>
       <Header />
       <PageContent>
         <div
@@ -115,9 +133,7 @@ const Topic: React.FC = () => {
           <Button type="link" onClick={() => history.goBack()}>
             <ArrowLeftOutlined style={{ fontSize: 32 }} />
           </Button>
-          <Typography.Title style={{ marginBottom: -5 }}>
-            Topic {id}
-          </Typography.Title>
+          <Title style={{ marginBottom: -5 }}>Topic {id}</Title>
         </div>
         {isLoading && !data && !isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
@@ -126,13 +142,38 @@ const Topic: React.FC = () => {
         ) : null}
         {isError ? (
           <div>
-            <Typography.Text strong key={1}>
+            <Text strong key={1}>
               Something went wrong...
-            </Typography.Text>
+            </Text>
           </div>
         ) : null}
         {data && !isLoading && !isError ? (
           <div>
+            <Card style={{ marginBottom: 15 }} type="inner">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {data && data[0].hits.hits.length && !isLoading ? (
+                  <Text>
+                    <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
+                    {numeral(data[0].hits.total.value).format('0,0')}
+                  </Text>
+                ) : null}
+                <Radio.Group
+                  onChange={e => setPostsViewType(e.target.value)}
+                  value={postsViewType}
+                  defaultValue="normal"
+                >
+                  <Radio.Button value="normal">Normal</Radio.Button>
+                  <Radio.Button value="header">Header Only</Radio.Button>
+                  <Radio.Button value="compact">Compact</Radio.Button>
+                </Radio.Group>
+              </div>
+            </Card>
             {data.map((group, groupIndex) => {
               if (!group.hits.hits.length) {
                 return (
@@ -143,13 +184,9 @@ const Topic: React.FC = () => {
                       textAlign: 'center',
                     }}
                   >
-                    <Typography.Text
-                      type="secondary"
-                      style={{ fontSize: 16 }}
-                      key={1}
-                    >
+                    <Text type="secondary" style={{ fontSize: 16 }} key={1}>
                       No results...
-                    </Typography.Text>
+                    </Text>
                   </div>
                 );
               }
@@ -157,21 +194,57 @@ const Topic: React.FC = () => {
               return group.hits.hits.map((post_raw, i, array) => {
                 const post = post_raw._source;
 
-                return (
-                  <div style={{ marginBottom: 30 }} key={post.post_id}>
-                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                    <Divider />
-                    {i === array.length - 1 ? (
-                      <LoadingMoreCard groupIndex={groupIndex} />
-                    ) : null}
-                  </div>
-                );
+                switch (postsViewType) {
+                  case 'normal':
+                    return (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                        <Divider />
+                        {i === array.length - 1 ? (
+                          <LoadingMore groupIndex={groupIndex} />
+                        ) : null}
+                      </div>
+                    );
+                  case 'header':
+                    return (
+                      <div key={post.post_id}>
+                        <HeaderPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                          style={{ marginBottom: 15 }}
+                        />
+                        {i === array.length - 1 ? (
+                          <LoadingMore groupIndex={groupIndex} />
+                        ) : null}
+                      </div>
+                    );
+                  case 'compact':
+                    return (
+                      <ul
+                        key={post.post_id}
+                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                      >
+                        <CompactPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                        {i === array.length - 1 ? (
+                          <LoadingMore groupIndex={groupIndex} onlyIcon />
+                        ) : null}
+                      </ul>
+                    );
+                  default:
+                    return null;
+                }
               });
             })}
           </div>
         ) : null}
       </PageContent>
-    </>
+    </div>
   );
 };
 

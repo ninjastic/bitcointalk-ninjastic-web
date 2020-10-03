@@ -9,6 +9,8 @@ import api from '../../services/api';
 import AddressAuthorsCard from '../AddressAuthorsCard';
 import AddressPostCard from '../AddressPostCard';
 
+const { Text } = Typography;
+
 const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
   const { data, isLoading, isError } = useQuery(
     `addressesPost:${id}`,
@@ -28,9 +30,7 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
         ) : (
           <div>
             {isError ? (
-              <Typography.Text>
-                No BTC/ETH addresses were found on this post.
-              </Typography.Text>
+              <Text>No BTC/ETH addresses were found on this post.</Text>
             ) : (
               <div>
                 {data.map(address => (

@@ -11,6 +11,8 @@ import PostCard from '../../components/PostCard';
 
 import { PageContent } from './styles';
 
+const { Text } = Typography;
+
 const Deleted: React.FC = () => {
   const {
     data,
@@ -52,7 +54,7 @@ const Deleted: React.FC = () => {
         <Card loading style={{ marginTop: 30 }} />
       ) : (
         <div style={{ textAlign: 'center', marginTop: 25 }}>
-          <Typography.Text>You reached the end!</Typography.Text>
+          <Text>You reached the end!</Text>
         </div>
       );
     }
@@ -77,20 +79,16 @@ const Deleted: React.FC = () => {
                 marginBottom: 20,
               }}
             >
-              <Typography.Text style={{ fontSize: 24, fontWeight: 500 }}>
+              <Text style={{ fontSize: 24, fontWeight: 500 }}>
                 Last Deleted Posts
-              </Typography.Text>
-              <Typography.Text type="secondary">
-                after 5 minutes of created
-              </Typography.Text>
+              </Text>
+              <Text type="secondary">after 5 minutes of created</Text>
             </div>
             {data.map((group, groupIndex) => {
               if (!group.hits.hits.length) {
                 return (
                   <div style={{ textAlign: 'center' }} key="NoResults">
-                    <Typography.Text type="secondary">
-                      No results.
-                    </Typography.Text>
+                    <Text type="secondary">No results.</Text>
                   </div>
                 );
               }

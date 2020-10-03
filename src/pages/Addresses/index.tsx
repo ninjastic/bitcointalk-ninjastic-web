@@ -23,6 +23,8 @@ import AddressCard from '../../components/AddressCard';
 
 import { PageContent } from './styles';
 
+const { Text } = Typography;
+
 interface Address {
   id: string;
   coin: string;
@@ -118,7 +120,7 @@ const Addresses: React.FC = () => {
         <Card loading style={{ marginTop: 15 }} />
       ) : (
         <div style={{ textAlign: 'center', marginTop: 20 }}>
-          <Typography.Text>You reached the end!</Typography.Text>
+          <Text>You reached the end!</Text>
         </div>
       );
     }
@@ -220,13 +222,11 @@ const Addresses: React.FC = () => {
                         alignItems: 'center',
                       }}
                     >
-                      <Typography.Text>
-                        Do your search on the card on the side
-                      </Typography.Text>
-                      <Typography.Text>or</Typography.Text>
-                      <Typography.Text style={{ textAlign: 'center' }}>
+                      <Text>Do your search on the card on the side</Text>
+                      <Text>or</Text>
+                      <Text style={{ textAlign: 'center' }}>
                         Just click the button and get a few random addresses.
-                      </Typography.Text>
+                      </Text>
                     </div>
                   </Card>
                 ) : null;
@@ -236,16 +236,16 @@ const Addresses: React.FC = () => {
             {data && !isLoading && !isLoadingAddress ? (
               <div>
                 {!data.length ? (
-                  <Typography.Text strong key={1}>
+                  <Text strong key={1}>
                     No results...
-                  </Typography.Text>
+                  </Text>
                 ) : null}
                 {data.map((group, groupIndex) => {
                   if (!group.length) {
                     return (
-                      <Typography.Text strong key={1}>
+                      <Text strong key={1}>
                         No results...
-                      </Typography.Text>
+                      </Text>
                     );
                   }
                   return group.map((record, i, array) => {

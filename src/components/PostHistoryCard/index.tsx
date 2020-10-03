@@ -10,6 +10,8 @@ import Diff from 'react-stylable-diff';
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
+const { Text } = Typography;
+
 interface Props {
   id: number;
   postTitle: string;
@@ -108,31 +110,26 @@ const PostHistoryCard: React.FC<Props> = ({
         showArrow={false}
       >
         {isError ? (
-          <Typography.Text>
-            No edit history was found for this post.
-          </Typography.Text>
+          <Text>No edit history was found for this post.</Text>
         ) : (
           <Timeline mode="left" style={{ marginTop: 5 }}>
             {nextCheck ? (
-              <Typography.Text>
-                <Typography.Text style={{ fontWeight: 500 }}>
-                  Next check:
-                </Typography.Text>{' '}
-                {nextCheck}
-              </Typography.Text>
+              <Text>
+                <Text style={{ fontWeight: 500 }}>Next check:</Text> {nextCheck}
+              </Text>
             ) : null}
             {data.deleted ? (
               <Timeline.Item color="red">
-                <Typography.Text>Post was deleted</Typography.Text>
+                <Text>Post was deleted</Text>
               </Timeline.Item>
             ) : null}
             {titleChanged ? (
               <Timeline.Item color="orange">
-                <Typography.Text>Title changed from </Typography.Text>
-                <Typography.Text code>{postTitle}</Typography.Text>
+                <Text>Title changed from </Text>
+                <Text code>{postTitle}</Text>
                 <div>
-                  <Typography.Text> to </Typography.Text>
-                  <Typography.Text code>{data.title}</Typography.Text>
+                  <Text> to </Text>
+                  <Text code>{data.title}</Text>
                   <Typography.Link
                     style={{ marginLeft: 3 }}
                     onClick={() =>
@@ -146,19 +143,19 @@ const PostHistoryCard: React.FC<Props> = ({
             ) : null}
             {boardIdChanged ? (
               <Timeline.Item color="green">
-                <Typography.Text>Board changed from </Typography.Text>
-                <Typography.Text code>
+                <Text>Board changed from </Text>
+                <Text code>
                   {boards.find(b => b.board_id === data.board_id)?.name}
-                </Typography.Text>
-                <Typography.Text> to </Typography.Text>
-                <Typography.Text code>
+                </Text>
+                <Text> to </Text>
+                <Text code>
                   {boards.find(b => b.board_id === postBoardId)?.name}
-                </Typography.Text>
+                </Text>
               </Timeline.Item>
             ) : null}
             {contentChanged ? (
               <Timeline.Item>
-                <Typography.Text>Content was edited</Typography.Text>
+                <Text>Content was edited</Text>
                 <Typography.Link
                   style={{ marginLeft: 3 }}
                   onClick={() =>

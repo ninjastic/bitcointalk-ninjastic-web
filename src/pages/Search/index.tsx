@@ -30,6 +30,8 @@ import CompactPostCard from '../../components/CompactPostCard';
 
 import { PageContent } from './styles';
 
+const { Text } = Typography;
+
 interface Post {
   post_id: number;
   topic_id: number;
@@ -206,7 +208,7 @@ const Search: React.FC = () => {
       if (!canFetchMore) {
         return (
           <div style={{ textAlign: 'center', marginTop: 25 }}>
-            <Typography.Text>You reached the end!</Typography.Text>
+            <Text>You reached the end!</Text>
           </div>
         );
       }
@@ -329,13 +331,11 @@ const Search: React.FC = () => {
                         alignItems: 'center',
                       }}
                     >
-                      <Typography.Text>
-                        Do your search on the card on the side
-                      </Typography.Text>
-                      <Typography.Text>or</Typography.Text>
-                      <Typography.Text>
+                      <Text>Do your search on the card on the side</Text>
+                      <Text>or</Text>
+                      <Text>
                         Just click the button and get the latest posts.
-                      </Typography.Text>
+                      </Text>
                     </div>
                   </Card>
                 ) : null;
@@ -343,9 +343,9 @@ const Search: React.FC = () => {
             </Observer>
             {isError ? (
               <Card>
-                <Typography.Text strong key={1}>
+                <Text strong key={1}>
                   Something went wrong...
-                </Typography.Text>
+                </Text>
               </Card>
             ) : null}
             {data && !isLoading && !isLoadingSearch && !isError ? (
@@ -362,12 +362,10 @@ const Search: React.FC = () => {
                     data[0].hits.hits.length &&
                     !isLoading &&
                     !isLoadingSearch ? (
-                      <Typography.Text>
-                        <Typography.Text style={{ fontWeight: 500 }}>
-                          Total results:
-                        </Typography.Text>{' '}
+                      <Text>
+                        <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
                         {numeral(data[0].hits.total.value).format('0,0')}
-                      </Typography.Text>
+                      </Text>
                     ) : null}
                     <Radio.Group
                       onChange={e => setPostsViewType(e.target.value)}
@@ -384,9 +382,9 @@ const Search: React.FC = () => {
                   if (!group.hits.hits.length) {
                     return (
                       <Card>
-                        <Typography.Text strong key={1}>
+                        <Text strong key={1}>
                           No results...
-                        </Typography.Text>
+                        </Text>
                       </Card>
                     );
                   }
