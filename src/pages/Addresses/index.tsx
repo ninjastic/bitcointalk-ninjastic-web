@@ -58,14 +58,24 @@ const Addresses: React.FC = () => {
       let results;
 
       if (!address_author) {
-        const { data: responseData } = await api.get(
-          `addresses?address=${address}&last=${last}&limit=50`,
-        );
+        const { data: responseData } = await api.get('addresses', {
+          params: {
+            address,
+            last,
+            limit: 50,
+          },
+        });
 
         results = responseData;
       } else if (address_author && !address) {
         const { data: responseData } = await api.get(
-          `users/${address_author}/addresses?last=${last}&limit=50`,
+          `users/${address_author}/addresses`,
+          {
+            params: {
+              last,
+              limit: 50,
+            },
+          },
         );
 
         results = responseData;

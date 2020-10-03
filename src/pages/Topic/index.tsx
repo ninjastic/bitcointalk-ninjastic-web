@@ -58,9 +58,14 @@ const Topic: React.FC = () => {
   } = useInfiniteQuery<ApiResponse>(
     'posts',
     async (key, lastId = 0) => {
-      const { data: responseData } = await api.get(
-        `posts?topic_id=${id}&last=${lastId}&order=ASC&limit=100`,
-      );
+      const { data: responseData } = await api.get('posts', {
+        params: {
+          topic_id: id,
+          last: lastId,
+          order: 'ASC',
+          limit: 100,
+        },
+      });
 
       return responseData;
     },

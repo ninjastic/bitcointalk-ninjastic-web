@@ -89,7 +89,6 @@ const GlobalStyle = createGlobalStyle`
     a {
         color: #258ae8;
         text-decoration: none;
-        background-color: transparent;
         outline: none;
         cursor: pointer;
         -webkit-transition: color .3s;
@@ -97,11 +96,7 @@ const GlobalStyle = createGlobalStyle`
         -webkit-text-decoration-skip: objects;
     }
 
-    post b, post b a, span, a.ul {
-        color: unset;
-    }
-
-    post .quoteheader b {
+    .post .quoteheader b {
         color: #258ae8;
     }
 

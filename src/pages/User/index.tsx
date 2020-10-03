@@ -332,7 +332,13 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     `userAddresses:${username}`,
     async (key, last = '') => {
       const { data: responseData } = await api.get(
-        `/users/${username}/addresses?last=${last}&limit=20`,
+        `/users/${username}/addresses`,
+        {
+          params: {
+            last,
+            limit: 20,
+          },
+        },
       );
 
       return responseData;

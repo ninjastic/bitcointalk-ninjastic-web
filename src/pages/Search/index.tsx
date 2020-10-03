@@ -148,9 +148,18 @@ const Search: React.FC = () => {
         board,
       } = searchQuery;
 
-      const { data: responseData } = await api.get(
-        `posts?author=${author}&content=${content}&topic_id=${topic_id}&board=${board}&after_date=${after_date}&before_date=${before_date}&last=${lastId}&limit=100`,
-      );
+      const { data: responseData } = await api.get('posts', {
+        params: {
+          author,
+          content,
+          topic_id,
+          board,
+          after_date,
+          before_date,
+          last: lastId,
+          limit: 100,
+        },
+      });
 
       setIsLoadingSearch(false);
       return responseData;
@@ -238,6 +247,7 @@ const Search: React.FC = () => {
                     <Form.Item label="Topic ID">
                       <Input
                         placeholder="5248878"
+                        type="number"
                         defaultValue={searchQuery.topic_id}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('topic_id', e.target.value)}
