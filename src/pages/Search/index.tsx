@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
 import {
   Form,
   Input,
@@ -13,9 +12,9 @@ import {
   BackTop,
   DatePicker,
   TreeSelect,
+  Radio,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
-import { format, addMinutes } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
@@ -26,6 +25,8 @@ import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
 import PostCard from '../../components/PostCard';
+import HeaderPostCard from '../../components/HeaderPostCard';
+import CompactPostCard from '../../components/CompactPostCard';
 
 import { PageContent } from './styles';
 
@@ -123,7 +124,7 @@ const SelectorBoards: React.FC = () => {
 
 const Search: React.FC = () => {
   const store = useSearchStore();
-  const [postsColumnType] = useState(false);
+  const [postsViewType, setPostsViewType] = useState('normal');
 
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
 
@@ -191,14 +192,22 @@ const Search: React.FC = () => {
     fetchMore();
   }, 500);
 
-  const LoadingMoreCard = ({ groupIndex }) => {
+  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
     if (groupIndex === data.length - 1) {
-      return canFetchMore ? (
-        <Card loading style={{ marginTop: 30 }} />
-      ) : (
-        <div style={{ textAlign: 'center', marginTop: 25 }}>
-          <Typography.Text>You reached the end!</Typography.Text>
+      if (!canFetchMore) {
+        return (
+          <div style={{ textAlign: 'center', marginTop: 25 }}>
+            <Typography.Text>You reached the end!</Typography.Text>
+          </div>
+        );
+      }
+
+      return onlyIcon ? (
+        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+          <LoadingOutlined style={{ fontSize: 30, color: '#fff' }} />
         </div>
+      ) : (
+        <Card loading style={{ marginTop: 30 }} />
       );
     }
     return null;
@@ -293,19 +302,6 @@ const Search: React.FC = () => {
                 </Row>
               </Form>
             </Card>
-            {data &&
-            data[0].hits.hits.length &&
-            !isLoading &&
-            !isLoadingSearch ? (
-              <div style={{ marginTop: 10, float: 'right' }}>
-                <Typography.Text>
-                  <Typography.Text style={{ fontWeight: 500 }}>
-                    Total results:
-                  </Typography.Text>{' '}
-                  {numeral(data[0].hits.total.value).format('0,0')}
-                </Typography.Text>
-              </div>
-            ) : null}
           </Col>
           <Col xs={24} md={24} lg={16}>
             <Observer>
@@ -336,88 +332,103 @@ const Search: React.FC = () => {
               }}
             </Observer>
             {isError ? (
-              <div>
+              <Card>
                 <Typography.Text strong key={1}>
                   Something went wrong...
                 </Typography.Text>
-              </div>
+              </Card>
             ) : null}
             {data && !isLoading && !isLoadingSearch && !isError ? (
               <div>
+                <Card style={{ marginBottom: 15 }} type="inner">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {data &&
+                    data[0].hits.hits.length &&
+                    !isLoading &&
+                    !isLoadingSearch ? (
+                      <Typography.Text>
+                        <Typography.Text style={{ fontWeight: 500 }}>
+                          Total results:
+                        </Typography.Text>{' '}
+                        {numeral(data[0].hits.total.value).format('0,0')}
+                      </Typography.Text>
+                    ) : null}
+                    <Radio.Group
+                      onChange={e => setPostsViewType(e.target.value)}
+                      value={postsViewType}
+                      defaultValue="normal"
+                    >
+                      <Radio.Button value="normal">Normal</Radio.Button>
+                      <Radio.Button value="header">Header Only</Radio.Button>
+                      <Radio.Button value="compact">Compact</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </Card>
                 {data.map((group, groupIndex) => {
                   if (!group.hits.hits.length) {
                     return (
-                      <Typography.Text strong key={1}>
-                        No results...
-                      </Typography.Text>
+                      <Card>
+                        <Typography.Text strong key={1}>
+                          No results...
+                        </Typography.Text>
+                      </Card>
                     );
                   }
 
                   return group.hits.hits.map((post_raw, i, array) => {
                     const post = post_raw._source;
 
-                    const date = new Date(post.date);
-
-                    const formattedDate = format(
-                      addMinutes(date, date.getTimezoneOffset()),
-                      'yyyy-MM-dd HH:mm:ss',
-                    );
-
-                    return postsColumnType ? (
-                      <div style={{ marginBottom: 15 }} key={post.post_id}>
-                        <Card>
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                            }}
+                    switch (postsViewType) {
+                      case 'normal':
+                        return (
+                          <div style={{ marginBottom: 30 }} key={post.post_id}>
+                            <PostCard
+                              data={post}
+                              number={groupIndex * 100 + i + 1}
+                            />
+                            <Divider />
+                            {i === array.length - 1 ? (
+                              <LoadingMore groupIndex={groupIndex} />
+                            ) : null}
+                          </div>
+                        );
+                      case 'header':
+                        return (
+                          <div key={post.post_id}>
+                            <HeaderPostCard
+                              data={post}
+                              number={groupIndex * 100 + i + 1}
+                              style={{ marginBottom: 15 }}
+                            />
+                            {i === array.length - 1 ? (
+                              <LoadingMore groupIndex={groupIndex} />
+                            ) : null}
+                          </div>
+                        );
+                      case 'compact':
+                        return (
+                          <ul
+                            key={post.post_id}
+                            style={{ paddingInlineStart: 20, marginBottom: 0 }}
                           >
-                            <a
-                              href={`https://bitcointalk.org/index.php?topic=${post.topic_id}.msg${post.post_id}#msg${post.post_id}`}
-                              style={{
-                                fontWeight: 500,
-                                wordWrap: 'break-word',
-                              }}
-                            >
-                              {post.title}
-                            </a>
-
-                            <div style={{ textAlign: 'right' }}>
-                              <Link to={`/post/${post.post_id}`}>
-                                {post.post_id}
-                              </Link>{' '}
-                              (#
-                              {groupIndex * 100 + i + 1})
-                            </div>
-                          </div>
-
-                          <div>
-                            Posted by{' '}
-                            <a
-                              style={{ fontWeight: 500 }}
-                              href={`https://bitcointalk.org/index.php?action=profile;u=${post.author_uid}`}
-                            >
-                              {post.author}
-                            </a>
-                            {post.archive ? ' and scraped on ' : ' on '}
-                            <span style={{ fontWeight: 500 }}>
-                              {formattedDate}
-                            </span>
-                          </div>
-                        </Card>
-                      </div>
-                    ) : (
-                      <div style={{ marginBottom: 30 }} key={post.post_id}>
-                        <PostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                        <Divider />
-                        {i === array.length - 1 ? (
-                          <LoadingMoreCard groupIndex={groupIndex} />
-                        ) : null}
-                      </div>
-                    );
+                            <CompactPostCard
+                              data={post}
+                              number={groupIndex * 100 + i + 1}
+                            />
+                            {i === array.length - 1 ? (
+                              <LoadingMore groupIndex={groupIndex} onlyIcon />
+                            ) : null}
+                          </ul>
+                        );
+                      default:
+                        return null;
+                    }
                   });
                 })}
               </div>
