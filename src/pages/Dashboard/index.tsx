@@ -37,8 +37,6 @@ const PostsLast24HoursGraph: React.FC<{ isSmallScreen: boolean }> = ({
     async () => {
       const { data: responseData } = await api.get('/posts/count');
 
-      responseData.pop();
-
       return responseData;
     },
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },

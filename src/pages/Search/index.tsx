@@ -350,7 +350,7 @@ const Search: React.FC = () => {
             ) : null}
             {data && !isLoading && !isLoadingSearch && !isError ? (
               <div>
-                <Card style={{ marginBottom: 15 }} type="inner">
+                <div style={{ marginBottom: 15 }}>
                   <div
                     style={{
                       display: 'flex',
@@ -377,7 +377,7 @@ const Search: React.FC = () => {
                       <Radio.Button value="compact">Compact</Radio.Button>
                     </Radio.Group>
                   </div>
-                </Card>
+                </div>
                 {data.map((group, groupIndex) => {
                   if (!group.hits.hits.length) {
                     return (

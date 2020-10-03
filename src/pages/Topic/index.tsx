@@ -149,7 +149,7 @@ const Topic: React.FC = () => {
         ) : null}
         {data && !isLoading && !isError ? (
           <div>
-            <Card style={{ marginBottom: 15 }} type="inner">
+            <div style={{ marginBottom: 15 }}>
               <div
                 style={{
                   display: 'flex',
@@ -173,7 +173,7 @@ const Topic: React.FC = () => {
                   <Radio.Button value="compact">Compact</Radio.Button>
                 </Radio.Group>
               </div>
-            </Card>
+            </div>
             {data.map((group, groupIndex) => {
               if (!group.hits.hits.length) {
                 return (
