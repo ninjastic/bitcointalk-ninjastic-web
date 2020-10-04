@@ -127,7 +127,7 @@ const Topic: React.FC = () => {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 15,
+            marginBottom: 20,
           }}
         >
           <Button type="link" onClick={() => history.goBack()}>
@@ -157,10 +157,10 @@ const Topic: React.FC = () => {
                   justifyContent: 'space-between',
                 }}
               >
-                {data && data[0].hits.hits.length && !isLoading ? (
+                {data && !isLoading ? (
                   <Text>
                     <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                    {numeral(data[0].hits.total.value).format('0,0')}
+                    {numeral(data[0].hits.total.value || 0).format('0,0')}
                   </Text>
                 ) : null}
                 <Radio.Group
@@ -177,7 +177,7 @@ const Topic: React.FC = () => {
             {data.map((group, groupIndex) => {
               if (!group.hits.hits.length) {
                 return (
-                  <div
+                  <Card
                     style={{
                       width: '100%',
                       marginTop: 15,
@@ -187,7 +187,7 @@ const Topic: React.FC = () => {
                     <Text type="secondary" style={{ fontSize: 16 }} key={1}>
                       No results...
                     </Text>
-                  </div>
+                  </Card>
                 );
               }
 

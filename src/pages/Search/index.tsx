@@ -250,6 +250,7 @@ const Search: React.FC = () => {
                       <Input
                         placeholder="5248878"
                         type="number"
+                        min={1}
                         defaultValue={searchQuery.topic_id}
                         onKeyDown={handleKeyDown}
                         onChange={e => setValue('topic_id', e.target.value)}
@@ -358,13 +359,10 @@ const Search: React.FC = () => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    {data &&
-                    data[0].hits.hits.length &&
-                    !isLoading &&
-                    !isLoadingSearch ? (
+                    {data && !isLoading && !isLoadingSearch ? (
                       <Text>
                         <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                        {numeral(data[0].hits.total.value).format('0,0')}
+                        {numeral(data[0].hits.total.value || 0).format('0,0')}
                       </Text>
                     ) : null}
                     <Radio.Group

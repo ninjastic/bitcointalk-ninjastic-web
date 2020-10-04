@@ -235,7 +235,7 @@ const Dashboard: React.FC = () => {
             <Divider />
             <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
               <Col xs={24} lg={12}>
-                <Title level={3}>Scraped Posts</Title>
+                <Title level={3}>Posts per day</Title>
                 <ResponsiveContainer width="100%" aspect={2 / 1}>
                   <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
