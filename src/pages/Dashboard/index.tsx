@@ -24,6 +24,7 @@ import { useMediaQuery } from 'react-responsive';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
+import AlertMessage from '../../components/AlertMessage';
 
 import { PageContent } from './styles';
 
@@ -219,6 +220,7 @@ const Dashboard: React.FC = () => {
     <>
       <Header />
       <PageContent>
+        <AlertMessage />
         {isLoading || isError ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             {isError ? (
