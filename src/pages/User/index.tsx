@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Card,
@@ -621,13 +621,13 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
 
   if (loading) {
     return (
-      <div style={{ height: 100, textAlign: 'center', marginTop: 30 }}>
+      <div style={{ height: 100, textAlign: 'center', marginTop: 50 }}>
         <LoadingOutlined style={{ fontSize: 36 }} />
       </div>
     );
   }
 
-  if (!data.length) {
+  if (!data?.length) {
     return (
       <div style={{ height: 100, textAlign: 'center', marginTop: 30 }}>
         <Text type="secondary">No data</Text>
@@ -789,8 +789,8 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
       </Col>
       <Col xs={24} lg={12}>
         <BoardsChart
-          data={data?.data.boards}
-          total={data?.data.posts_count_with_boards}
+          data={data?.data?.boards}
+          total={data?.data?.posts_count_with_boards}
           loading={isLoading || isFetching}
         />
       </Col>
@@ -803,6 +803,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
 
 const User: React.FC = () => {
   const { username } = useRouteMatch().params as MatchParams;
+  const history = useHistory();
 
   const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
 
@@ -864,6 +865,19 @@ const User: React.FC = () => {
                 }}
               />
             </Col>
+            <Col xs={12} md={6} lg={6}>
+              <Statistic
+                title="Links"
+                value={null}
+                valueRender={() => (
+                  <Button
+                    onClick={() => history.push(`/search?author=${username}`)}
+                  >
+                    Search Posts
+                  </Button>
+                )}
+              />
+            </Col>
           </Row>
           <Divider />
           <Row gutter={[24, 24]} align="stretch">
@@ -881,19 +895,17 @@ const User: React.FC = () => {
             </Col>
             <Divider />
             <Col span={24}>
-              <Card>
-                <Tabs defaultActiveKey="1">
-                  <Tabs.TabPane tab="Mentioned Addresses" key="1">
-                    <MentionedAddresses username={data.data.author} />
-                  </Tabs.TabPane>
-                  <Tabs.TabPane tab="Deleted Posts" key="2">
-                    <DeletedPosts username={data.data.author} />
-                  </Tabs.TabPane>
-                  <Tabs.TabPane tab="Edited Posts" key="3">
-                    <EditedPosts username={data.data.author} />
-                  </Tabs.TabPane>
-                </Tabs>
-              </Card>
+              <Tabs defaultActiveKey="1">
+                <Tabs.TabPane tab="Mentioned Addresses" key="1">
+                  <MentionedAddresses username={data.data.author} />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Deleted Posts" key="2">
+                  <DeletedPosts username={data.data.author} />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Edited Posts" key="3">
+                  <EditedPosts username={data.data.author} />
+                </Tabs.TabPane>
+              </Tabs>
             </Col>
           </Row>
         </PageContent>

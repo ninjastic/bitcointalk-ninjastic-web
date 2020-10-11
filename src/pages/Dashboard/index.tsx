@@ -146,13 +146,13 @@ const PostsTodayCard: React.FC = () => {
     );
   }
 
-  const totalCount = data.reduce((prev, current) => {
+  const totalCount = data?.reduce((prev, current) => {
     return prev + current.doc_count;
   }, 0);
 
   return (
     <Col xs={12} lg={6}>
-      <Statistic title="Posts Today" value={totalCount} />
+      <Statistic title="Posts 24h" value={totalCount} />
     </Col>
   );
 };

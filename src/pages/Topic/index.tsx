@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { Typography, Divider, Button, Card, Radio } from 'antd';
+import { Typography, Divider, Button, Card, Radio, Tabs } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import numeral from 'numeral';
@@ -10,12 +10,15 @@ import Header from '../../components/Header';
 
 import api from '../../services/api';
 
-import { PageContent } from './styles';
 import PostCard from '../../components/PostCard';
 import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
+import TopicAuthorsCard from '../../components/TopicAuthorsCard';
+
+import { PageContent } from './styles';
 
 const { Text, Title } = Typography;
+const { TabPane } = Tabs;
 
 interface Post {
   post_id: number;
@@ -28,24 +31,19 @@ interface Post {
   board_id: number;
   board_name: string;
   archive: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
-interface ApiResponseHitsData {
-  _id: string;
-  _source: Post;
-}
-
-interface ApiResponseHits {
-  hits: ApiResponseHitsData[];
-  total: {
-    value: number;
-  };
+interface Data {
+  total_results: number;
+  posts: Post[];
 }
 
 interface ApiResponse {
-  took: number;
   timed_out: boolean;
-  hits: ApiResponseHits;
+  result: number;
+  data: Data;
 }
 
 interface MatchParams {
@@ -66,7 +64,7 @@ const Topic: React.FC = () => {
     canFetchMore,
     data,
   } = useInfiniteQuery<ApiResponse>(
-    'posts',
+    `posts:topic:${id}`,
     async (key, lastId = 0) => {
       const { data: responseData } = await api.get('posts', {
         params: {
@@ -84,9 +82,9 @@ const Topic: React.FC = () => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.hits.hits.length < 100) return false;
+        if (lastGroup.data.posts.length < 100) return false;
 
-        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._id;
+        return lastGroup.data.posts[lastGroup.data.posts.length - 1].post_id;
       },
     },
   );
@@ -135,113 +133,113 @@ const Topic: React.FC = () => {
           </Button>
           <Title style={{ marginBottom: -5 }}>Topic {id}</Title>
         </div>
-        {isLoading && !data && !isError ? (
+        {isLoading ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
             <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
           </div>
         ) : null}
         {isError ? (
-          <div>
-            <Text strong key={1}>
+          <Card style={{ marginTop: 15, textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 16 }} key={1}>
               Something went wrong...
             </Text>
-          </div>
+          </Card>
         ) : null}
         {data && !isLoading && !isError ? (
-          <div>
-            <div style={{ marginBottom: 15 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                {data && !isLoading ? (
-                  <Text>
-                    <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                    {numeral(data[0].hits.total.value || 0).format('0,0')}
-                  </Text>
-                ) : null}
-                <Radio.Group
-                  onChange={e => setPostsViewType(e.target.value)}
-                  value={postsViewType}
-                  defaultValue="normal"
+          <Tabs defaultActiveKey="1">
+            <TabPane tab="Posts" key="1">
+              <div style={{ marginBottom: 15 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
-                  <Radio.Button value="normal">Normal</Radio.Button>
-                  <Radio.Button value="header">Header Only</Radio.Button>
-                  <Radio.Button value="compact">Compact</Radio.Button>
-                </Radio.Group>
-              </div>
-            </div>
-            {data.map((group, groupIndex) => {
-              if (!group.hits.hits.length) {
-                return (
-                  <Card
-                    style={{
-                      width: '100%',
-                      marginTop: 15,
-                      textAlign: 'center',
-                    }}
-                  >
-                    <Text type="secondary" style={{ fontSize: 16 }} key={1}>
-                      No results...
+                  {data && !isLoading ? (
+                    <Text>
+                      <Text style={{ fontWeight: 500 }}>Posts:</Text>{' '}
+                      {numeral(data[0].data.total_results || 0).format('0,0')}
                     </Text>
-                  </Card>
-                );
-              }
-
-              return group.hits.hits.map((post_raw, i, array) => {
-                const post = post_raw._source;
-
-                switch (postsViewType) {
-                  case 'normal':
-                    return (
-                      <div style={{ marginBottom: 30 }} key={post.post_id}>
-                        <PostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                        <Divider />
-                        {i === array.length - 1 ? (
-                          <LoadingMore groupIndex={groupIndex} />
-                        ) : null}
-                      </div>
-                    );
-                  case 'header':
-                    return (
-                      <div key={post.post_id}>
-                        <HeaderPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                          style={{ marginBottom: 15 }}
-                        />
-                        {i === array.length - 1 ? (
-                          <LoadingMore groupIndex={groupIndex} />
-                        ) : null}
-                      </div>
-                    );
-                  case 'compact':
-                    return (
-                      <ul
-                        key={post.post_id}
-                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                      >
-                        <CompactPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                        {i === array.length - 1 ? (
-                          <LoadingMore groupIndex={groupIndex} onlyIcon />
-                        ) : null}
-                      </ul>
-                    );
-                  default:
-                    return null;
+                  ) : null}
+                  <Radio.Group
+                    onChange={e => setPostsViewType(e.target.value)}
+                    value={postsViewType}
+                    defaultValue="normal"
+                  >
+                    <Radio.Button value="normal">Normal</Radio.Button>
+                    <Radio.Button value="header">Header Only</Radio.Button>
+                    <Radio.Button value="compact">Compact</Radio.Button>
+                  </Radio.Group>
+                </div>
+              </div>
+              {data.map((group, groupIndex) => {
+                if (!group.data.posts.length) {
+                  return (
+                    <Card
+                      style={{ marginTop: 15, textAlign: 'center' }}
+                      key="NotFound"
+                    >
+                      <Text type="secondary" style={{ fontSize: 16 }} key={1}>
+                        No results...
+                      </Text>
+                    </Card>
+                  );
                 }
-              });
-            })}
-          </div>
+
+                return group.data.posts.map((post, i, array) => {
+                  switch (postsViewType) {
+                    case 'normal':
+                      return (
+                        <div style={{ marginBottom: 30 }} key={post.post_id}>
+                          <PostCard
+                            data={post}
+                            number={groupIndex * 100 + i + 1}
+                          />
+                          <Divider />
+                          {i === array.length - 1 ? (
+                            <LoadingMore groupIndex={groupIndex} />
+                          ) : null}
+                        </div>
+                      );
+                    case 'header':
+                      return (
+                        <div key={post.post_id}>
+                          <HeaderPostCard
+                            data={post}
+                            number={groupIndex * 100 + i + 1}
+                            style={{ marginBottom: 15 }}
+                          />
+                          {i === array.length - 1 ? (
+                            <LoadingMore groupIndex={groupIndex} />
+                          ) : null}
+                        </div>
+                      );
+                    case 'compact':
+                      return (
+                        <ul
+                          key={post.post_id}
+                          style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                        >
+                          <CompactPostCard
+                            data={post}
+                            number={groupIndex * 100 + i + 1}
+                          />
+                          {i === array.length - 1 ? (
+                            <LoadingMore groupIndex={groupIndex} onlyIcon />
+                          ) : null}
+                        </ul>
+                      );
+                    default:
+                      return null;
+                  }
+                });
+              })}
+            </TabPane>
+            <TabPane tab="Users" key="2">
+              <TopicAuthorsCard topicId={id} />
+            </TabPane>
+          </Tabs>
         ) : null}
       </PageContent>
     </div>

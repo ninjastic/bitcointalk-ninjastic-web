@@ -18,6 +18,9 @@ import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
+import { autorun } from 'mobx';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 import numeral from 'numeral';
 
 import api from '../../services/api';
@@ -43,24 +46,19 @@ interface Post {
   board_id: number;
   board_name: string;
   archive: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
-interface ApiResponseHitsData {
-  _id: string;
-  _source: Post;
-}
-
-interface ApiResponseHits {
-  hits: ApiResponseHitsData[];
-  total: {
-    value: number;
-  };
+interface Data {
+  total_results: number;
+  posts: Post[];
 }
 
 interface ApiResponse {
-  took: number;
   timed_out: boolean;
-  hits: ApiResponseHits;
+  result: number;
+  data: Data;
 }
 
 const SelectorBoards: React.FC = () => {
@@ -126,9 +124,21 @@ const SelectorBoards: React.FC = () => {
 
 const Search: React.FC = () => {
   const store = useSearchStore();
+  const { search } = useLocation();
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
+
+  autorun(() => {
+    const query = queryString.parse(search);
+
+    setValue('author', query.author);
+    setValue('content', query.content);
+    setValue('topic_id', query.topic_id);
+    setValue('after_date', query.after_date);
+    setValue('before_date', query.before_date);
+    setValue('board', query.board);
+  });
 
   const {
     isLoading,
@@ -172,9 +182,9 @@ const Search: React.FC = () => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.hits.hits.length < 100) return false;
+        if (lastGroup.data.posts.length < 100) return false;
 
-        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._id;
+        return lastGroup.data.posts[lastGroup.data.posts.length - 1].post_id;
       },
     },
   );
@@ -362,7 +372,7 @@ const Search: React.FC = () => {
                     {data && !isLoading && !isLoadingSearch ? (
                       <Text>
                         <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                        {numeral(data[0].hits.total.value || 0).format('0,0')}
+                        {numeral(data[0].data.total_results || 0).format('0,0')}
                       </Text>
                     ) : null}
                     <Radio.Group
@@ -377,9 +387,9 @@ const Search: React.FC = () => {
                   </div>
                 </div>
                 {data.map((group, groupIndex) => {
-                  if (!group.hits.hits.length) {
+                  if (!group.data.posts.length) {
                     return (
-                      <Card>
+                      <Card key={groupIndex}>
                         <Text strong key={1}>
                           No results...
                         </Text>
@@ -387,9 +397,7 @@ const Search: React.FC = () => {
                     );
                   }
 
-                  return group.hits.hits.map((post_raw, i, array) => {
-                    const post = post_raw._source;
-
+                  return group.data.posts.map((post, i, array) => {
                     switch (postsViewType) {
                       case 'normal':
                         return (
