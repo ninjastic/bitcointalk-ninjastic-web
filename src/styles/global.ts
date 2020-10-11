@@ -16,7 +16,6 @@ const GlobalStyle = createGlobalStyle`
     body {
         height: auto;
         width: auto;
-        background-color: #1D1D1D;
     }
 
     #root {

@@ -77,7 +77,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
     {
       title: 'User Stats',
       dataIndex: 'author',
-      key: 'author',
+      key: 'stats',
       render: text => {
         return <Link to={`/user/${text}`}>View</Link>;
       },
@@ -85,7 +85,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
     {
       title: 'View Posts',
       dataIndex: 'author',
-      key: 'author',
+      key: 'view-posts',
       render: text => {
         return (
           <Link to={`/search?author=${text}&topic_id=${topicId}`}>View</Link>

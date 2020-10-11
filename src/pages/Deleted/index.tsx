@@ -82,7 +82,7 @@ const Deleted: React.FC = () => {
               <Text style={{ fontSize: 24, fontWeight: 500 }}>
                 Last Deleted Posts
               </Text>
-              <Text type="secondary">after 5 minutes of created</Text>
+              <Text type="secondary">within 5 minutes of created</Text>
             </div>
             {data.map((group, groupIndex) => {
               if (!group.hits.hits.length) {

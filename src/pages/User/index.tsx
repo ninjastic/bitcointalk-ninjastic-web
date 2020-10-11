@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Card,
@@ -26,6 +26,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from 'recharts';
 import {
   format,
@@ -43,6 +45,8 @@ import api from '../../services/api';
 import Header from '../../components/Header';
 import AddressCard from '../../components/AddressCard';
 import PostCard from '../../components/PostCard';
+import HeaderPostCard from '../../components/HeaderPostCard';
+import CompactPostCard from '../../components/CompactPostCard';
 
 import { PageContent } from './styles';
 
@@ -106,6 +110,8 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
 };
 
 const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
+  const [postsViewType, setPostsViewType] = useState('normal');
+
   const {
     data,
     isLoading,
@@ -169,6 +175,30 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
         })`}
         key={1}
       >
+        <div style={{ marginBottom: 15 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            {data && !isLoading ? (
+              <Text>
+                <Text style={{ fontWeight: 500 }}>Results:</Text>
+              </Text>
+            ) : null}
+            <Radio.Group
+              onChange={e => setPostsViewType(e.target.value)}
+              value={postsViewType}
+              defaultValue="normal"
+            >
+              <Radio.Button value="normal">Normal</Radio.Button>
+              <Radio.Button value="header">Header Only</Radio.Button>
+              <Radio.Button value="compact">Compact</Radio.Button>
+            </Radio.Group>
+          </div>
+        </div>
         {data.map((group, groupIndex, array) => {
           if (!group.hits.hits.length) {
             return (
@@ -183,12 +213,42 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
               {group.hits.hits.map((postRaw, i) => {
                 const post = postRaw._source;
 
-                return (
-                  <div style={{ marginBottom: 30 }} key={postRaw._id}>
-                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                    <Divider />
-                  </div>
-                );
+                switch (postsViewType) {
+                  case 'normal':
+                    return (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                        <Divider />
+                      </div>
+                    );
+                  case 'header':
+                    return (
+                      <div key={post.post_id}>
+                        <HeaderPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                          style={{ marginBottom: 15 }}
+                        />
+                      </div>
+                    );
+                  case 'compact':
+                    return (
+                      <ul
+                        key={post.post_id}
+                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                      >
+                        <CompactPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                      </ul>
+                    );
+                  default:
+                    return null;
+                }
               })}
               {groupIndex === array.length - 1 ? (
                 <div style={{ marginTop: 15, textAlign: 'center' }}>
@@ -215,6 +275,8 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
+  const [postsViewType, setPostsViewType] = useState('normal');
+
   const {
     data,
     isLoading,
@@ -278,6 +340,30 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
         })`}
         key={1}
       >
+        <div style={{ marginBottom: 15 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            {data && !isLoading ? (
+              <Text>
+                <Text style={{ fontWeight: 500 }}>Results:</Text>
+              </Text>
+            ) : null}
+            <Radio.Group
+              onChange={e => setPostsViewType(e.target.value)}
+              value={postsViewType}
+              defaultValue="normal"
+            >
+              <Radio.Button value="normal">Normal</Radio.Button>
+              <Radio.Button value="header">Header Only</Radio.Button>
+              <Radio.Button value="compact">Compact</Radio.Button>
+            </Radio.Group>
+          </div>
+        </div>
         {data.map((group, groupIndex, array) => {
           if (!group.hits.hits.length) {
             return (
@@ -292,12 +378,42 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
               {group.hits.hits.map((postRaw, i) => {
                 const post = postRaw._source;
 
-                return (
-                  <div style={{ marginBottom: 30 }} key={postRaw._id}>
-                    <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                    <Divider />
-                  </div>
-                );
+                switch (postsViewType) {
+                  case 'normal':
+                    return (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                        <Divider />
+                      </div>
+                    );
+                  case 'header':
+                    return (
+                      <div key={post.post_id}>
+                        <HeaderPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                          style={{ marginBottom: 15 }}
+                        />
+                      </div>
+                    );
+                  case 'compact':
+                    return (
+                      <ul
+                        key={post.post_id}
+                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                      >
+                        <CompactPostCard
+                          data={post}
+                          number={groupIndex * 100 + i + 1}
+                        />
+                      </ul>
+                    );
+                  default:
+                    return null;
+                }
               })}
               {groupIndex === array.length - 1 ? (
                 <div style={{ marginTop: 15, textAlign: 'center' }}>
@@ -320,6 +436,58 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
         })}
       </Collapse.Panel>
     </Collapse>
+  );
+};
+
+const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
+  const { data, isLoading } = useQuery(
+    `userTopTopics:${username}`,
+    async () => {
+      const { data: responseData } = await api.get(`/users/${username}/topics`);
+
+      return responseData;
+    },
+    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  if (isLoading) {
+    return <LoadingOutlined style={{ color: '#fff' }} />;
+  }
+
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+      render: (text, record) => (
+        <a href={`https://bitcointalk.org/index.php?topic=${record.topic_id}`}>
+          {text}
+        </a>
+      ),
+    },
+    {
+      title: 'Posts',
+      dataIndex: 'count',
+      key: 'count',
+    },
+    {
+      title: 'View Posts',
+      dataIndex: 'topic_id',
+      key: 'view-posts',
+      render: text => (
+        <Link to={`/search?author=${username}&topic_id=${text}`}>View</Link>
+      ),
+    },
+  ];
+
+  return (
+    <Table
+      size="small"
+      dataSource={data?.data}
+      columns={columns}
+      bordered
+      loading={isLoading}
+    />
   );
 };
 
@@ -449,38 +617,6 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  const CustomizedAxisTick: React.FC<{
-    x: string;
-    y: string;
-    payload: { value: string };
-  }> = ({ x, y, payload }) => {
-    if (!payload.value) {
-      return (
-        <text
-          x={Number(x) + 4.5}
-          y={Number(y) / 2}
-          dy={-10}
-          fontSize={15}
-          fill="#757575"
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          No data
-        </text>
-      );
-    }
-
-    const date = new Date(payload.value);
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(addMinutes(date, date.getTimezoneOffset()), 'yyyy/MM/dd')}
-        </text>
-      </g>
-    );
-  };
-
   if (isLoading) {
     return <LoadingOutlined style={{ color: '#fff' }} />;
   }
@@ -488,34 +624,31 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
   return (
     <>
       <ResponsiveContainer width="100%" aspect={2 / 1}>
-        <LineChart
-          data={isError ? [{ value: null }] : data.data}
-          margin={{ top: 0, left: -55, right: 0, bottom: 0 }}
-        >
+        <LineChart data={isError ? [{ value: null }] : data.data}>
           <XAxis
             dataKey="key_as_string"
-            tick={({ x, y, payload }) => (
-              <CustomizedAxisTick x={x} y={y} payload={payload} />
-            )}
+            tickFormatter={value => {
+              const date = new Date(value);
+              return format(
+                addMinutes(date, date.getTimezoneOffset()),
+                'MM/dd',
+              );
+            }}
             domain={['dataMin', 'dataMax']}
-            interval={1}
           />
-          <YAxis dataKey="doc_count" />
+          <YAxis dataKey="doc_count" allowDecimals={false} />
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip
             contentStyle={{ backgroundColor: '#1D1D1D' }}
             label="{timeTaken}"
             labelFormatter={value => {
               const date = new Date(value);
+              const formated = format(
+                addMinutes(date, date.getTimezoneOffset()),
+                'MM/dd',
+              );
 
-              return `Day: ${
-                isValid(new Date(value))
-                  ? format(
-                      addMinutes(date, date.getTimezoneOffset()),
-                      'yyyy/MM/dd',
-                    )
-                  : null
-              }`;
+              return `Day: ${isValid(new Date(value)) ? formated : null}`;
             }}
             formatter={value => [value, 'Posts']}
           />
@@ -541,77 +674,91 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  const CustomizedAxisTick: React.FC<{
-    x: string;
-    y: string;
-    payload: { value: string };
-  }> = ({ x, y, payload }) => {
-    if (!payload.value) {
-      return (
-        <text
-          x={Number(x) + 4.5}
-          y={Number(y) / 2}
-          dy={-10}
-          fontSize={15}
-          fill="#757575"
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          No data
-        </text>
-      );
-    }
-
-    const date = new Date(payload.value);
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(addMinutes(date, date.getTimezoneOffset()), 'yyyy/MM/dd')}
-        </text>
-      </g>
-    );
-  };
-
   if (isLoading) {
     return <LoadingOutlined style={{ color: '#fff' }} />;
   }
 
   return (
     <ResponsiveContainer width="100%" aspect={2 / 1}>
-      <LineChart
-        data={isError ? [{ value: null }] : data.data}
-        margin={{ top: 0, left: -55, right: 0, bottom: 0 }}
-      >
+      <LineChart data={isError ? [{ value: null }] : data.data}>
         <XAxis
           dataKey="key_as_string"
-          tick={({ x, y, payload }) => (
-            <CustomizedAxisTick x={x} y={y} payload={payload} />
-          )}
+          tickFormatter={value => {
+            const date = new Date(value);
+            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
+          }}
           domain={['dataMin', 'dataMax']}
-          interval={6}
         />
-        <YAxis dataKey="doc_count" />
+        <YAxis dataKey="doc_count" allowDecimals={false} />
         <CartesianGrid strokeDasharray="3 3" />
         <Tooltip
           contentStyle={{ backgroundColor: '#1D1D1D' }}
           label="{timeTaken}"
           labelFormatter={value => {
             const date = new Date(value);
+            const formated = format(
+              addMinutes(date, date.getTimezoneOffset()),
+              'MM/dd',
+            );
 
-            return `Day: ${
-              isValid(new Date(value))
-                ? format(
-                    addMinutes(date, date.getTimezoneOffset()),
-                    'yyyy/MM/dd',
-                  )
-                : null
-            }`;
+            return `Day: ${isValid(new Date(value)) ? formated : null}`;
           }}
           formatter={value => [value, 'Posts']}
         />
         <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
       </LineChart>
+    </ResponsiveContainer>
+  );
+};
+
+const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
+  const { data, isLoading, isError } = useQuery(
+    `userPostsYear:${username}`,
+    async () => {
+      const oneYearAgo = sub(new Date(), { years: 1 }).toISOString();
+
+      const { data: responseData } = await api.get(
+        `/users/${username}/posts?from=${oneYearAgo}&interval=7d`,
+      );
+
+      return responseData;
+    },
+    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  if (isLoading) {
+    return <LoadingOutlined style={{ color: '#fff' }} />;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" aspect={2 / 0.5}>
+      <BarChart data={isError ? [{ value: null }] : data.data}>
+        <XAxis
+          dataKey="key_as_string"
+          tickFormatter={value => {
+            const date = new Date(value);
+            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
+          }}
+          domain={['dataMin', 'dataMax']}
+        />
+        <YAxis dataKey="doc_count" allowDecimals={false} />
+        <CartesianGrid strokeDasharray="3 3" />
+        <Tooltip
+          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          label="{timeTaken}"
+          labelFormatter={value => {
+            const date = new Date(value);
+            const formated = format(
+              addMinutes(date, date.getTimezoneOffset()),
+              'MM/dd',
+            );
+
+            return `Day: ${isValid(new Date(value)) ? formated : null}`;
+          }}
+          formatter={value => [value, 'Posts']}
+        />
+        <Bar dataKey="doc_count" fill="#8884d8" />
+      </BarChart>
     </ResponsiveContainer>
   );
 };
@@ -894,15 +1041,22 @@ const User: React.FC = () => {
               <PostsMonthChart username={data.data.author} />
             </Col>
             <Divider />
+            <Row gutter={[24, 24]}>
+              <Title level={3}>Posts per week (last year)</Title>
+              <PostsYearChart username={data.data.author} />
+            </Row>
             <Col span={24}>
               <Tabs defaultActiveKey="1">
-                <Tabs.TabPane tab="Mentioned Addresses" key="1">
+                <Tabs.TabPane tab="Favorite Topics" key="1">
+                  <FavoriteTopics username={data.data.author} />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Mentioned Addresses" key="2">
                   <MentionedAddresses username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Deleted Posts" key="2">
+                <Tabs.TabPane tab="Deleted Posts" key="3">
                   <DeletedPosts username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Edited Posts" key="3">
+                <Tabs.TabPane tab="Edited Posts" key="4">
                   <EditedPosts username={data.data.author} />
                 </Tabs.TabPane>
               </Tabs>

@@ -28,91 +28,7 @@ import AlertMessage from '../../components/AlertMessage';
 
 import { PageContent } from './styles';
 
-const { Text, Title } = Typography;
-
-const PostsLast24HoursGraph: React.FC<{ isSmallScreen: boolean }> = ({
-  isSmallScreen,
-}) => {
-  const { data, isLoading } = useQuery(
-    'postsPerHourLast24h',
-    async () => {
-      const { data: responseData } = await api.get('/posts/count');
-
-      return responseData;
-    },
-    { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
-  );
-
-  if (isLoading) {
-    return (
-      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-        <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />
-      </div>
-    );
-  }
-
-  const CustomizedAxisTick: React.FC<{
-    x: string;
-    y: string;
-    payload: { value: string };
-  }> = ({ x, y, payload }) => {
-    if (!payload.value) {
-      return (
-        <text
-          x={Number(x) + 4.5}
-          y={Number(y) / 2}
-          dy={-10}
-          fontSize={15}
-          fill="#757575"
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          No data
-        </text>
-      );
-    }
-
-    const date = new Date(payload.value);
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm')}
-        </text>
-      </g>
-    );
-  };
-
-  return (
-    <ResponsiveContainer width="100%" aspect={2 / (isSmallScreen ? 1 : 0.5)}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="key_as_string"
-          tick={({ x, y, payload }) => (
-            <CustomizedAxisTick x={x} y={y} payload={payload} />
-          )}
-        />
-        <YAxis dataKey="doc_count" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
-          label="{timeTaken}"
-          labelFormatter={value => {
-            const date = new Date(value);
-
-            return `${
-              isValid(new Date(value))
-                ? format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm')
-                : null
-            } (UTC)`;
-          }}
-          formatter={value => [value, 'Posts']}
-        />
-        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-};
+const { Title } = Typography;
 
 const PostsTodayCard: React.FC = () => {
   const { data, isLoading } = useQuery(
@@ -135,33 +51,71 @@ const PostsTodayCard: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  if (isLoading) {
-    return (
-      <Col xs={12} lg={6}>
-        <Statistic
-          title="Posts Today"
-          valueRender={() => <LoadingOutlined />}
-        />
-      </Col>
-    );
-  }
-
   const totalCount = data?.reduce((prev, current) => {
     return prev + current.doc_count;
   }, 0);
 
   return (
-    <Col xs={12} lg={6}>
-      <Statistic title="Posts 24h" value={totalCount} />
-    </Col>
+    <Statistic
+      title="Posts 24h"
+      value={totalCount}
+      valueRender={value => (isLoading ? <LoadingOutlined /> : value)}
+    />
   );
 };
 
-const Dashboard: React.FC = () => {
+const PostsLast24HoursGraph: React.FC = () => {
   const isSmallScreen = useMediaQuery({ query: '(max-width: 991px)' });
 
-  const { data, isLoading, isError } = useQuery(
-    'posts_count_24h',
+  const { data, isLoading } = useQuery(
+    'postsPerHourLast24h',
+    async () => {
+      const { data: responseData } = await api.get('/posts/count');
+
+      return responseData;
+    },
+    { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
+  );
+
+  if (isLoading) {
+    return <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" aspect={2 / (isSmallScreen ? 1 : 0.5)}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="key_as_string"
+          tickFormatter={value => {
+            const date = new Date(value);
+            return format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm');
+          }}
+        />
+        <YAxis dataKey="doc_count" allowDecimals={false} />
+        <Tooltip
+          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          label="{timeTaken}"
+          labelFormatter={value => {
+            const date = new Date(value);
+            const formatted = format(
+              addMinutes(date, date.getTimezoneOffset()),
+              'HH:mm',
+            );
+
+            return `${isValid(new Date(value)) ? formatted : null} (UTC)`;
+          }}
+          formatter={value => [value, 'Posts']}
+        />
+        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+};
+
+const PostsPerDayGraph: React.FC = () => {
+  const { data, isLoading } = useQuery(
+    'postsPerDay',
     async () => {
       const currentDate = new Date();
 
@@ -184,104 +138,69 @@ const Dashboard: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  const CustomizedAxisTick: React.FC<{
-    x: string;
-    y: string;
-    payload: { value: string };
-  }> = ({ x, y, payload }) => {
-    if (!payload.value) {
-      return (
-        <text
-          x={Number(x) + 4.5}
-          y={Number(y) / 2}
-          dy={-10}
-          fontSize={15}
-          fill="#757575"
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          No data
-        </text>
-      );
-    }
+  if (isLoading) {
+    return <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />;
+  }
 
-    const date = new Date(payload.value);
+  return (
+    <ResponsiveContainer width="100%" aspect={2 / 1}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="key_as_string"
+          tickFormatter={value => {
+            const date = new Date(value);
+            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
+          }}
+        />
+        <YAxis dataKey="doc_count" allowDecimals={false} />
+        <Tooltip
+          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          label="{timeTaken}"
+          labelFormatter={value => {
+            const date = new Date(value);
+            const formatted = format(
+              addMinutes(date, date.getTimezoneOffset()),
+              'MM/dd',
+            );
 
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={36} y={0} dy={16} textAnchor="end" fill="#666">
-          {format(addMinutes(date, date.getTimezoneOffset()), 'yyyy/MM/dd')}
-        </text>
-      </g>
-    );
-  };
+            return `${isValid(new Date(value)) ? formatted : null} (UTC)`;
+          }}
+          formatter={value => [value, 'Posts']}
+        />
+        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+};
 
+const Dashboard: React.FC = () => {
   return (
     <>
       <Header />
       <PageContent>
         <AlertMessage />
-        {isLoading || isError ? (
-          <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            {isError ? (
-              <Text>We are having some trouble contacting the server...</Text>
-            ) : (
-              <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
-            )}
-          </div>
-        ) : (
-          <div>
-            <Row gutter={[24, 24]}>
-              <PostsTodayCard />
-            </Row>
-            <Divider />
-            <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
-              <Col xs={24} lg={12}>
-                <Title level={3}>Posts per day</Title>
-                <ResponsiveContainer width="100%" aspect={2 / 1}>
-                  <LineChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="key_as_string"
-                      tick={({ x, y, payload }) => (
-                        <CustomizedAxisTick x={x} y={y} payload={payload} />
-                      )}
-                    />
-                    <YAxis dataKey="doc_count" />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1D1D1D' }}
-                      label="{timeTaken}"
-                      labelFormatter={value => {
-                        const date = new Date(value);
-
-                        return `${
-                          isValid(new Date(value))
-                            ? format(
-                                addMinutes(date, date.getTimezoneOffset()),
-                                'yyyy/MM/dd',
-                              )
-                            : null
-                        } (UTC)`;
-                      }}
-                      formatter={value => [value, 'Posts']}
-                    />
-                    <Line
-                      dataKey="doc_count"
-                      stroke="#8884d8"
-                      type="monotone"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Col>
-            </Row>
-            <Row gutter={[24, 24]}>
-              <Col xs={24}>
-                <Title level={3}>Posts in the last 24 hours</Title>
-                <PostsLast24HoursGraph isSmallScreen={isSmallScreen} />
-              </Col>
-            </Row>
-          </div>
-        )}
+        <Row gutter={[24, 24]}>
+          <Col xs={12} lg={8}>
+            <PostsTodayCard />
+          </Col>
+          <Col xs={12} lg={8}>
+            <Statistic title="Archived Posts" value="43 mil+" />
+          </Col>
+        </Row>
+        <Divider />
+        <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
+          <Col xs={24} lg={12}>
+            <Title level={3}>Posts per day</Title>
+            <PostsPerDayGraph />
+          </Col>
+        </Row>
+        <Row gutter={[24, 24]}>
+          <Col xs={24}>
+            <Title level={3}>Posts in the last 24 hours</Title>
+            <PostsLast24HoursGraph />
+          </Col>
+        </Row>
       </PageContent>
     </>
   );

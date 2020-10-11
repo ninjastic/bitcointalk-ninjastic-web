@@ -19,7 +19,7 @@ import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { Observer } from 'mobx-react';
 import { autorun } from 'mobx';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import numeral from 'numeral';
 
@@ -65,31 +65,32 @@ const SelectorBoards: React.FC = () => {
   const [search, setSearch] = useState('');
   const [boardTitle, setBoardTitle] = useState('');
 
-  const { setValue, setBoards } = useSearchStore();
+  const { setValue, setBoards, boards, searchQuery } = useSearchStore();
 
   const { data, isLoading } = useQuery(
     'boards',
     async () => {
       const { data: responseData } = await api.get('/boards');
+      const { data: responseDataRaw } = await api.get('/boards/?raw=1');
 
-      return responseData;
-    },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
-  );
-
-  useQuery(
-    'boardsRaw',
-    async () => {
-      const { data: responseData } = await api.get('/boards/?raw=1');
-
-      if (responseData && responseData.length) {
-        setBoards(responseData);
+      if (responseDataRaw && responseDataRaw.length) {
+        setBoards(responseDataRaw);
       }
 
       return responseData;
     },
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
+
+  autorun(() => {
+    if (searchQuery.board && boards && !boardTitle) {
+      const foundBoard = boards.find(
+        board => board.board_id === Number(searchQuery.board),
+      );
+
+      if (foundBoard) setBoardTitle(foundBoard.name);
+    }
+  });
 
   const boardTestMatch = (searchText: string, board): boolean => {
     const { title } = board;
@@ -123,8 +124,10 @@ const SelectorBoards: React.FC = () => {
 };
 
 const Search: React.FC = () => {
-  const store = useSearchStore();
   const { search } = useLocation();
+  const history = useHistory();
+
+  const store = useSearchStore();
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
@@ -189,10 +192,25 @@ const Search: React.FC = () => {
     },
   );
 
+  const searchPosts = () => {
+    const queryStringified = queryString.stringify({
+      author: searchQuery.author,
+      topic_id: searchQuery.topic_id,
+      content: searchQuery.content,
+      after_date: searchQuery.after_date,
+      before_date: searchQuery.before_date,
+      board: searchQuery.board,
+    });
+
+    history.push(`/search?${queryStringified}`);
+
+    setIsLoadingSearch(true);
+    refetch();
+  };
+
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
-      setIsLoadingSearch(true);
-      refetch();
+      searchPosts();
     }
   };
 
@@ -313,10 +331,7 @@ const Search: React.FC = () => {
                           isLoading ||
                           (isLoadingSearch && !isError)
                         }
-                        onClick={() => {
-                          setIsLoadingSearch(true);
-                          refetch();
-                        }}
+                        onClick={searchPosts}
                       >
                         Search
                       </Button>
