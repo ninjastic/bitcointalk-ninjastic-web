@@ -85,7 +85,7 @@ const Addresses: React.FC = () => {
 
       setIsLoadingAddress(false);
 
-      return results;
+      return results.data;
     },
     {
       enabled: false,

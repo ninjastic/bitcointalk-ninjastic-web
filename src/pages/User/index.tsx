@@ -133,10 +133,11 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.hits.hits.length < 20) return false;
+        if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._source
-          .created_at;
+        return lastGroup.data.posts_history[
+          lastGroup.data.posts_history.length - 1
+        ].created_at;
       },
     },
   );
@@ -153,6 +154,21 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Deleted Posts" key={1}>
+          <Text type="secondary">Something went wrong.</Text>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
+
+  const deletedPostsLength = data.reduce(
+    (p, c) => p + c.data.posts_history.length,
+    0,
+  );
+
+  if (deletedPostsLength === 0) {
+    return (
+      <Collapse>
+        <Collapse.Panel header="Deleted Posts" key={1}>
           <Text type="secondary">
             No deleted posts were found in our database.
           </Text>
@@ -160,12 +176,6 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
       </Collapse>
     );
   }
-
-  let deletedPostsLength = 0;
-
-  data.forEach(group => {
-    deletedPostsLength += group.hits.hits.length;
-  });
 
   return (
     <Collapse>
@@ -185,7 +195,8 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
           >
             {data && !isLoading ? (
               <Text>
-                <Text style={{ fontWeight: 500 }}>Results:</Text>
+                <Text style={{ fontWeight: 500 }}>Results: </Text>
+                <Text>{data[0].data.total_results}</Text>
               </Text>
             ) : null}
             <Radio.Group
@@ -200,7 +211,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
           </div>
         </div>
         {data.map((group, groupIndex, array) => {
-          if (!group.hits.hits.length) {
+          if (!group.data.posts_history.length) {
             return (
               <div style={{ textAlign: 'center' }} key="NoResults">
                 <Text type="secondary">No results.</Text>
@@ -209,10 +220,8 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
           }
 
           return (
-            <div>
-              {group.hits.hits.map((postRaw, i) => {
-                const post = postRaw._source;
-
+            <div key={groupIndex}>
+              {group.data.posts_history.map((post, i) => {
                 switch (postsViewType) {
                   case 'normal':
                     return (
@@ -298,10 +307,11 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.hits.hits.length < 20) return false;
+        if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.hits.hits[lastGroup.hits.hits.length - 1]._source
-          .created_at;
+        return lastGroup.data.posts_history[
+          lastGroup.data.posts_history.length - 1
+        ].created_at;
       },
     },
   );
@@ -318,6 +328,21 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Edited Posts" key={1}>
+          <Text type="secondary">Something went wrong.</Text>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
+
+  const editedPostsLength = data.reduce(
+    (p, c) => p + c.data.posts_history.length,
+    0,
+  );
+
+  if (editedPostsLength === 0) {
+    return (
+      <Collapse>
+        <Collapse.Panel header="Edited Posts" key={1}>
           <Text type="secondary">
             No edited posts were found in our database.
           </Text>
@@ -325,12 +350,6 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
       </Collapse>
     );
   }
-
-  let editedPostsLength = 0;
-
-  data.forEach(group => {
-    editedPostsLength += group.hits.hits.length;
-  });
 
   return (
     <Collapse>
@@ -351,6 +370,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
             {data && !isLoading ? (
               <Text>
                 <Text style={{ fontWeight: 500 }}>Results:</Text>
+                <Text>{data[0].data.total_results}</Text>
               </Text>
             ) : null}
             <Radio.Group
@@ -365,7 +385,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
           </div>
         </div>
         {data.map((group, groupIndex, array) => {
-          if (!group.hits.hits.length) {
+          if (!group.data.posts_history.length) {
             return (
               <div style={{ textAlign: 'center' }} key="NoResults">
                 <Text type="secondary">No results.</Text>
@@ -375,9 +395,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
 
           return (
             <div key={groupIndex}>
-              {group.hits.hits.map((postRaw, i) => {
-                const post = postRaw._source;
-
+              {group.data.posts_history.map((post, i) => {
                 switch (postsViewType) {
                   case 'normal':
                     return (
@@ -486,6 +504,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
       dataSource={data?.data}
       columns={columns}
       bordered
+      rowKey="topic_id"
       loading={isLoading}
     />
   );
@@ -519,9 +538,9 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.length < 20) return false;
+        if (lastGroup.data.length < 20) return false;
 
-        const last = lastGroup[lastGroup.length - 1];
+        const last = lastGroup.data[lastGroup.data.length - 1];
         return `${last.address},${last.created_at},${last.id}`;
       },
     },
@@ -539,6 +558,16 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Mentioned Addresses" key={1}>
+          <Text type="secondary">Something went wrong.</Text>
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
+
+  if (data.reduce((p, c) => p + c.data.length, 0) === 0) {
+    return (
+      <Collapse>
+        <Collapse.Panel header="Mentioned Addresses" key={1}>
           <Text type="secondary">No addresses were found in our database.</Text>
         </Collapse.Panel>
       </Collapse>
@@ -549,7 +578,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   let addressesLength = 0;
 
   data.forEach(group => {
-    group.forEach(address => {
+    group.data.forEach(address => {
       addressesLength += 1;
 
       address.authors.forEach(author => {
@@ -573,7 +602,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
         {data.map((group, groupIndex, array) => {
           return (
             <div key={groupIndex}>
-              {group.map((address, i) => {
+              {group.data.map((address, i) => {
                 return (
                   <AddressCard
                     data={address}
@@ -764,7 +793,18 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const COLORS = [
+    { start: '#ED213A', end: '#93291E' },
+    { start: '#525252', end: '#3d72b4' },
+    { start: '#00B4DB', end: '#0083B0' },
+    { start: '#ffb347', end: '#ffcc33' },
+    { start: '#CB356B', end: '#BD3F32' },
+    { start: '#fd746c', end: '#ff9068' },
+    { start: '#f46b45', end: '#eea849' },
+    { start: '#11998e', end: '#38ef7d' },
+    { start: '#396afc', end: '#2948ff' },
+    { start: '#F2F2F2', end: '#DBDBDB' },
+  ];
 
   if (loading) {
     return (
@@ -785,6 +825,20 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
   return (
     <ResponsiveContainer width="100%" aspect={2 / 1.3}>
       <PieChart margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
+        <defs>
+          {data.map((entry, index) => (
+            <linearGradient id={`myGradient${index}`}>
+              <stop
+                offset="0%"
+                stopColor={COLORS[index % COLORS.length].start}
+              />
+              <stop
+                offset="100%"
+                stopColor={COLORS[index % COLORS.length].end}
+              />
+            </linearGradient>
+          ))}
+        </defs>
         <Pie
           isAnimationActive={false}
           data={data}
@@ -801,7 +855,7 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
           {data.map((board, index) => (
             <Cell
               key={`cell-${board.name}`}
-              fill={COLORS[index % COLORS.length]}
+              fill={`url(#myGradient${index})`}
             />
           ))}
         </Pie>
@@ -823,7 +877,7 @@ const BoardsTable: React.FC<{ data: any; loading: boolean }> = ({
     ? data.boards.map(board => ({
         ...board,
         percentage: `${(
-          (Number(board.count) / data.posts_count_with_boards) *
+          (Number(board.count) / data.total_results_with_board) *
           100
         ).toFixed(0)}%`,
       }))
@@ -937,7 +991,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
       <Col xs={24} lg={12}>
         <BoardsChart
           data={data?.data?.boards}
-          total={data?.data?.posts_count_with_boards}
+          total={data?.data?.total_results_with_board}
           loading={isLoading || isFetching}
         />
       </Col>

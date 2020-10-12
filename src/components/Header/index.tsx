@@ -48,8 +48,8 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
       <Menu.Item key="/addresses">
         <Link to="/addresses">Addresses</Link>
       </Menu.Item>
-      <Menu.Item key="/deleted">
-        <Link to="/deleted">Deleted</Link>
+      <Menu.Item key="/patrol">
+        <Link to="/patrol">Patrol</Link>
       </Menu.Item>
       <div
         style={{

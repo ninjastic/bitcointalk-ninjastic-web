@@ -28,11 +28,15 @@ interface Address {
   posts_id: number[];
 }
 
+interface Response {
+  data: Address;
+}
+
 const Address: React.FC = () => {
   const history = useHistory();
   const { address } = useRouteMatch().params as MatchParams;
 
-  const { data, isLoading, isError } = useQuery<Address>(
+  const { data, isLoading, isError } = useQuery<Response>(
     `address:${address}`,
     async () => {
       const { data: responseData } = await api.get(`addresses/${address}`);
@@ -59,15 +63,11 @@ const Address: React.FC = () => {
           </Button>
           <Title style={{ marginBottom: -5 }}>Address</Title>
         </div>
-        {isLoading || isError ? (
-          <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            {isError ? (
-              <Text>This address could not be found in our database.</Text>
-            ) : (
-              <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
-            )}
-          </div>
-        ) : (
+        {isLoading ? (
+          <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+        ) : null}
+        {isError ? <Text>Something went wrong</Text> : null}
+        {data ? (
           <div>
             <Card
               title={
@@ -88,7 +88,7 @@ const Address: React.FC = () => {
                           wordWrap: 'break-word',
                         }}
                       >
-                        {data.address}
+                        {data.data.address}
                       </span>
                     </div>
                   </div>
@@ -99,10 +99,10 @@ const Address: React.FC = () => {
               <div style={{ marginBottom: 10 }}>
                 <AddressAuthorsCard address={address} />
               </div>
-              <AddressPostCard postsId={data.posts_id} />
+              <AddressPostCard postsId={data.data.posts_id} />
             </Card>
           </div>
-        )}
+        ) : null}
       </PageContent>
     </>
   );

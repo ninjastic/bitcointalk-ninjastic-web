@@ -29,11 +29,12 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
           <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
         ) : (
           <div>
-            {isError ? (
+            {isError ? <Text>Something went wrong.</Text> : null}
+            {!data.data.length ? (
               <Text>No BTC/ETH addresses were found on this post.</Text>
-            ) : (
-              <div>
-                {data.map(address => (
+            ) : null}
+            {data.data
+              ? data.data.map(address => (
                   <Collapse key={address.address}>
                     <Collapse.Panel
                       header={
@@ -66,9 +67,8 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
                       <AddressPostCard postsId={address.posts_id} />
                     </Collapse.Panel>
                   </Collapse>
-                ))}
-              </div>
-            )}
+                ))
+              : null}
           </div>
         )}
       </Collapse.Panel>

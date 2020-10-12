@@ -1,12 +1,9 @@
 import React from 'react';
-import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import { ConfigProvider, Tooltip } from 'antd';
 import { format, addMinutes } from 'date-fns';
 
-import api from '../../services/api';
 import direction from '../../services/direction';
-import { useSearchStore } from '../../stores/SearchStore';
 
 interface Post {
   post_id: number;
@@ -27,22 +24,6 @@ interface Props {
 }
 
 const CompactPostCard: React.FC<Props> = ({ data, number }) => {
-  const { setBoards, boards } = useSearchStore();
-
-  useQuery(
-    'boardsRaw',
-    async () => {
-      const { data: responseData } = await api.get('/boards/?raw=1');
-
-      if (responseData && responseData.length) {
-        setBoards(responseData);
-      }
-
-      return responseData;
-    },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
-  );
-
   const postDirection = direction(data.content);
 
   const date = new Date(data.date);
@@ -52,11 +33,6 @@ const CompactPostCard: React.FC<Props> = ({ data, number }) => {
   );
 
   const postNumber = number ? ` (#${number})` : null;
-
-  const lastBoard =
-    data.board_name || (data.board_id && boards.length)
-      ? boards.find(board => board.board_id === data.board_id)?.name
-      : null;
 
   return (
     <ConfigProvider direction={postDirection}>
@@ -104,7 +80,7 @@ const CompactPostCard: React.FC<Props> = ({ data, number }) => {
           >
             <div style={{ textAlign: 'right' }}>
               <div>
-                {lastBoard} {postNumber} [
+                {data.board_name} {postNumber} [
                 <Link to={`/post/${data.post_id}`}>archive</Link>]
               </div>
             </div>

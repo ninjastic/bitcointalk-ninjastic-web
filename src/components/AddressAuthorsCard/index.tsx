@@ -1,8 +1,11 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { Card, Row, Col } from 'antd';
+import { Card, Row, Col, Typography } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
 import api from '../../services/api';
+
+const { Text } = Typography;
 
 interface Props {
   address: string;
@@ -37,22 +40,32 @@ const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
   );
 
   if (isLoading || isError) {
-    return <></>;
+    return <LoadingOutlined />;
   }
 
   return (
     <Card type="inner" title="Users">
       <Row gutter={[4, 4]}>
-        {data.map(entry => (
-          <Col xs={10} lg={4} key={entry.author}>
-            <a
-              href={`https://bitcointalk.org/index.php?action=profile;u=${entry.author_uid}`}
-              style={{ color: `${textToColor(entry.author)}` }}
-            >
-              {entry.author} ({entry.posts_id.length})
-            </a>
-          </Col>
-        ))}
+        {data.data.map(entry => {
+          if (!entry.author) {
+            return (
+              <Text key={1} type="secondary">
+                Something went wrong.
+              </Text>
+            );
+          }
+
+          return (
+            <Col xs={10} lg={4} key={entry.author}>
+              <a
+                href={`https://bitcointalk.org/index.php?action=profile;u=${entry.author_uid}`}
+                style={{ color: `${textToColor(entry.author)}` }}
+              >
+                {entry.author} ({entry.posts_id.length})
+              </a>
+            </Col>
+          );
+        })}
       </Row>
     </Card>
   );

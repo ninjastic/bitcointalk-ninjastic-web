@@ -51,7 +51,7 @@ const PostsTodayCard: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  const totalCount = data?.reduce((prev, current) => {
+  const totalCount = data?.data?.reduce((prev, current) => {
     return prev + current.doc_count;
   }, 0);
 
@@ -83,7 +83,7 @@ const PostsLast24HoursGraph: React.FC = () => {
 
   return (
     <ResponsiveContainer width="100%" aspect={2 / (isSmallScreen ? 1 : 0.5)}>
-      <LineChart data={data}>
+      <LineChart data={data?.data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="key_as_string"
@@ -131,7 +131,7 @@ const PostsPerDayGraph: React.FC = () => {
         `/posts/count?from=${lastWeekDateUTC.toISOString()}&to=${yesterdayDateUTC.toISOString()}&interval=1d`,
       );
 
-      responseData.pop();
+      responseData.data.pop();
 
       return responseData;
     },
@@ -144,7 +144,7 @@ const PostsPerDayGraph: React.FC = () => {
 
   return (
     <ResponsiveContainer width="100%" aspect={2 / 1}>
-      <LineChart data={data}>
+      <LineChart data={data?.data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="key_as_string"

@@ -116,7 +116,7 @@ const SelectorBoards: React.FC = () => {
       onChange={handleOnChange}
       onSearch={setSearch}
       filterTreeNode={boardTestMatch}
-      treeData={data}
+      treeData={data?.data}
       loading={isLoading}
       placeholder="Bounties (Altcoins)"
     />
@@ -151,7 +151,7 @@ const Search: React.FC = () => {
     fetchMore,
     canFetchMore,
     data,
-  } = useInfiniteQuery<ApiResponse>(
+  } = useInfiniteQuery<any>(
     'posts',
     async (key, lastId = 0) => {
       const {

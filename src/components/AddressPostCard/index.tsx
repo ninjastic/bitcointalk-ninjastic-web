@@ -91,13 +91,8 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
     );
   }
 
-  return data.map(post => {
-    return (
-      <AddressPostCollapse
-        data={post._source ? post._source : post}
-        key={post._source ? post._source.post_id : post.post_id}
-      />
-    );
+  return data.data.map(post => {
+    return <AddressPostCollapse data={post} key={post.post_id} />;
   });
 };
 
