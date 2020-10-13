@@ -10,7 +10,6 @@ import {
   Typography,
   Divider,
   BackTop,
-  DatePicker,
   TreeSelect,
   Radio,
 } from 'antd';
@@ -23,6 +22,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import numeral from 'numeral';
 
+import { addMinutes } from 'date-fns';
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -30,6 +30,7 @@ import Header from '../../components/Header';
 import PostCard from '../../components/PostCard';
 import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
+import DatePicker from '../../components/DatePicker';
 
 import { PageContent } from './styles';
 
@@ -252,6 +253,20 @@ const Search: React.FC = () => {
     return null;
   };
 
+  const afterDate = searchQuery.after_date
+    ? addMinutes(
+        new Date(searchQuery.after_date),
+        new Date(searchQuery.after_date).getTimezoneOffset(),
+      )
+    : null;
+
+  const beforeDate = searchQuery.before_date
+    ? addMinutes(
+        new Date(searchQuery.before_date),
+        new Date(searchQuery.before_date).getTimezoneOffset(),
+      )
+    : null;
+
   return (
     <div>
       <Header />
@@ -302,6 +317,7 @@ const Search: React.FC = () => {
                       <DatePicker.RangePicker
                         showTime
                         allowEmpty={[true, true]}
+                        defaultValue={[afterDate, beforeDate]}
                         onChange={handleChangeDateRange}
                       />
                     </Form.Item>
