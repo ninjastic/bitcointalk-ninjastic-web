@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from 'react-query';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { Typography, Button } from 'antd';
+import { Typography, Button, Card } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 
 import Header from '../../components/Header';
@@ -50,15 +50,13 @@ const Post: React.FC = () => {
           </Button>
           <Title style={{ marginBottom: -5 }}>Post {id}</Title>
         </div>
-        {isLoading || isError ? (
+        {isLoading ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            {isError ? (
-              <Text>This post could not be found in our database.</Text>
-            ) : (
-              <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
-            )}
+            <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
           </div>
-        ) : (
+        ) : null}
+        {isError ? <Text>Something went wrong...</Text> : null}
+        {!isLoading && data?.data.length ? (
           <div>
             <PostCard data={data.data[0]} />
             <PostHistoryCard
@@ -70,7 +68,14 @@ const Post: React.FC = () => {
             />
             <PostAddressesCard id={data.data[0].post_id} />
           </div>
-        )}
+        ) : null}
+        {!isLoading && !data?.data.length ? (
+          <Card style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
+            <Text type="secondary">
+              This post could not be found on our database.
+            </Text>
+          </Card>
+        ) : null}
       </PageContent>
     </>
   );

@@ -156,7 +156,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
       <Collapse>
         <Collapse.Panel header="Deleted Posts" key={1}>
           <Text type="secondary">
-            No deleted posts were found in our database.
+            No deleted posts were found on your database.
           </Text>
         </Collapse.Panel>
       </Collapse>
@@ -334,7 +334,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
       <Collapse>
         <Collapse.Panel header="Edited Posts" key={1}>
           <Text type="secondary">
-            No edited posts were found in our database.
+            No edited posts were found on your database.
           </Text>
         </Collapse.Panel>
       </Collapse>
@@ -609,7 +609,9 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Mentioned Addresses" key={1}>
-          <Text type="secondary">No addresses were found in our database.</Text>
+          <Text type="secondary">
+            No addresses were found on your database.
+          </Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -972,7 +974,7 @@ const User: React.FC = () => {
       {isLoading || isError || !data.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
           {!isLoading && data?.result === 404 ? (
-            <Text>This user could not be found in our database.</Text>
+            <Text>This user could not be found on your database.</Text>
           ) : null}
           {!isLoading && isError ? <Text>Something went wrong...</Text> : null}
           {isLoading ? <LoadingOutlined style={{ fontSize: 50 }} /> : null}
