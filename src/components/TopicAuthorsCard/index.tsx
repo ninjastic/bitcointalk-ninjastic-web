@@ -75,7 +75,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       key: 'count',
     },
     {
-      title: 'User Stats',
+      title: 'User Page',
       dataIndex: 'author',
       key: 'stats',
       render: text => {

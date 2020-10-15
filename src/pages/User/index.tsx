@@ -15,28 +15,8 @@ import {
   Radio,
   Tabs,
 } from 'antd';
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  BarChart,
-  Bar,
-} from 'recharts';
-import {
-  format,
-  sub,
-  isValid,
-  addMinutes,
-  startOfDay,
-  endOfDay,
-} from 'date-fns';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { sub, addMinutes, startOfDay, endOfDay } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 
 import { LoadingOutlined } from '@ant-design/icons';
@@ -47,6 +27,8 @@ import AddressCard from '../../components/AddressCard';
 import PostCard from '../../components/PostCard';
 import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
+import PostsLineChart from '../../components/PostsLineChart';
+import PostsBarChart from '../../components/PostsBarChart';
 
 import { PageContent } from './styles';
 
@@ -144,9 +126,13 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-        <LoadingOutlined style={{ color: '#fff' }} />
-      </div>
+      <Collapse>
+        <Collapse.Panel
+          header={isLoading ? <LoadingOutlined /> : 'Deleted Posts'}
+          disabled={isLoading}
+          key={1}
+        />
+      </Collapse>
     );
   }
 
@@ -318,9 +304,13 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-        <LoadingOutlined style={{ color: '#fff' }} />
-      </div>
+      <Collapse>
+        <Collapse.Panel
+          header={isLoading ? <LoadingOutlined /> : 'Edited Posts'}
+          disabled={isLoading}
+          key={1}
+        />
+      </Collapse>
     );
   }
 
@@ -458,19 +448,46 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading } = useQuery(
+  const [period, setPeriod] = useState('all-time');
+
+  const { data, isLoading, refetch, isFetching } = useQuery(
     `userTopTopics:${username}`,
     async () => {
-      const { data: responseData } = await api.get(`/users/${username}/topics`);
+      let from = '';
+      let to = '';
+
+      const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
+
+      switch (period) {
+        case 'all-time':
+          from = '';
+          to = '';
+          break;
+        case '30-days':
+          from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
+          to = endOfDay(dateUTC).toISOString();
+          break;
+        case '7-days':
+          from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
+          to = endOfDay(dateUTC).toISOString();
+          break;
+        default:
+          break;
+      }
+
+      const { data: responseData } = await api.get(
+        `/users/${username}/topics`,
+        { params: { from, to } },
+      );
 
       return responseData;
     },
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
-  }
+  useEffect(() => {
+    refetch();
+  }, [period, refetch]);
 
   const columns = [
     {
@@ -499,14 +516,34 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
   ];
 
   return (
-    <Table
-      size="small"
-      dataSource={data?.data}
-      columns={columns}
-      bordered
-      rowKey="topic_id"
-      loading={isLoading}
-    />
+    <div>
+      <div
+        style={{
+          marginBottom: 10,
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Radio.Group
+          defaultValue="all-time"
+          value={period}
+          onChange={e => setPeriod(e.target.value)}
+        >
+          <Radio.Button value="all-time">All time</Radio.Button>
+          <Radio.Button value="30-days">30 days</Radio.Button>
+          <Radio.Button value="7-days">7 days</Radio.Button>
+        </Radio.Group>
+      </div>
+      <Table
+        size="small"
+        dataSource={data?.data}
+        columns={columns}
+        bordered
+        rowKey="topic_id"
+        loading={isLoading || isFetching}
+        pagination={false}
+      />
+    </div>
   );
 };
 
@@ -548,9 +585,13 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-        <LoadingOutlined style={{ color: '#fff' }} />
-      </div>
+      <Collapse>
+        <Collapse.Panel
+          header={isLoading ? <LoadingOutlined /> : 'Mentioned Addresses'}
+          disabled={isLoading}
+          key={1}
+        />
+      </Collapse>
     );
   }
 
@@ -636,8 +677,8 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading, isError } = useQuery(
-    `userPostsWeek:${username}`,
+  const { data, isLoading } = useQuery(
+    `user:${username}:posts:week`,
     async () => {
       const { data: responseData } = await api.get(`/users/${username}/posts`);
 
@@ -646,149 +687,63 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
-  }
-
   return (
-    <>
-      <ResponsiveContainer width="100%" aspect={2 / 1}>
-        <LineChart data={isError ? [{ value: null }] : data.data}>
-          <XAxis
-            dataKey="key_as_string"
-            tickFormatter={value => {
-              const date = new Date(value);
-              return format(
-                addMinutes(date, date.getTimezoneOffset()),
-                'MM/dd',
-              );
-            }}
-            domain={['dataMin', 'dataMax']}
-          />
-          <YAxis dataKey="doc_count" allowDecimals={false} />
-          <CartesianGrid strokeDasharray="3 3" />
-          <Tooltip
-            contentStyle={{ backgroundColor: '#1D1D1D' }}
-            label="{timeTaken}"
-            labelFormatter={value => {
-              const date = new Date(value);
-              const formated = format(
-                addMinutes(date, date.getTimezoneOffset()),
-                'MM/dd',
-              );
-
-              return `Day: ${isValid(new Date(value)) ? formated : null}`;
-            }}
-            formatter={value => [value, 'Posts']}
-          />
-          <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
-        </LineChart>
-      </ResponsiveContainer>
-    </>
+    <PostsLineChart
+      data={data?.data}
+      loading={isLoading}
+      dateFormat="MM/dd"
+      size="small"
+    />
   );
 };
 
 const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading } = useQuery(
     `userPostsMonth:${username}`,
     async () => {
       const oneMonthAgo = sub(new Date(), { months: 1 }).toISOString();
 
-      const { data: responseData } = await api.get(
-        `/users/${username}/posts?from=${oneMonthAgo}`,
-      );
+      const { data: responseData } = await api.get(`/users/${username}/posts`, {
+        params: {
+          from: oneMonthAgo,
+        },
+      });
 
       return responseData;
     },
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
-  }
-
   return (
-    <ResponsiveContainer width="100%" aspect={2 / 1}>
-      <LineChart data={isError ? [{ value: null }] : data.data}>
-        <XAxis
-          dataKey="key_as_string"
-          tickFormatter={value => {
-            const date = new Date(value);
-            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
-          }}
-          domain={['dataMin', 'dataMax']}
-        />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
-          label="{timeTaken}"
-          labelFormatter={value => {
-            const date = new Date(value);
-            const formated = format(
-              addMinutes(date, date.getTimezoneOffset()),
-              'MM/dd',
-            );
-
-            return `Day: ${isValid(new Date(value)) ? formated : null}`;
-          }}
-          formatter={value => [value, 'Posts']}
-        />
-        <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
-      </LineChart>
-    </ResponsiveContainer>
+    <PostsLineChart
+      data={data?.data}
+      loading={isLoading}
+      dateFormat="MM/dd"
+      size="small"
+    />
   );
 };
 
 const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading } = useQuery(
     `userPostsYear:${username}`,
     async () => {
       const oneYearAgo = sub(new Date(), { years: 1 }).toISOString();
 
-      const { data: responseData } = await api.get(
-        `/users/${username}/posts?from=${oneYearAgo}&interval=7d`,
-      );
+      const { data: responseData } = await api.get(`/users/${username}/posts`, {
+        params: {
+          from: oneYearAgo,
+          interval: '7d',
+        },
+      });
 
       return responseData;
     },
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff' }} />;
-  }
-
   return (
-    <ResponsiveContainer width="100%" aspect={2 / 0.5}>
-      <BarChart data={isError ? [{ value: null }] : data.data}>
-        <XAxis
-          dataKey="key_as_string"
-          tickFormatter={value => {
-            const date = new Date(value);
-            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
-          }}
-          domain={['dataMin', 'dataMax']}
-        />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
-          label="{timeTaken}"
-          labelFormatter={value => {
-            const date = new Date(value);
-            const formated = format(
-              addMinutes(date, date.getTimezoneOffset()),
-              'MM/dd',
-            );
-
-            return `Day: ${isValid(new Date(value)) ? formated : null}`;
-          }}
-          formatter={value => [value, 'Posts']}
-        />
-        <Bar dataKey="doc_count" fill="#8884d8" />
-      </BarChart>
-    </ResponsiveContainer>
+    <PostsBarChart data={data?.data} loading={isLoading} dateFormat="MM/dd" />
   );
 };
 
@@ -826,8 +781,8 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
     <ResponsiveContainer width="100%" aspect={2 / 1.3}>
       <PieChart margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
         <defs>
-          {data.map((entry, index) => (
-            <linearGradient id={`myGradient${index}`}>
+          {data.map((_, index) => (
+            <linearGradient id={`myGradient${index}`} key={index}>
               <stop
                 offset="0%"
                 stopColor={COLORS[index % COLORS.length].start}
@@ -919,7 +874,7 @@ const BoardsTable: React.FC<{ data: any; loading: boolean }> = ({
 };
 
 const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
-  const [boardsActivityTime, setBoardsActivityTime] = useState('all-time');
+  const [period, setPeriod] = useState('all-time');
 
   const { data, refetch, isLoading, isFetching } = useQuery(
     `userBoards:${username}`,
@@ -927,23 +882,20 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
       let from = '';
       let to = '';
 
-      const currentDateUTC = addMinutes(
-        new Date(),
-        new Date().getTimezoneOffset(),
-      );
+      const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
 
-      switch (boardsActivityTime) {
+      switch (period) {
         case 'all-time':
           from = '';
           to = '';
           break;
         case '30-days':
-          from = sub(startOfDay(currentDateUTC), { months: 1 }).toISOString();
-          to = endOfDay(currentDateUTC).toISOString();
+          from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
+          to = endOfDay(dateUTC).toISOString();
           break;
         case '7-days':
-          from = sub(startOfDay(currentDateUTC), { weeks: 1 }).toISOString();
-          to = endOfDay(currentDateUTC).toISOString();
+          from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
+          to = endOfDay(dateUTC).toISOString();
           break;
         default:
           break;
@@ -961,11 +913,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
 
   useEffect(() => {
     refetch();
-  }, [boardsActivityTime, refetch]);
-
-  const handleChangeBoardsActivityTime = e => {
-    setBoardsActivityTime(e.target.value);
-  };
+  }, [period, refetch]);
 
   return (
     <>
@@ -980,8 +928,8 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         <Text style={{ fontSize: 24, fontWeight: 500 }}>Boards Activity</Text>
         <Radio.Group
           defaultValue="all-time"
-          value={boardsActivityTime}
-          onChange={handleChangeBoardsActivityTime}
+          value={period}
+          onChange={e => setPeriod(e.target.value)}
         >
           <Radio.Button value="all-time">All time</Radio.Button>
           <Radio.Button value="30-days">30 days</Radio.Button>
@@ -1095,10 +1043,10 @@ const User: React.FC = () => {
               <PostsMonthChart username={data.data.author} />
             </Col>
             <Divider />
-            <Row gutter={[24, 24]}>
+            <Col span={24}>
               <Title level={3}>Posts per week (last year)</Title>
               <PostsYearChart username={data.data.author} />
-            </Row>
+            </Col>
             <Col span={24}>
               <Tabs defaultActiveKey="1">
                 <Tabs.TabPane tab="Favorite Topics" key="1">

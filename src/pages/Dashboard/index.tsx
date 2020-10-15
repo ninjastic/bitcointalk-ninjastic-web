@@ -3,8 +3,8 @@ import { Typography, Row, Col, Divider, Statistic } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,6 +25,7 @@ import api from '../../services/api';
 
 import Header from '../../components/Header';
 import AlertMessage from '../../components/AlertMessage';
+import PostsLineChart from '../../components/PostsLineChart';
 
 import { PageContent } from './styles';
 
@@ -78,12 +79,16 @@ const PostsLast24HoursGraph: React.FC = () => {
   );
 
   if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />;
+    return (
+      <div style={{ margin: '30px 0 20px 0' }}>
+        <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />
+      </div>
+    );
   }
 
   return (
     <ResponsiveContainer width="100%" aspect={2 / (isSmallScreen ? 1 : 0.5)}>
-      <LineChart data={data?.data}>
+      <BarChart data={data?.data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="key_as_string"
@@ -107,8 +112,8 @@ const PostsLast24HoursGraph: React.FC = () => {
           }}
           formatter={value => [value, 'Posts']}
         />
-        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
-      </LineChart>
+        <Bar dataKey="doc_count" fill="#8884d8" />
+      </BarChart>
     </ResponsiveContainer>
   );
 };
@@ -117,19 +122,19 @@ const PostsPerDayGraph: React.FC = () => {
   const { data, isLoading } = useQuery(
     'postsPerDay',
     async () => {
-      const currentDate = new Date();
+      const date = new Date();
 
-      const currentDateUTC = addMinutes(
-        currentDate,
-        currentDate.getTimezoneOffset(),
-      );
+      const dateUTC = addMinutes(date, date.getTimezoneOffset());
+      const lastWeekDateUTC = sub(startOfDay(dateUTC), { months: 1 });
+      const yesterdayDateUTC = sub(endOfDay(dateUTC), { days: 1 });
 
-      const lastWeekDateUTC = sub(startOfDay(currentDateUTC), { months: 1 });
-      const yesterdayDateUTC = sub(endOfDay(currentDateUTC), { days: 1 });
-
-      const { data: responseData } = await api.get(
-        `/posts/count?from=${lastWeekDateUTC.toISOString()}&to=${yesterdayDateUTC.toISOString()}&interval=1d`,
-      );
+      const { data: responseData } = await api.get('/posts/count', {
+        params: {
+          from: lastWeekDateUTC.toISOString(),
+          to: yesterdayDateUTC.toISOString(),
+          interval: '1d',
+        },
+      });
 
       responseData.data.pop();
 
@@ -138,39 +143,48 @@ const PostsPerDayGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  if (isLoading) {
-    return <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />;
-  }
+  return (
+    <PostsLineChart
+      data={data?.data}
+      loading={isLoading}
+      dateFormat="MM/dd"
+      size="small"
+    />
+  );
+};
+
+const PostsPerMonthGraph: React.FC = () => {
+  const { data, isLoading } = useQuery(
+    'postsPerMonth',
+    async () => {
+      const date = new Date();
+
+      const dateUTC = addMinutes(date, date.getTimezoneOffset());
+      const lastWeekDateUTC = sub(startOfDay(dateUTC), { years: 1 });
+      const yesterdayDateUTC = sub(endOfDay(dateUTC), { days: 1 });
+
+      const { data: responseData } = await api.get('/posts/count', {
+        params: {
+          from: lastWeekDateUTC.toISOString(),
+          to: yesterdayDateUTC.toISOString(),
+          interval: '30d',
+        },
+      });
+
+      responseData.data.pop();
+
+      return responseData;
+    },
+    { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
+  );
 
   return (
-    <ResponsiveContainer width="100%" aspect={2 / 1}>
-      <LineChart data={data?.data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="key_as_string"
-          tickFormatter={value => {
-            const date = new Date(value);
-            return format(addMinutes(date, date.getTimezoneOffset()), 'MM/dd');
-          }}
-        />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
-          label="{timeTaken}"
-          labelFormatter={value => {
-            const date = new Date(value);
-            const formatted = format(
-              addMinutes(date, date.getTimezoneOffset()),
-              'MM/dd',
-            );
-
-            return `${isValid(new Date(value)) ? formatted : null} (UTC)`;
-          }}
-          formatter={value => [value, 'Posts']}
-        />
-        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
-      </LineChart>
-    </ResponsiveContainer>
+    <PostsLineChart
+      data={data?.data}
+      loading={isLoading}
+      dateFormat="yyyy/MM"
+      size="small"
+    />
   );
 };
 
@@ -193,6 +207,10 @@ const Dashboard: React.FC = () => {
           <Col xs={24} lg={12}>
             <Title level={3}>Posts per day</Title>
             <PostsPerDayGraph />
+          </Col>
+          <Col xs={24} lg={12}>
+            <Title level={3}>Posts per month</Title>
+            <PostsPerMonthGraph />
           </Col>
         </Row>
         <Row gutter={[24, 24]}>

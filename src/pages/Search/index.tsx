@@ -74,8 +74,8 @@ const SelectorBoards: React.FC = () => {
       const { data: responseData } = await api.get('/boards');
       const { data: responseDataRaw } = await api.get('/boards/?raw=1');
 
-      if (responseDataRaw && responseDataRaw.length) {
-        setBoards(responseDataRaw);
+      if (responseDataRaw && responseDataRaw.data.length) {
+        setBoards(responseDataRaw.data);
       }
 
       return responseData;
