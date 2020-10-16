@@ -18,6 +18,7 @@ import {
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { sub, addMinutes, startOfDay, endOfDay } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
+import queryString from 'query-string';
 
 import { LoadingOutlined } from '@ant-design/icons';
 import api from '../../services/api';
@@ -104,9 +105,13 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
   } = useInfiniteQuery(
     `userDeletedPosts:${username}`,
     async (key, last = '') => {
-      const { data: responseData } = await api.get(
-        `posts/history?deleted=true&author=${username}&last=${last}`,
-      );
+      const { data: responseData } = await api.get('posts/history', {
+        params: {
+          deleted: true,
+          author: username,
+          last,
+        },
+      });
 
       return responseData;
     },
@@ -282,9 +287,13 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
   } = useInfiniteQuery(
     `userEditedPosts:${username}`,
     async (key, last = '') => {
-      const { data: responseData } = await api.get(
-        `posts/history?deleted=false&author=${username}&last=${last}`,
-      );
+      const { data: responseData } = await api.get(`posts/history`, {
+        params: {
+          deleted: false,
+          author: username,
+          last,
+        },
+      });
 
       return responseData;
     },
@@ -450,30 +459,36 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
 const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
   const [period, setPeriod] = useState('all-time');
 
+  const getDatePeriod = datePeriod => {
+    let from = null;
+    let to = null;
+
+    const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
+
+    switch (datePeriod) {
+      case 'all-time':
+        from = null;
+        to = null;
+        break;
+      case '30-days':
+        from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
+        to = endOfDay(dateUTC).toISOString();
+        break;
+      case '7-days':
+        from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
+        to = endOfDay(dateUTC).toISOString();
+        break;
+      default:
+        break;
+    }
+
+    return [from, to];
+  };
+
   const { data, isLoading, refetch, isFetching } = useQuery(
     `userTopTopics:${username}`,
     async () => {
-      let from = '';
-      let to = '';
-
-      const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
-
-      switch (period) {
-        case 'all-time':
-          from = '';
-          to = '';
-          break;
-        case '30-days':
-          from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
-          to = endOfDay(dateUTC).toISOString();
-          break;
-        case '7-days':
-          from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
-          to = endOfDay(dateUTC).toISOString();
-          break;
-        default:
-          break;
-      }
+      const [from, to] = getDatePeriod(period);
 
       const { data: responseData } = await api.get(
         `/users/${username}/topics`,
@@ -488,6 +503,8 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
   useEffect(() => {
     refetch();
   }, [period, refetch]);
+
+  const [from, to] = getDatePeriod(period);
 
   const columns = [
     {
@@ -509,9 +526,19 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
       title: 'View Posts',
       dataIndex: 'topic_id',
       key: 'view-posts',
-      render: text => (
-        <Link to={`/search?author=${username}&topic_id=${text}`}>View</Link>
-      ),
+      render: (text, record) => {
+        const queryStringified = queryString.stringify(
+          {
+            author: username,
+            topic_id: record.topic_id,
+            after_date: from,
+            before_date: to,
+          },
+          { skipEmptyString: true, skipNull: true },
+        );
+
+        return <Link to={`/search?${queryStringified}`}>View</Link>;
+      },
     },
   ];
 
@@ -826,17 +853,19 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
   );
 };
 
-const BoardsTable: React.FC<{ data: any; loading: boolean }> = ({
-  data,
-  loading,
-}) => {
+const BoardsTable: React.FC<{
+  username: string;
+  data: any;
+  loading: boolean;
+  from: string | null;
+  to: string | null;
+}> = ({ username, data, loading, from, to }) => {
   const tableData = data
     ? data.boards.map(board => ({
         ...board,
-        percentage: `${(
-          (Number(board.count) / data.total_results_with_board) *
-          100
-        ).toFixed(0)}%`,
+        percentage: `${Math.floor(
+          (Number(board.count) / data.total_results_with_board) * 100,
+        )}%`,
       }))
     : [];
 
@@ -859,6 +888,25 @@ const BoardsTable: React.FC<{ data: any; loading: boolean }> = ({
       key: 'percentage',
       width: 50,
     },
+    {
+      title: 'View Posts',
+      dataIndex: 'view',
+      key: 'view',
+      width: 75,
+      render: (text, record) => {
+        const queryStringified = queryString.stringify(
+          {
+            author: username,
+            board: record.key,
+            after_date: from,
+            before_date: to,
+          },
+          { skipEmptyString: true, skipNull: true },
+        );
+
+        return <Link to={`/search?${queryStringified}`}>View</Link>;
+      },
+    },
   ];
 
   return (
@@ -878,30 +926,36 @@ const BoardsTable: React.FC<{ data: any; loading: boolean }> = ({
 const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
   const [period, setPeriod] = useState('all-time');
 
+  const getDatePeriod = datePeriod => {
+    let from = null;
+    let to = null;
+
+    const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
+
+    switch (datePeriod) {
+      case 'all-time':
+        from = null;
+        to = null;
+        break;
+      case '30-days':
+        from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
+        to = endOfDay(dateUTC).toISOString();
+        break;
+      case '7-days':
+        from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
+        to = endOfDay(dateUTC).toISOString();
+        break;
+      default:
+        break;
+    }
+
+    return [from, to];
+  };
+
   const { data, refetch, isLoading, isFetching } = useQuery(
     `userBoards:${username}`,
     async () => {
-      let from = '';
-      let to = '';
-
-      const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
-
-      switch (period) {
-        case 'all-time':
-          from = '';
-          to = '';
-          break;
-        case '30-days':
-          from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
-          to = endOfDay(dateUTC).toISOString();
-          break;
-        case '7-days':
-          from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
-          to = endOfDay(dateUTC).toISOString();
-          break;
-        default:
-          break;
-      }
+      const [from, to] = getDatePeriod(period);
 
       const { data: responseData } = await api.get(
         `/users/${username}/boards`,
@@ -916,6 +970,8 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
   useEffect(() => {
     refetch();
   }, [period, refetch]);
+
+  const [from, to] = getDatePeriod(period);
 
   return (
     <>
@@ -946,7 +1002,13 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         />
       </Col>
       <Col xs={24} lg={12}>
-        <BoardsTable data={data?.data} loading={isLoading || isFetching} />
+        <BoardsTable
+          username={username}
+          data={data?.data}
+          loading={isLoading || isFetching}
+          from={from}
+          to={to}
+        />
       </Col>
     </>
   );
@@ -973,7 +1035,7 @@ const User: React.FC = () => {
       <Header />
       {isLoading || isError || !data.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          {!isLoading && data?.result === 404 ? (
+          {!isLoading && !data.data ? (
             <Text>This user could not be found on your database.</Text>
           ) : null}
           {!isLoading && isError ? <Text>Something went wrong...</Text> : null}
@@ -994,8 +1056,20 @@ const User: React.FC = () => {
                   title={
                     <div>
                       <Title level={3} style={{ margin: 0 }}>
-                        {data.data.author}
+                        {data.data.usernames.filter(u => {
+                          return u.toLowerCase() === username.toLowerCase();
+                        })}
                       </Title>
+                      {data.data.usernames.length > 1 ? (
+                        <div>
+                          <Text style={{ fontSize: 14 }}>
+                            <Text type="secondary">aka </Text>
+                            {data.data.usernames.filter(u => {
+                              return u.toLowerCase() !== username.toLowerCase();
+                            })}
+                          </Text>
+                        </div>
+                      ) : null}
                       <Typography.Link
                         style={{ fontSize: 16 }}
                         href={`https://bitcointalk.org/index.php?action=profile;u=${data.data.author_uid}`}

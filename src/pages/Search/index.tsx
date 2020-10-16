@@ -194,14 +194,17 @@ const Search: React.FC = () => {
   );
 
   const searchPosts = () => {
-    const queryStringified = queryString.stringify({
-      author: searchQuery.author,
-      topic_id: searchQuery.topic_id,
-      content: searchQuery.content,
-      after_date: searchQuery.after_date,
-      before_date: searchQuery.before_date,
-      board: searchQuery.board,
-    });
+    const queryStringified = queryString.stringify(
+      {
+        author: searchQuery.author,
+        topic_id: searchQuery.topic_id,
+        content: searchQuery.content,
+        after_date: searchQuery.after_date,
+        before_date: searchQuery.before_date,
+        board: searchQuery.board,
+      },
+      { skipEmptyString: true, skipNull: true },
+    );
 
     history.push(`/search?${queryStringified}`);
 
