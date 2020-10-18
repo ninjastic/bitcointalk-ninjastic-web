@@ -31,12 +31,12 @@ const PostHistoryCard: React.FC<Props> = ({
   const { boards, setBoards } = store;
 
   useQuery(
-    'boardsRaw',
+    'boards',
     async () => {
       const { data: responseData } = await api.get('/boards/?raw=1');
 
-      if (responseData && responseData.length) {
-        setBoards(responseData);
+      if (responseData.data && responseData.data.length) {
+        setBoards(responseData.data);
       }
 
       return responseData;
@@ -157,14 +157,14 @@ const PostHistoryCard: React.FC<Props> = ({
                     <Timeline.Item color="green">
                       <Text>Board changed from </Text>
                       <Text code>
+                        {boards.find(b => b.board_id === postBoardId)?.name}
+                      </Text>
+                      <Text> to </Text>
+                      <Text code>
                         {
                           boards.find(b => b.board_id === post_history.board_id)
                             ?.name
                         }
-                      </Text>
-                      <Text> to </Text>
-                      <Text code>
-                        {boards.find(b => b.board_id === postBoardId)?.name}
                       </Text>
                     </Timeline.Item>
                   ) : null}
