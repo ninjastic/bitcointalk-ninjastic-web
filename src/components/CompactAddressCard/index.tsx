@@ -1,11 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ConfigProvider, Tooltip } from 'antd';
+import { ConfigProvider, Typography } from 'antd';
 import { format, addMinutes } from 'date-fns';
 
 import direction from '../../services/direction';
 
-interface Post {
+const { Text } = Typography;
+
+interface Address {
+  address: string;
+  coin: string;
   post_id: number;
   topic_id: number;
   title: string;
@@ -15,15 +19,14 @@ interface Post {
   date: string;
   board_id: number;
   board_name: string;
-  archive: boolean;
 }
 
 interface Props {
-  data: Post;
+  data: Address;
   number?: number;
 }
 
-const CompactPostCard: React.FC<Props> = ({ data, number }) => {
+const CompactAddressCard: React.FC<Props> = ({ data, number }) => {
   const postDirection = direction(data.content);
 
   const date = new Date(data.date);
@@ -39,37 +42,14 @@ const CompactPostCard: React.FC<Props> = ({ data, number }) => {
       <li className="post">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>
-            <a
-              href={`https://bitcointalk.org/index.php?topic=${data.topic_id}.msg${data.post_id}#msg${data.post_id}`}
-              style={{
-                fontWeight: 500,
-                fontSize: 16,
-                wordWrap: 'break-word',
-              }}
-            >
-              {data.post_id}
-            </a>{' '}
-            by{' '}
+            <Link to={`/address/${data.address}`}>{data.address} </Link> by{' '}
             <a
               style={{ fontWeight: 500 }}
               href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
             >
               {data.author}
-            </a>
-            {data.archive ? ' and scraped on ' : ' on '}
-            <span style={{ fontWeight: 500 }}>{formattedDate} UTC </span>
-            {data.archive ? (
-              <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                <span
-                  style={{
-                    borderBottom: '1px dotted white',
-                    cursor: 'pointer',
-                  }}
-                >
-                  (archived)
-                </span>
-              </Tooltip>
-            ) : null}
+            </a>{' '}
+            on <Text strong>{formattedDate} UTC </Text>
           </div>
           <div
             style={{
@@ -91,4 +71,4 @@ const CompactPostCard: React.FC<Props> = ({ data, number }) => {
   );
 };
 
-export default CompactPostCard;
+export default CompactAddressCard;

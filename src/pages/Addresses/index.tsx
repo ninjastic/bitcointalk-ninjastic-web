@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import {
   Form,
@@ -9,33 +9,61 @@ import {
   Col,
   Typography,
   BackTop,
-  Divider,
+  Collapse,
+  Select,
+  Radio,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Observer } from 'mobx-react';
+import { autorun } from 'mobx';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import { useHistory, useLocation } from 'react-router-dom';
+import numeral from 'numeral';
+import queryString from 'query-string';
 
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
 import Header from '../../components/Header';
 import AddressCard from '../../components/AddressCard';
+import BoardSelect from '../../components/BoardSelect';
 
 import { PageContent } from './styles';
+import CompactAddressCard from '../../components/CompactAddressCard';
 
 const { Text } = Typography;
+const { Option } = Select;
 
 interface Address {
-  id: string;
-  coin: string;
   address: string;
-  posts_id: number[];
-  created_at: Date;
-  updated_at: Date;
+  coin: 'BTC' | 'ETH';
+  post_id: number;
+  topic_id: number;
+  author: string;
+  author_uid: number;
+  title: string;
+  content: string;
+  date: string;
+  archive: boolean;
+  board_id: number;
+  board_name: string;
+}
+
+interface Data {
+  total_results: number;
+  addresses: Address[];
+}
+
+interface Response {
+  data: Data;
 }
 
 const Addresses: React.FC = () => {
   const store = useSearchStore();
+  const history = useHistory();
+  const { search } = useLocation();
+
+  const [viewType, setViewType] = useState('normal');
 
   const {
     setValue,
@@ -43,6 +71,15 @@ const Addresses: React.FC = () => {
     isLoadingAddress,
     setIsLoadingAddress,
   } = store;
+
+  autorun(() => {
+    const query = queryString.parse(search);
+
+    setValue('address', query.address);
+    setValue('address_author', query.author);
+    setValue('address_coin', query.coin);
+    setValue('address_board', query.board);
+  });
 
   const {
     isLoading,
@@ -52,40 +89,30 @@ const Addresses: React.FC = () => {
     canFetchMore,
     data,
     isError,
-  } = useInfiniteQuery<Address[]>(
+  } = useInfiniteQuery<Response>(
     `addresses`,
     async (key, last = '') => {
-      const { address, address_author } = searchQuery;
+      const {
+        address,
+        address_author,
+        address_coin,
+        address_board,
+      } = searchQuery;
 
-      let results;
-
-      if (!address_author) {
-        const { data: responseData } = await api.get('addresses', {
-          params: {
-            address,
-            last,
-            limit: 50,
-          },
-        });
-
-        results = responseData;
-      } else if (address_author && !address) {
-        const { data: responseData } = await api.get(
-          `users/${address_author}/addresses`,
-          {
-            params: {
-              last,
-              limit: 50,
-            },
-          },
-        );
-
-        results = responseData;
-      }
+      const { data: responseData } = await api.get('addresses', {
+        params: {
+          address: address || null,
+          author: address_author || null,
+          coin: address_coin || null,
+          board: address_board || null,
+          last: last || null,
+          limit: 50,
+        },
+      });
 
       setIsLoadingAddress(false);
 
-      return results.data;
+      return responseData;
     },
     {
       enabled: false,
@@ -93,18 +120,35 @@ const Addresses: React.FC = () => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.length < 50) return false;
+        if (lastGroup.data.addresses.length < 50) return false;
 
-        const last = lastGroup[lastGroup.length - 1];
-        return `${last.address},${last.created_at},${last.id}`;
+        const last =
+          lastGroup.data.addresses[lastGroup.data.addresses.length - 1];
+        return last.post_id;
       },
     },
   );
 
+  const searchAddresses = () => {
+    const queryStringified = queryString.stringify(
+      {
+        address: searchQuery.address || null,
+        author: searchQuery.address_author || null,
+        coin: searchQuery.address_coin || null,
+        board: searchQuery.address_board || null,
+      },
+      { skipEmptyString: true, skipNull: true },
+    );
+
+    history.push(`/addresses?${queryStringified}`);
+
+    setIsLoadingAddress(true);
+    refetch();
+  };
+
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
-      setIsLoadingAddress(true);
-      refetch();
+      searchAddresses();
     }
   };
 
@@ -114,14 +158,32 @@ const Addresses: React.FC = () => {
     fetchMore();
   }, 500);
 
-  const LoadingMoreCard = ({ groupIndex }) => {
+  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
     if (groupIndex === data.length - 1) {
-      return canFetchMore ? (
-        <Card loading style={{ marginTop: 15 }} />
-      ) : (
-        <div style={{ textAlign: 'center', marginTop: 20 }}>
-          <Text>You reached the end!</Text>
+      if (!canFetchMore) {
+        return (
+          <div style={{ textAlign: 'center', marginTop: 25 }}>
+            <Text>You reached the end!</Text>
+          </div>
+        );
+      }
+
+      return onlyIcon ? (
+        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+          <LoadingOutlined style={{ fontSize: 30 }} />
         </div>
+      ) : (
+        <Collapse style={{ marginTop: 15 }}>
+          <Collapse.Panel
+            key="Loading"
+            disabled
+            header={
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <LoadingOutlined style={{ fontSize: 24 }} />
+              </div>
+            }
+          />
+        </Collapse>
       );
     }
     return null;
@@ -145,7 +207,6 @@ const Addresses: React.FC = () => {
                             placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
                             onKeyDown={handleKeyDown}
                             defaultValue={searchQuery.address}
-                            disabled={!!searchQuery.address_author.length}
                             onChange={e =>
                               setValue('address', e.target.value.trim())
                             }
@@ -154,27 +215,36 @@ const Addresses: React.FC = () => {
                       </Observer>
                     </Form.Item>
                   </Col>
-
-                  <Divider>Or</Divider>
                   <Col span={24}>
                     <Form.Item label="Username">
-                      <Observer>
-                        {() => (
-                          <Input
-                            allowClear
-                            placeholder="TryNinja"
-                            onKeyDown={handleKeyDown}
-                            defaultValue={searchQuery.address_author}
-                            disabled={!!searchQuery.address.length}
-                            onChange={e =>
-                              setValue('address_author', e.target.value.trim())
-                            }
-                          />
-                        )}
-                      </Observer>
+                      <Input
+                        allowClear
+                        placeholder="TryNinja"
+                        onKeyDown={handleKeyDown}
+                        defaultValue={searchQuery.address_author}
+                        onChange={e =>
+                          setValue('address_author', e.target.value.trim())
+                        }
+                      />
                     </Form.Item>
                   </Col>
-
+                  <Col span={24}>
+                    <Form.Item label="Coin">
+                      <Select
+                        defaultValue={searchQuery.address_coin || 'Any'}
+                        onChange={value => setValue('address_coin', value)}
+                      >
+                        <Option value="">Any</Option>
+                        <Option value="BTC">BTC</Option>
+                        <Option value="ETH">ETH</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={24}>
+                    <Form.Item label="Board">
+                      <BoardSelect searchQueryField="address_board" />
+                    </Form.Item>
+                  </Col>
                   <Col span={24} style={{ textAlign: 'right' }}>
                     <Form.Item>
                       <Button
@@ -183,7 +253,7 @@ const Addresses: React.FC = () => {
                           isFetching ||
                           isLoading ||
                           (isLoadingAddress && !isError) ? (
-                            <LoadingOutlined style={{ color: '#fff' }} />
+                            <LoadingOutlined style={{}} />
                           ) : (
                             <SearchOutlined />
                           )
@@ -193,10 +263,7 @@ const Addresses: React.FC = () => {
                           isLoading ||
                           (isLoadingAddress && !isError)
                         }
-                        onClick={() => {
-                          setIsLoadingAddress(true);
-                          refetch();
-                        }}
+                        onClick={searchAddresses}
                       >
                         Search
                       </Button>
@@ -225,41 +292,89 @@ const Addresses: React.FC = () => {
                       <Text>Do your search on the card on the side</Text>
                       <Text>or</Text>
                       <Text style={{ textAlign: 'center' }}>
-                        Just click the button and get a few random addresses.
+                        Just click the button and get the latest addresses.
                       </Text>
                     </div>
                   </Card>
                 ) : null;
               }}
             </Observer>
-
+            {!isLoading && isError ? (
+              <Card>
+                <Text strong>Something went wrong...</Text>
+              </Card>
+            ) : null}
             {data && !isLoading && !isLoadingAddress ? (
               <div>
-                {!data.length ? (
-                  <Text strong key={1}>
-                    No results...
-                  </Text>
-                ) : null}
-                {data.map((group, groupIndex) => {
-                  if (!group.length) {
-                    return (
-                      <Text strong key={1}>
-                        No results...
+                <div style={{ marginBottom: 15 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {data && !isLoading ? (
+                      <Text>
+                        <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
+                        {numeral(data[0].data.total_results || 0).format('0,0')}
                       </Text>
+                    ) : null}
+                    <Radio.Group
+                      onChange={e => setViewType(e.target.value)}
+                      value={viewType}
+                      defaultValue="normal"
+                    >
+                      <Radio.Button value="normal">Normal</Radio.Button>
+                      <Radio.Button value="compact">Compact</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </div>
+                {data.map((group, groupIndex) => {
+                  if (!group.data.addresses.length) {
+                    return (
+                      <Card>
+                        <Text strong key={1}>
+                          No results...
+                        </Text>
+                      </Card>
                     );
                   }
-                  return group.map((record, i, array) => {
-                    return (
-                      <div style={{ marginBottom: 15 }} key={record.address}>
-                        <AddressCard
-                          data={record}
-                          number={groupIndex * 50 + i + 1}
-                        />
-                        {i === array.length - 1 ? (
-                          <LoadingMoreCard groupIndex={groupIndex} />
-                        ) : null}
-                      </div>
-                    );
+                  return group.data.addresses.map((record, i, array) => {
+                    switch (viewType) {
+                      case 'normal':
+                        return (
+                          <div
+                            style={{ marginBottom: 15 }}
+                            key={`${record.address}_${record.post_id}`}
+                          >
+                            <AddressCard
+                              data={record}
+                              number={groupIndex * 50 + i + 1}
+                            />
+                            {i === array.length - 1 ? (
+                              <LoadingMore groupIndex={groupIndex} />
+                            ) : null}
+                          </div>
+                        );
+                      case 'compact':
+                        return (
+                          <ul
+                            key={`${record.address}_${record.post_id}`}
+                            style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                          >
+                            <CompactAddressCard
+                              data={record}
+                              number={groupIndex * 100 + i + 1}
+                            />
+                            {i === array.length - 1 ? (
+                              <LoadingMore groupIndex={groupIndex} onlyIcon />
+                            ) : null}
+                          </ul>
+                        );
+                      default:
+                        return null;
+                    }
                   });
                 })}
               </div>

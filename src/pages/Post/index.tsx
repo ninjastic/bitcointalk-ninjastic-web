@@ -52,11 +52,15 @@ const Post: React.FC = () => {
         </div>
         {isLoading ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+            <LoadingOutlined style={{ fontSize: 50 }} />
           </div>
         ) : null}
-        {isError ? <Text>Something went wrong...</Text> : null}
-        {!isLoading && data?.data.length ? (
+        {isError ? (
+          <Card style={{ display: 'flex', justifyContent: 'center' }}>
+            <Text>Something went wrong...</Text>
+          </Card>
+        ) : null}
+        {!isLoading && !isError && data?.data.length ? (
           <div>
             <PostCard data={data.data[0]} />
             <PostHistoryCard
@@ -69,11 +73,9 @@ const Post: React.FC = () => {
             <PostAddressesCard id={data.data[0].post_id} />
           </div>
         ) : null}
-        {!isLoading && !data?.data.length ? (
+        {!isLoading && !isError && !data?.data.length ? (
           <Card style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            <Text type="secondary">
-              This post could not be found on our database.
-            </Text>
+            <Text>This post could not be found on our database.</Text>
           </Card>
         ) : null}
       </PageContent>

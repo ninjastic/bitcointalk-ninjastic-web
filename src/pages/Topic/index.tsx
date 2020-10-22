@@ -27,7 +27,7 @@ interface Post {
   author: string;
   author_uid: number;
   content: string;
-  date: Date;
+  date: string;
   board_id: number;
   board_name: string;
   archive: boolean;
@@ -40,9 +40,7 @@ interface Data {
   posts: Post[];
 }
 
-interface ApiResponse {
-  timed_out: boolean;
-  result: number;
+interface Response {
   data: Data;
 }
 
@@ -63,7 +61,7 @@ const Topic: React.FC = () => {
     fetchMore,
     canFetchMore,
     data,
-  } = useInfiniteQuery<ApiResponse>(
+  } = useInfiniteQuery<Response>(
     `posts:topic:${id}`,
     async (key, lastId = 0) => {
       const { data: responseData } = await api.get('posts', {
@@ -107,7 +105,7 @@ const Topic: React.FC = () => {
 
       return onlyIcon ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          <LoadingOutlined style={{ fontSize: 30, color: '#fff' }} />
+          <LoadingOutlined style={{ fontSize: 30 }} />
         </div>
       ) : (
         <Card loading style={{ marginTop: 30 }} />
@@ -135,17 +133,15 @@ const Topic: React.FC = () => {
         </div>
         {isLoading ? (
           <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-            <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+            <LoadingOutlined style={{ fontSize: 50 }} />
           </div>
         ) : null}
         {isError ? (
-          <Card style={{ marginTop: 15, textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 16 }} key={1}>
-              Something went wrong...
-            </Text>
+          <Card style={{ marginTop: 15, textAlign: 'center' }} key={1}>
+            <Text>Something went wrong...</Text>
           </Card>
         ) : null}
-        {data && !isLoading && !isError ? (
+        {!isLoading && !isError && data[0]?.data.posts.length ? (
           <Tabs defaultActiveKey="1">
             <TabPane tab="Posts" key="1">
               <div style={{ marginBottom: 15 }}>
@@ -156,12 +152,10 @@ const Topic: React.FC = () => {
                     justifyContent: 'space-between',
                   }}
                 >
-                  {data && !isLoading ? (
-                    <Text>
-                      <Text style={{ fontWeight: 500 }}>Posts:</Text>{' '}
-                      {numeral(data[0].data.total_results || 0).format('0,0')}
-                    </Text>
-                  ) : null}
+                  <Text>
+                    <Text strong>Posts:</Text>{' '}
+                    {numeral(data[0].data.total_results || 0).format('0,0')}
+                  </Text>
                   <Radio.Group
                     onChange={e => setPostsViewType(e.target.value)}
                     value={postsViewType}

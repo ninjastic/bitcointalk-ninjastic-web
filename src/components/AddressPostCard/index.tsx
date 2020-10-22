@@ -41,7 +41,7 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
     return (
       <Collapse>
         <Collapse.Panel
-          header={<LoadingOutlined style={{ color: '#fff', fontSize: 16 }} />}
+          header={<LoadingOutlined style={{ fontSize: 16 }} />}
           key={ids}
         />
       </Collapse>

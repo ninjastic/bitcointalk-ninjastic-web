@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Menu, Input, Button, Select, Drawer } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
+import { BulbFilled, MenuOutlined, StarFilled } from '@ant-design/icons';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
+import { useThemeSwitcher } from 'react-css-theme-switcher';
+
+import { useSearchStore } from '../../stores/SearchStore';
 
 interface MenuItemsProps {
   mode: 'vertical' | 'horizontal';
@@ -11,6 +14,9 @@ interface MenuItemsProps {
 const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
   const history = useHistory();
   const { pathname } = useLocation();
+  const { isDarkMode, setIsDarkMode } = useSearchStore();
+
+  const { switcher, themes } = useThemeSwitcher();
 
   const match = pathname.match(/\/(.*)\/(.*)/);
 
@@ -25,6 +31,11 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
     }
   };
 
+  const toggleTheme = (value: boolean) => {
+    setIsDarkMode(value);
+    switcher({ theme: value ? themes.dark : themes.light });
+  };
+
   return (
     <Menu
       mode={mode}
@@ -35,7 +46,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
         padding: mode === 'horizontal' ? '0' : '10px',
         margin: mode === 'horizontal' ? 'auto' : 'initial',
         marginTop: mode === 'horizontal' ? '0' : '40px',
-        maxWidth: mode === 'horizontal' ? '1200px' : '100%',
+        maxWidth: mode === 'horizontal' ? '1300px' : '100%',
         display: mode === 'horizontal' ? 'flex' : 'block',
       }}
     >
@@ -61,24 +72,40 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
           left: mode === 'horizontal' ? '-105px' : '0',
         }}
       >
-        <Input.Group compact>
-          <Select
-            defaultValue={selectDefaultValue}
-            onChange={e => setSearchType(e)}
-            style={{ width: 100 }}
-          >
-            <Select.Option value="post">Post ID</Select.Option>
-            <Select.Option value="topic">Topic ID</Select.Option>
-            <Select.Option value="address">Address</Select.Option>
-            <Select.Option value="user">User</Select.Option>
-          </Select>
-          <Input.Search
-            onSearch={handleSearch}
-            defaultValue={searchDefaultValue}
-            placeholder="Search"
-            style={{ height: 32 }}
-          />
-        </Input.Group>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: mode === 'horizontal' ? 'row' : 'column',
+          }}
+        >
+          {isDarkMode ? (
+            <Button onClick={() => toggleTheme(false)} type="text">
+              <BulbFilled />
+            </Button>
+          ) : (
+            <Button onClick={() => toggleTheme(true)} type="text">
+              <StarFilled />
+            </Button>
+          )}
+          <Input.Group compact>
+            <Select
+              defaultValue={selectDefaultValue}
+              onChange={e => setSearchType(e)}
+              style={{ width: 100 }}
+            >
+              <Select.Option value="post">Post ID</Select.Option>
+              <Select.Option value="topic">Topic ID</Select.Option>
+              <Select.Option value="address">Address</Select.Option>
+              <Select.Option value="user">User</Select.Option>
+            </Select>
+            <Input.Search
+              onSearch={handleSearch}
+              defaultValue={searchDefaultValue}
+              placeholder="Search"
+              style={{ height: 32 }}
+            />
+          </Input.Group>
+        </div>
       </div>
     </Menu>
   );
@@ -107,7 +134,7 @@ const Header: React.FC = () => {
           placement="left"
           visible={showMenu}
           onClose={() => setShowMenu(false)}
-          bodyStyle={{ padding: 0, background: '#141414' }}
+          bodyStyle={{ padding: 0, background: 'var(--body-background)' }}
         >
           <HeaderMenu mode="vertical" />
         </Drawer>

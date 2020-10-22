@@ -1,17 +1,24 @@
 import React from 'react';
-import { Collapse } from 'antd';
+import { Collapse, Typography } from 'antd';
 import { Link } from 'react-router-dom';
+import parse from 'html-react-parser';
+import DOMPurity from 'dompurify';
+import { addMinutes, format } from 'date-fns';
 
-import AddressAuthorsCard from '../AddressAuthorsCard';
-import AddressPostCard from '../AddressPostCard';
+const { Text } = Typography;
 
 interface Address {
-  id: string;
-  coin: string;
   address: string;
-  posts_id: number[];
-  authors?: string[];
-  authors_uid?: number[];
+  coin: string;
+  post_id: number;
+  topic_id: number;
+  title: string;
+  author: string;
+  author_uid: number;
+  content: string;
+  date: string;
+  board_id: number;
+  board_name: string;
 }
 
 interface Props {
@@ -20,41 +27,84 @@ interface Props {
 }
 
 const AddressCard: React.FC<Props> = ({ data, number }) => {
+  const icons = [
+    {
+      coin: 'ETH',
+      image:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-icon-purple.svg/1200px-Ethereum-icon-purple.svg.png',
+    },
+    {
+      coin: 'BTC',
+      image:
+        'https://cdn.iconscout.com/icon/free/png-256/bitcoin-385-920570.png',
+    },
+  ];
+
+  const date = new Date(data.date);
+  const formattedDate = format(
+    addMinutes(date, date.getTimezoneOffset()),
+    "yyyy-MM-dd HH:mm:ss 'UTC'",
+  );
+
   return (
     <Collapse>
       <Collapse.Panel
-        key={data.address}
+        key={`${data.address}_${data.post_id}`}
         header={
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              wordWrap: 'break-word',
-              maxWidth: '100%',
-            }}
-          >
-            <Link
-              to={`/address/${data.address}`}
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex' }}>
+              <img
+                height={24}
+                width={24}
+                src={icons.find(i => i.coin === data.coin)?.image}
+                alt={data.coin}
+                style={{ marginRight: 5 }}
+              />
+              <div>
+                <div>
+                  <Link
+                    to={`/address/${data.address}`}
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 16,
+                      wordWrap: 'break-word',
+                    }}
+                  >
+                    {data.address}
+                  </Link>
+                  <div>
+                    by{' '}
+                    <a
+                      href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
+                    >
+                      {data.author}
+                    </a>{' '}
+                    on <Text strong>{formattedDate}</Text>
+                    <div style={{ marginTop: 5 }}>
+                      <Text code>
+                        {data.title.substring(0, 50)}
+                        {data.title.length > 50 ? '...' : ''}
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
               style={{
-                fontWeight: 500,
-                wordWrap: 'break-word',
-                maxWidth: '90%',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              {data.address} [{data.coin}] ({data.posts_id.length})
-            </Link>
-
-            <div>
-              (#
-              {number})
+              <div style={{ textAlign: 'right' }}>
+                <Link to={`/post/${data.post_id}`}>{data.post_id}</Link> (#
+                {number})<div>{data.board_name || '-'}</div>
+              </div>
             </div>
           </div>
         }
       >
-        <div style={{ marginBottom: 10 }}>
-          <AddressAuthorsCard address={data.address} />
-        </div>
-        <AddressPostCard postsId={data.posts_id} />
+        {parse(DOMPurity.sanitize(data.content))}
       </Collapse.Panel>
     </Collapse>
   );

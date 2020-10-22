@@ -65,10 +65,7 @@ const PostHistoryCard: React.FC<Props> = ({
   if (isLoading) {
     return (
       <Collapse>
-        <Collapse.Panel
-          header={<LoadingOutlined style={{ color: '#fff' }} />}
-          key={id}
-        />
+        <Collapse.Panel header={<LoadingOutlined />} key={id} />
       </Collapse>
     );
   }

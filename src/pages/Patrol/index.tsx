@@ -76,7 +76,7 @@ const LastDeletedPosts: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-        <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+        <LoadingOutlined style={{ fontSize: 50 }} />
       </div>
     );
   }
@@ -124,7 +124,7 @@ const LastDeletedPosts: React.FC = () => {
 
 const TopTopicsLineChart: React.FC = () => {
   const COLORS = [
-    '#8884d8',
+    'var(--primary-color)',
     '#FF5733',
     '#25F9DC',
     '#F9258C',
@@ -170,7 +170,7 @@ const TopTopicsLineChart: React.FC = () => {
         />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           labelFormatter={(value: string) => {
             const date = formatDate(value, 'HH:mm');
             return `${date} (UTC)`;
@@ -251,7 +251,7 @@ const TopTopicsTable: React.FC = () => {
 
 const TopUsersLineChart: React.FC = () => {
   const COLORS = [
-    '#8884d8',
+    'var(--primary-color)',
     '#FF5733',
     '#25F9DC',
     '#F9258C',
@@ -297,7 +297,7 @@ const TopUsersLineChart: React.FC = () => {
         />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           labelFormatter={(value: string) => {
             const date = formatDate(value, 'HH:mm');
             return `${date} (UTC)`;
@@ -373,7 +373,7 @@ const TopUsersTable: React.FC = () => {
 
 const TopBoardsLineChart: React.FC = () => {
   const COLORS = [
-    '#8884d8',
+    'var(--primary-color)',
     '#FF5733',
     '#25F9DC',
     '#F9258C',
@@ -419,7 +419,7 @@ const TopBoardsLineChart: React.FC = () => {
         />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           labelFormatter={(value: string) => {
             const date = formatDate(value, 'HH:mm');
             return `${date} (UTC)`;

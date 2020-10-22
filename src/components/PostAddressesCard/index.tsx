@@ -15,7 +15,11 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
   const { data, isLoading, isError } = useQuery(
     `addressesPost:${id}`,
     async () => {
-      const { data: responseData } = await api.get(`addresses/post/${id}`);
+      const { data: responseData } = await api.get('addresses', {
+        params: {
+          post_id: id,
+        },
+      });
 
       return responseData;
     },
@@ -26,15 +30,15 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
     <Collapse style={{ marginTop: 15, marginBottom: 25 }}>
       <Collapse.Panel header="Addresses" key={`post-${id}`}>
         {isLoading ? (
-          <LoadingOutlined style={{ fontSize: 50, color: '#fff' }} />
+          <LoadingOutlined style={{ fontSize: 50 }} />
         ) : (
           <div>
-            {isError ? <Text>Something went wrong.</Text> : null}
-            {!data.data.length ? (
+            {isError ? <Text>Something went wrong...</Text> : null}
+            {!data.data.addresses.length ? (
               <Text>No BTC/ETH addresses were found on this post.</Text>
             ) : null}
             {data.data
-              ? data.data.map(address => (
+              ? data.data.addresses.map(address => (
                   <Collapse key={address.address}>
                     <Collapse.Panel
                       header={
@@ -54,8 +58,7 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
                               maxWidth: '90%',
                             }}
                           >
-                            {address.address} [{address.coin}] (
-                            {address.posts_id.length})
+                            {address.address} [{address.coin}]
                           </Link>
                         </div>
                       }

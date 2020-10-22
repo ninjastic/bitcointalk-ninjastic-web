@@ -14,6 +14,8 @@ interface SearchStoreState {
     topic_id: string;
     address: string;
     address_author: string;
+    address_coin: string;
+    address_board: string;
     after_date: string;
     before_date: string;
     board: string;
@@ -21,6 +23,8 @@ interface SearchStoreState {
   boards: Board[];
   isLoadingSearch: boolean;
   isLoadingAddress: boolean;
+  isDarkMode: boolean;
+  setIsDarkMode: (value: boolean) => void;
   setIsLoadingSearch: (value: boolean) => void;
   setIsLoadingAddress: (value: boolean) => void;
   setValue: (type: string, value: any) => void;
@@ -39,6 +43,8 @@ const StoreProvider = ({ children }) => {
       topic_id: '',
       address: '',
       address_author: '',
+      address_coin: '',
+      address_board: '',
       after_date: '',
       before_date: '',
       board: '',
@@ -46,6 +52,11 @@ const StoreProvider = ({ children }) => {
     boards: [],
     isLoadingSearch: false,
     isLoadingAddress: false,
+    isDarkMode: localStorage.getItem('ninjastic:isDarkMode') === 'true',
+    setIsDarkMode: value => {
+      store.isDarkMode = value;
+      localStorage.setItem('ninjastic:isDarkMode', value);
+    },
     setIsLoadingSearch: value => {
       store.isLoadingSearch = value;
     },

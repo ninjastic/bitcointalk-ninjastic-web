@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteQuery, useQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import {
   Form,
   Input,
@@ -10,8 +10,8 @@ import {
   Typography,
   Divider,
   BackTop,
-  TreeSelect,
   Radio,
+  Tabs,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
@@ -21,8 +21,8 @@ import { autorun } from 'mobx';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import numeral from 'numeral';
-
 import { addMinutes } from 'date-fns';
+
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -31,6 +31,7 @@ import PostCard from '../../components/PostCard';
 import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
 import DatePicker from '../../components/DatePicker';
+import BoardSelect from '../../components/BoardSelect';
 
 import { PageContent } from './styles';
 
@@ -43,7 +44,7 @@ interface Post {
   author: string;
   author_uid: number;
   content: string;
-  date: Date;
+  date: string;
   board_id: number;
   board_name: string;
   archive: boolean;
@@ -56,73 +57,9 @@ interface Data {
   posts: Post[];
 }
 
-interface ApiResponse {
-  timed_out: boolean;
-  result: number;
+interface Response {
   data: Data;
 }
-
-const SelectorBoards: React.FC = () => {
-  const [search, setSearch] = useState('');
-  const [boardTitle, setBoardTitle] = useState('');
-
-  const { setValue, setBoards, boards, searchQuery } = useSearchStore();
-
-  const { data, isLoading } = useQuery(
-    'boards',
-    async () => {
-      const { data: responseData } = await api.get('/boards');
-      const { data: responseDataRaw } = await api.get('/boards/?raw=1');
-
-      if (responseDataRaw && responseDataRaw.data.length) {
-        setBoards(responseDataRaw.data);
-      }
-
-      return responseData;
-    },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
-  );
-
-  autorun(() => {
-    if (searchQuery.board && boards && !boardTitle) {
-      const foundBoard = boards.find(
-        board => board.board_id === Number(searchQuery.board),
-      );
-
-      if (foundBoard) setBoardTitle(foundBoard.name);
-    }
-  });
-
-  const boardTestMatch = (searchText: string, board): boolean => {
-    const { title } = board;
-    if (title.toLowerCase().startsWith(searchText.toLowerCase())) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const handleOnChange = (selectedValue: string, selectedTitle) => {
-    setBoardTitle(selectedTitle[0]);
-    setValue('board', selectedValue || '');
-  };
-
-  return (
-    <TreeSelect
-      treeDefaultExpandAll
-      showSearch
-      allowClear
-      value={boardTitle || null}
-      searchValue={search}
-      onChange={handleOnChange}
-      onSearch={setSearch}
-      filterTreeNode={boardTestMatch}
-      treeData={data?.data}
-      loading={isLoading}
-      placeholder="Bounties (Altcoins)"
-    />
-  );
-};
 
 const Search: React.FC = () => {
   const { search } = useLocation();
@@ -152,7 +89,7 @@ const Search: React.FC = () => {
     fetchMore,
     canFetchMore,
     data,
-  } = useInfiniteQuery<any>(
+  } = useInfiniteQuery<Response>(
     'posts',
     async (key, lastId = 0) => {
       const {
@@ -247,7 +184,7 @@ const Search: React.FC = () => {
 
       return onlyIcon ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          <LoadingOutlined style={{ fontSize: 30, color: '#fff' }} />
+          <LoadingOutlined style={{ fontSize: 30 }} />
         </div>
       ) : (
         <Card loading style={{ marginTop: 30 }} />
@@ -328,7 +265,7 @@ const Search: React.FC = () => {
 
                   <Col span={24}>
                     <Form.Item label="Board">
-                      <SelectorBoards />
+                      <BoardSelect searchQueryField="board" />
                     </Form.Item>
                   </Col>
 
@@ -340,7 +277,7 @@ const Search: React.FC = () => {
                           isFetching ||
                           isLoading ||
                           (isLoadingSearch && !isError) ? (
-                            <LoadingOutlined style={{ color: '#fff' }} />
+                            <LoadingOutlined style={{}} />
                           ) : (
                             <SearchOutlined />
                           )
@@ -394,92 +331,104 @@ const Search: React.FC = () => {
               </Card>
             ) : null}
             {data && !isLoading && !isLoadingSearch && !isError ? (
-              <div>
-                <div style={{ marginBottom: 15 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    {data && !isLoading && !isLoadingSearch ? (
-                      <Text>
-                        <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                        {numeral(data[0].data.total_results || 0).format('0,0')}
-                      </Text>
-                    ) : null}
-                    <Radio.Group
-                      onChange={e => setPostsViewType(e.target.value)}
-                      value={postsViewType}
-                      defaultValue="normal"
+              <Tabs defaultActiveKey="1">
+                <Tabs.TabPane tab="Results" key="1">
+                  <div style={{ marginBottom: 15 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
                     >
-                      <Radio.Button value="normal">Normal</Radio.Button>
-                      <Radio.Button value="header">Header Only</Radio.Button>
-                      <Radio.Button value="compact">Compact</Radio.Button>
-                    </Radio.Group>
-                  </div>
-                </div>
-                {data.map((group, groupIndex) => {
-                  if (!group.data.posts.length) {
-                    return (
-                      <Card key={groupIndex}>
-                        <Text strong key={1}>
-                          No results...
+                      {data && !isLoading && !isLoadingSearch ? (
+                        <Text>
+                          <Text style={{ fontWeight: 500 }}>
+                            Total results:
+                          </Text>{' '}
+                          {numeral(data[0].data.total_results || 0).format(
+                            '0,0',
+                          )}
                         </Text>
-                      </Card>
-                    );
-                  }
-
-                  return group.data.posts.map((post, i, array) => {
-                    switch (postsViewType) {
-                      case 'normal':
-                        return (
-                          <div style={{ marginBottom: 30 }} key={post.post_id}>
-                            <PostCard
-                              data={post}
-                              number={groupIndex * 100 + i + 1}
-                            />
-                            <Divider />
-                            {i === array.length - 1 ? (
-                              <LoadingMore groupIndex={groupIndex} />
-                            ) : null}
-                          </div>
-                        );
-                      case 'header':
-                        return (
-                          <div key={post.post_id}>
-                            <HeaderPostCard
-                              data={post}
-                              number={groupIndex * 100 + i + 1}
-                              style={{ marginBottom: 15 }}
-                            />
-                            {i === array.length - 1 ? (
-                              <LoadingMore groupIndex={groupIndex} />
-                            ) : null}
-                          </div>
-                        );
-                      case 'compact':
-                        return (
-                          <ul
-                            key={post.post_id}
-                            style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                          >
-                            <CompactPostCard
-                              data={post}
-                              number={groupIndex * 100 + i + 1}
-                            />
-                            {i === array.length - 1 ? (
-                              <LoadingMore groupIndex={groupIndex} onlyIcon />
-                            ) : null}
-                          </ul>
-                        );
-                      default:
-                        return null;
+                      ) : null}
+                      <Radio.Group
+                        onChange={e => setPostsViewType(e.target.value)}
+                        value={postsViewType}
+                        defaultValue="normal"
+                      >
+                        <Radio.Button value="normal">Normal</Radio.Button>
+                        <Radio.Button value="header">Header Only</Radio.Button>
+                        <Radio.Button value="compact">Compact</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                  </div>
+                  {data.map((group, groupIndex) => {
+                    if (!group.data.posts.length) {
+                      return (
+                        <Card key={groupIndex}>
+                          <Text strong key={1}>
+                            No results...
+                          </Text>
+                        </Card>
+                      );
                     }
-                  });
-                })}
-              </div>
+
+                    return group.data.posts.map((post, i, array) => {
+                      switch (postsViewType) {
+                        case 'normal':
+                          return (
+                            <div
+                              style={{ marginBottom: 30 }}
+                              key={post.post_id}
+                            >
+                              <PostCard
+                                data={post}
+                                number={groupIndex * 100 + i + 1}
+                              />
+                              <Divider />
+                              {i === array.length - 1 ? (
+                                <LoadingMore groupIndex={groupIndex} />
+                              ) : null}
+                            </div>
+                          );
+                        case 'header':
+                          return (
+                            <div key={post.post_id}>
+                              <HeaderPostCard
+                                data={post}
+                                number={groupIndex * 100 + i + 1}
+                                style={{ marginBottom: 15 }}
+                              />
+                              {i === array.length - 1 ? (
+                                <LoadingMore groupIndex={groupIndex} />
+                              ) : null}
+                            </div>
+                          );
+                        case 'compact':
+                          return (
+                            <ul
+                              key={post.post_id}
+                              style={{
+                                paddingInlineStart: 20,
+                                marginBottom: 0,
+                              }}
+                            >
+                              <CompactPostCard
+                                data={post}
+                                number={groupIndex * 100 + i + 1}
+                              />
+                              {i === array.length - 1 ? (
+                                <LoadingMore groupIndex={groupIndex} onlyIcon />
+                              ) : null}
+                            </ul>
+                          );
+                        default:
+                          return null;
+                      }
+                    });
+                  })}
+                </Tabs.TabPane>
+              </Tabs>
             ) : null}
           </Col>
         </Row>

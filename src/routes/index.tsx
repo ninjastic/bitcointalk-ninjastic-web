@@ -1,6 +1,8 @@
 import React from 'react';
 import { Switch, BrowserRouter as Router, Route } from 'react-router-dom';
+import { useThemeSwitcher } from 'react-css-theme-switcher';
 
+import { LoadingOutlined } from '@ant-design/icons';
 import Dashboard from '../pages/Dashboard';
 import Search from '../pages/Search';
 import Post from '../pages/Post';
@@ -12,6 +14,23 @@ import User from '../pages/User';
 import Patrol from '../pages/Patrol';
 
 const Routes: React.FC = () => {
+  const { status } = useThemeSwitcher();
+
+  if (status !== 'loaded') {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <LoadingOutlined style={{ fontSize: 64 }} />
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Switch>

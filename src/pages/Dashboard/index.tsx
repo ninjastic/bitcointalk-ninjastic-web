@@ -81,7 +81,7 @@ const PostsLast24HoursGraph: React.FC = () => {
   if (isLoading) {
     return (
       <div style={{ margin: '30px 0 20px 0' }}>
-        <LoadingOutlined style={{ color: '#fff', fontSize: 24 }} />
+        <LoadingOutlined style={{ fontSize: 24 }} />
       </div>
     );
   }
@@ -99,7 +99,7 @@ const PostsLast24HoursGraph: React.FC = () => {
         />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           label="{timeTaken}"
           labelFormatter={value => {
             const date = new Date(value);
@@ -112,7 +112,7 @@ const PostsLast24HoursGraph: React.FC = () => {
           }}
           formatter={value => [value, 'Posts']}
         />
-        <Bar dataKey="doc_count" fill="#8884d8" />
+        <Bar dataKey="doc_count" fill="var(--primary-color)" />
       </BarChart>
     </ResponsiveContainer>
   );

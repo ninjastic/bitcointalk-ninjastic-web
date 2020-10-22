@@ -1,45 +1,43 @@
 import { createGlobalStyle } from 'styled-components';
 
-import 'antd/dist/antd.dark.min.css';
-
 const GlobalStyle = createGlobalStyle`
     html {
         box-sizing: border-box;
         overflow-y: scroll;
-        background-color: #1D1D1D;
-    }
-
-    *, *:before, *:after {
-        box-sizing: inherit;
+        background-color: var(--body-background);
     }
     
     body {
         height: auto;
         width: auto;
+        background-color: var(--body-background);
     }
-
+    
     #root {
         height: 100vh;
-        background-color: #1D1D1D;
+        background-color: var(--body-background);
+    }
+
+    *, *:before, *:after {
+        box-sizing: inherit;
     }
 
     .quote {
         min-height: 48px;
         padding: 12px;
-        background: #1D1D1D;
-        border: 1px solid #303030;
-        border-bottom: 1px solid #303030;
+        border: 1px solid var(--border-color-base);
+        border-bottom: 1px solid var(--border-color-base);
+        background-color: var(--quote-background);
         border-radius: 2px 2px 0 0;
         margin-left: 6px;
         margin-bottom: 4px;
     }
 
     .code {
-        background-color: #1D1D1D;
         font-family: "courier new", "times new roman", monospace;
         font-size: 12px;
         line-height: 1.3em;
-        border: 1px solid #303030;
+        border: 1px solid var(--border-color-base);
         padding: 5px;
         margin: 1px 3px 4px 6px;
         width: 93%;
@@ -57,16 +55,14 @@ const GlobalStyle = createGlobalStyle`
     }
 
     .quoteheader {
-        color: #476C8E;
         text-decoration: none;
         font-style: normal;
         font-weight: bold;
-
         padding: 12px;
         margin-left: 6px;
         margin-top: 6px;
-        background: #1D1D1D;
-        border: 1px solid #303030;
+        border: 1px solid var(--border-color-base);
+        background-color: var(--quote-background);
         border-bottom: 0;
         border-radius: 2px 2px 0 0;
     }
@@ -86,17 +82,12 @@ const GlobalStyle = createGlobalStyle`
     }
 
     a {
-        color: #258ae8;
         text-decoration: none;
         outline: none;
         cursor: pointer;
         -webkit-transition: color .3s;
         transition: color .3s;
         -webkit-text-decoration-skip: objects;
-    }
-
-    .post .quoteheader b {
-        color: #258ae8;
     }
 
     .ant-card-extra {

@@ -34,9 +34,7 @@ const PostsBarChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
 
   if (loading) {
     return (
-      <LoadingOutlined
-        style={{ color: '#fff', fontSize: 24, margin: '30px 0 20px 0' }}
-      />
+      <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />
     );
   }
 
@@ -44,14 +42,14 @@ const PostsBarChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
     <ResponsiveContainer width="100%" aspect={isSmallScreen ? 2 / 1 : 2 / 0.5}>
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
-        <Bar dataKey="doc_count" fill="#8884d8" />
+        <Bar dataKey="doc_count" fill="var(--primary-color)" />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <XAxis
           dataKey="key_as_string"
           tickFormatter={value => formatDate(value, dateFormat)}
         />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           label="{timeTaken}"
           formatter={value => [value, 'Posts']}
           labelFormatter={(value: string) => {

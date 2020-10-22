@@ -52,43 +52,22 @@ interface BoardsChartProps {
 
 const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
   const [avatarSuccess, setAvatarSuccess] = useState(false);
-  const [imageType, setImageType] = useState('png');
-  const [loading, setLoading] = useState(true);
 
   const onLoad = () => {
     setAvatarSuccess(true);
-    setLoading(false);
-  };
-
-  const onError = () => {
-    if (imageType === 'jpg') return;
-    setImageType('jpg');
-    setLoading(false);
   };
 
   return (
-    <>
-      {loading ? (
-        <Image
-          src="data:image/png;base64,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"
-          alt="User avatar"
-          style={{
-            marginRight: 15,
-          }}
-        />
-      ) : null}
-      <Image
-        src={`https://bitcointalk.org/useravatars/avatar_${author_uid}.${imageType}`}
-        alt="User avatar"
-        onLoad={onLoad}
-        onError={onError}
-        style={{
-          marginRight: 15,
-          display: avatarSuccess ? 'initial' : 'none',
-        }}
-        fallback="data:image/png;base64,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"
-      />
-    </>
+    <Image
+      src={`https://bitcointalk.org/useravatars/avatar_${author_uid}.png`}
+      alt="User avatar"
+      onLoad={onLoad}
+      style={{
+        marginRight: 15,
+        display: avatarSuccess ? 'initial' : 'none',
+      }}
+      fallback={`https://bitcointalk.org/useravatars/avatar_${author_uid}.jpg`}
+    />
   );
 };
 
@@ -145,7 +124,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Deleted Posts" key={1}>
-          <Text type="secondary">Something went wrong.</Text>
+          <Text type="secondary">Something went wrong...</Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -327,7 +306,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Edited Posts" key={1}>
-          <Text type="secondary">Something went wrong.</Text>
+          <Text type="secondary">Something went wrong...</Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -368,7 +347,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
           >
             {data && !isLoading ? (
               <Text>
-                <Text style={{ fontWeight: 500 }}>Results:</Text>
+                <Text strong>Results:</Text>
                 <Text>{data[0].data.total_results}</Text>
               </Text>
             ) : null}
@@ -575,6 +554,29 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
+  interface Address {
+    address: string;
+    coin: string;
+    post_id: number;
+    topic_id: number;
+    author: string;
+    author_uid: number;
+    title: string;
+    content: string;
+    date: string;
+    board_id: number;
+    board_name: string;
+  }
+
+  interface Data {
+    total_results: number;
+    addresses: Address[];
+  }
+
+  interface Response {
+    data: Data;
+  }
+
   const {
     data,
     isLoading,
@@ -582,18 +584,16 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     isFetchingMore,
     canFetchMore,
     isError,
-  } = useInfiniteQuery(
+  } = useInfiniteQuery<Response>(
     `userAddresses:${username}`,
     async (key, last = '') => {
-      const { data: responseData } = await api.get(
-        `/users/${username}/addresses`,
-        {
-          params: {
-            last,
-            limit: 20,
-          },
+      const { data: responseData } = await api.get(`/addresses`, {
+        params: {
+          author: username,
+          last,
+          limit: 20,
         },
-      );
+      });
 
       return responseData;
     },
@@ -602,10 +602,11 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.data.length < 20) return false;
+        if (lastGroup.data.addresses.length < 20) return false;
 
-        const last = lastGroup.data[lastGroup.data.length - 1];
-        return `${last.address},${last.created_at},${last.id}`;
+        const last =
+          lastGroup.data.addresses[lastGroup.data.addresses.length - 1];
+        return last.post_id;
       },
     },
   );
@@ -626,13 +627,13 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Mentioned Addresses" key={1}>
-          <Text type="secondary">Something went wrong.</Text>
+          <Text type="secondary">Something went wrong...</Text>
         </Collapse.Panel>
       </Collapse>
     );
   }
 
-  if (data.reduce((p, c) => p + c.data.length, 0) === 0) {
+  if (data.reduce((p, c) => p + c.data.addresses.length, 0) === 0) {
     return (
       <Collapse>
         <Collapse.Panel header="Mentioned Addresses" key={1}>
@@ -644,40 +645,21 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     );
   }
 
-  const uniqueUsers = [];
-  let addressesLength = 0;
-
-  data.forEach(group => {
-    group.data.forEach(address => {
-      addressesLength += 1;
-
-      address.authors.forEach(author => {
-        const exists = uniqueUsers.find(user => user === author);
-
-        if (!exists) {
-          uniqueUsers.push(author);
-        }
-      });
-    });
-  });
-
   return (
     <Collapse>
       <Collapse.Panel
-        header={`Mentioned Addresses (${addressesLength}${
-          addressesLength === 20 ? '+' : ''
-        })`}
+        header={`Mentioned Addresses (${data[0]?.data.total_results})`}
         key={1}
       >
         {data.map((group, groupIndex, array) => {
           return (
             <div key={groupIndex}>
-              {group.data.map((address, i) => {
+              {group.data.addresses.map((address, i) => {
                 return (
                   <AddressCard
                     data={address}
                     number={groupIndex * 20 + i + 1}
-                    key={address.id}
+                    key={`${address.address}_${address.post_id}`}
                   />
                 );
               })}
@@ -787,7 +769,7 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
     { start: '#f46b45', end: '#eea849' },
     { start: '#11998e', end: '#38ef7d' },
     { start: '#396afc', end: '#2948ff' },
-    { start: '#F2F2F2', end: '#DBDBDB' },
+    { start: '#7F00FF', end: '#E100FF' },
   ];
 
   if (loading) {
@@ -830,7 +812,7 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
           endAngle={0}
           innerRadius={60}
           outerRadius={80}
-          fill="#8884d8"
+          fill="var(--primary-color)"
           paddingAngle={5}
           dataKey="count"
           nameKey="name"
@@ -983,7 +965,9 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
           justifyContent: 'space-between',
         }}
       >
-        <Text style={{ fontSize: 24, fontWeight: 500 }}>Boards Activity</Text>
+        <Text strong style={{ fontSize: 24 }}>
+          Boards Activity
+        </Text>
         <Radio.Group
           defaultValue="all-time"
           value={period}
@@ -1033,9 +1017,9 @@ const User: React.FC = () => {
   return (
     <div>
       <Header />
-      {isLoading || isError || !data.data ? (
+      {isLoading || isError || !data?.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          {!isLoading && !data.data ? (
+          {!isLoading && !isError && !data?.data ? (
             <Text>This user could not be found on your database.</Text>
           ) : null}
           {!isLoading && isError ? <Text>Something went wrong...</Text> : null}

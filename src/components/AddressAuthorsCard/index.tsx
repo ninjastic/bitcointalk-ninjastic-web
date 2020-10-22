@@ -50,7 +50,7 @@ const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
           if (!entry.author) {
             return (
               <Text key={1} type="secondary">
-                Something went wrong.
+                Something went wrong...
               </Text>
             );
           }

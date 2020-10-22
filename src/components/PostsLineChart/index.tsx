@@ -40,9 +40,7 @@ const PostsLineChart: React.FC<Params> = ({
 
   if (loading) {
     return (
-      <LoadingOutlined
-        style={{ color: '#fff', fontSize: 24, margin: '30px 0 20px 0' }}
-      />
+      <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />
     );
   }
 
@@ -53,14 +51,18 @@ const PostsLineChart: React.FC<Params> = ({
     >
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
-        <Line dataKey="doc_count" stroke="#8884d8" type="monotone" />
+        <Line
+          dataKey="doc_count"
+          stroke="var(--primary-color)"
+          type="monotone"
+        />
         <YAxis dataKey="doc_count" allowDecimals={false} />
         <XAxis
           dataKey="key_as_string"
           tickFormatter={value => formatDate(value, dateFormat)}
         />
         <Tooltip
-          contentStyle={{ backgroundColor: '#1D1D1D' }}
+          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           label="{timeTaken}"
           formatter={value => [value, 'Posts']}
           labelFormatter={(value: string) => {

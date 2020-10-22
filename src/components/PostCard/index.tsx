@@ -14,7 +14,7 @@ interface Post {
   author: string;
   author_uid: number;
   content: string;
-  date: Date;
+  date: string;
   board_id: number;
   board_name: string;
   archive: boolean;
