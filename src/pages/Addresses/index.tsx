@@ -83,9 +83,9 @@ const AuthorsTab: React.FC = () => {
       const { data: responseData } = await api.get('addresses/authors', {
         params: {
           address,
-          address_author,
-          address_coin,
-          address_board,
+          author: address_author,
+          coin: address_coin,
+          board: address_board,
         },
       });
 

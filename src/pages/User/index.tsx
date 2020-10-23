@@ -647,9 +647,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel header="Address Mentions" key={1}>
-          <Text type="secondary">
-            No addresses were found on our database.
-          </Text>
+          <Text type="secondary">No addresses were found on our database.</Text>
         </Collapse.Panel>
       </Collapse>
     );
@@ -1050,16 +1048,17 @@ const User: React.FC = () => {
                   title={
                     <div>
                       <Title level={3} style={{ margin: 0 }}>
-                        {data.data.usernames.filter(u => {
-                          return u.toLowerCase() === username.toLowerCase();
-                        })}
+                        {data.data.author}
                       </Title>
-                      {data.data.usernames.length > 1 ? (
+                      {data.data.other_usernames.length > 0 ? (
                         <div>
                           <Text style={{ fontSize: 14 }}>
                             <Text type="secondary">aka </Text>
-                            {data.data.usernames.filter(u => {
-                              return u.toLowerCase() !== username.toLowerCase();
+                            {data.data.other_usernames?.filter(u => {
+                              return (
+                                u.toLowerCase() !==
+                                data.data.author.toLowerCase()
+                              );
                             })}
                           </Text>
                         </div>
