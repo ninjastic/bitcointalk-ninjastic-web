@@ -5,6 +5,9 @@ import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
 import { addMinutes, format } from 'date-fns';
 
+import imageBTC from '../../assets/images/btc.png';
+import imageETH from '../../assets/images/eth.png';
+
 const { Text } = Typography;
 
 interface Address {
@@ -30,13 +33,11 @@ const AddressCard: React.FC<Props> = ({ data, number }) => {
   const icons = [
     {
       coin: 'ETH',
-      image:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-icon-purple.svg/1200px-Ethereum-icon-purple.svg.png',
+      image: imageETH,
     },
     {
       coin: 'BTC',
-      image:
-        'https://cdn.iconscout.com/icon/free/png-256/bitcoin-385-920570.png',
+      image: imageBTC,
     },
   ];
 

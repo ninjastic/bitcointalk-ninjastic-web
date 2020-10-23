@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Form,
   Input,
@@ -12,6 +12,8 @@ import {
   Collapse,
   Select,
   Radio,
+  Tabs,
+  Checkbox,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Observer } from 'mobx-react';
@@ -31,7 +33,7 @@ import BoardSelect from '../../components/BoardSelect';
 import { PageContent } from './styles';
 import CompactAddressCard from '../../components/CompactAddressCard';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 const { Option } = Select;
 
 interface Address {
@@ -57,6 +59,79 @@ interface Data {
 interface Response {
   data: Data;
 }
+
+const AuthorsTab: React.FC = () => {
+  const store = useSearchStore();
+  const { searchQuery } = store;
+
+  const [showCount, setShowCount] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { data, isError } = useQuery(
+    'addresses:Authors',
+    async () => {
+      const {
+        address,
+        address_author,
+        address_coin,
+        address_board,
+      } = searchQuery;
+
+      setIsLoading(true);
+
+      const { data: responseData } = await api.get('addresses/authors', {
+        params: {
+          address,
+          address_author,
+          address_coin,
+          address_board,
+        },
+      });
+
+      setIsLoading(false);
+
+      return responseData;
+    },
+    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+  );
+
+  if (isLoading) {
+    return (
+      <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
+        <LoadingOutlined style={{ fontSize: 24 }} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <Text>Something wrong happened...</Text>;
+  }
+
+  const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
+      i !== array.length - 1 ? '\n' : ''
+    }`;
+  }, '');
+
+  return (
+    <div>
+      <Title level={3}>
+        List of users ({data?.data.authors?.length || '0'})
+      </Title>
+      <Checkbox
+        onChange={e => setShowCount(e.target.checked)}
+        style={{ marginBottom: 10 }}
+      >
+        Include count
+      </Checkbox>
+      <Input.TextArea
+        value={authorsText}
+        contentEditable={false}
+        autoSize={{ minRows: 3, maxRows: 10 }}
+      />
+    </div>
+  );
+};
 
 const Addresses: React.FC = () => {
   const store = useSearchStore();
@@ -305,79 +380,91 @@ const Addresses: React.FC = () => {
               </Card>
             ) : null}
             {data && !isLoading && !isLoadingAddress ? (
-              <div>
-                <div style={{ marginBottom: 15 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    {data && !isLoading ? (
-                      <Text>
-                        <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
-                        {numeral(data[0].data.total_results || 0).format('0,0')}
-                      </Text>
-                    ) : null}
-                    <Radio.Group
-                      onChange={e => setViewType(e.target.value)}
-                      value={viewType}
-                      defaultValue="normal"
+              <Tabs defaultActiveKey="1">
+                <Tabs.TabPane tab="Results" key="1">
+                  <div style={{ marginBottom: 15 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
                     >
-                      <Radio.Button value="normal">Normal</Radio.Button>
-                      <Radio.Button value="compact">Compact</Radio.Button>
-                    </Radio.Group>
-                  </div>
-                </div>
-                {data.map((group, groupIndex) => {
-                  if (!group.data.addresses.length) {
-                    return (
-                      <Card>
-                        <Text strong key={1}>
-                          No results...
+                      {data && !isLoading ? (
+                        <Text>
+                          <Text style={{ fontWeight: 500 }}>
+                            Total results:
+                          </Text>{' '}
+                          {numeral(data[0].data.total_results || 0).format(
+                            '0,0',
+                          )}
                         </Text>
-                      </Card>
-                    );
-                  }
-                  return group.data.addresses.map((record, i, array) => {
-                    switch (viewType) {
-                      case 'normal':
-                        return (
-                          <div
-                            style={{ marginBottom: 15 }}
-                            key={`${record.address}_${record.post_id}`}
-                          >
-                            <AddressCard
-                              data={record}
-                              number={groupIndex * 50 + i + 1}
-                            />
-                            {i === array.length - 1 ? (
-                              <LoadingMore groupIndex={groupIndex} />
-                            ) : null}
-                          </div>
-                        );
-                      case 'compact':
-                        return (
-                          <ul
-                            key={`${record.address}_${record.post_id}`}
-                            style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                          >
-                            <CompactAddressCard
-                              data={record}
-                              number={groupIndex * 100 + i + 1}
-                            />
-                            {i === array.length - 1 ? (
-                              <LoadingMore groupIndex={groupIndex} onlyIcon />
-                            ) : null}
-                          </ul>
-                        );
-                      default:
-                        return null;
+                      ) : null}
+                      <Radio.Group
+                        onChange={e => setViewType(e.target.value)}
+                        value={viewType}
+                        defaultValue="normal"
+                      >
+                        <Radio.Button value="normal">Normal</Radio.Button>
+                        <Radio.Button value="compact">Compact</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                  </div>
+                  {data.map((group, groupIndex) => {
+                    if (!group.data.addresses.length) {
+                      return (
+                        <Card>
+                          <Text strong key={1}>
+                            No results...
+                          </Text>
+                        </Card>
+                      );
                     }
-                  });
-                })}
-              </div>
+                    return group.data.addresses.map((record, i, array) => {
+                      switch (viewType) {
+                        case 'normal':
+                          return (
+                            <div
+                              style={{ marginBottom: 15 }}
+                              key={`${record.address}_${record.post_id}`}
+                            >
+                              <AddressCard
+                                data={record}
+                                number={groupIndex * 50 + i + 1}
+                              />
+                              {i === array.length - 1 ? (
+                                <LoadingMore groupIndex={groupIndex} />
+                              ) : null}
+                            </div>
+                          );
+                        case 'compact':
+                          return (
+                            <ul
+                              key={`${record.address}_${record.post_id}`}
+                              style={{
+                                paddingInlineStart: 20,
+                                marginBottom: 0,
+                              }}
+                            >
+                              <CompactAddressCard
+                                data={record}
+                                number={groupIndex * 100 + i + 1}
+                              />
+                              {i === array.length - 1 ? (
+                                <LoadingMore groupIndex={groupIndex} onlyIcon />
+                              ) : null}
+                            </ul>
+                          );
+                        default:
+                          return null;
+                      }
+                    });
+                  })}
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Users" key="2">
+                  <AuthorsTab />
+                </Tabs.TabPane>
+              </Tabs>
             ) : null}
           </Col>
         </Row>

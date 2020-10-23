@@ -140,7 +140,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
       <Collapse>
         <Collapse.Panel header="Deleted Posts" key={1}>
           <Text type="secondary">
-            No deleted posts were found on your database.
+            No deleted posts were found on our database.
           </Text>
         </Collapse.Panel>
       </Collapse>
@@ -322,7 +322,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
       <Collapse>
         <Collapse.Panel header="Edited Posts" key={1}>
           <Text type="secondary">
-            No edited posts were found on your database.
+            No edited posts were found on our database.
           </Text>
         </Collapse.Panel>
       </Collapse>
@@ -505,7 +505,8 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
       title: 'View Posts',
       dataIndex: 'topic_id',
       key: 'view-posts',
-      render: (text, record) => {
+      width: 130,
+      render: (_, record) => {
         const queryStringified = queryString.stringify(
           {
             author: username,
@@ -517,6 +518,15 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
         );
 
         return <Link to={`/search?${queryStringified}`}>View</Link>;
+      },
+    },
+    {
+      title: 'View Topic Stats',
+      dataIndex: 'topic_id',
+      key: 'view-posts',
+      width: 130,
+      render: (_, record) => {
+        return <Link to={`/topic/${record.topic_id}`}>View</Link>;
       },
     },
   ];
@@ -615,7 +625,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     return (
       <Collapse>
         <Collapse.Panel
-          header={isLoading ? <LoadingOutlined /> : 'Mentioned Addresses'}
+          header={isLoading ? <LoadingOutlined /> : 'Address Mentions'}
           disabled={isLoading}
           key={1}
         />
@@ -626,7 +636,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   if (isError) {
     return (
       <Collapse>
-        <Collapse.Panel header="Mentioned Addresses" key={1}>
+        <Collapse.Panel header="Address Mentions" key={1}>
           <Text type="secondary">Something went wrong...</Text>
         </Collapse.Panel>
       </Collapse>
@@ -636,9 +646,9 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   if (data.reduce((p, c) => p + c.data.addresses.length, 0) === 0) {
     return (
       <Collapse>
-        <Collapse.Panel header="Mentioned Addresses" key={1}>
+        <Collapse.Panel header="Address Mentions" key={1}>
           <Text type="secondary">
-            No addresses were found on your database.
+            No addresses were found on our database.
           </Text>
         </Collapse.Panel>
       </Collapse>
@@ -648,7 +658,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   return (
     <Collapse>
       <Collapse.Panel
-        header={`Mentioned Addresses (${data[0]?.data.total_results})`}
+        header={`Address Mentions (${data[0]?.data.total_results})`}
         key={1}
       >
         {data.map((group, groupIndex, array) => {
@@ -1020,7 +1030,7 @@ const User: React.FC = () => {
       {isLoading || isError || !data?.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
           {!isLoading && !isError && !data?.data ? (
-            <Text>This user could not be found on your database.</Text>
+            <Text>This user could not be found on our database.</Text>
           ) : null}
           {!isLoading && isError ? <Text>Something went wrong...</Text> : null}
           {isLoading ? <LoadingOutlined style={{ fontSize: 50 }} /> : null}
@@ -1112,7 +1122,7 @@ const User: React.FC = () => {
                 <Tabs.TabPane tab="Favorite Topics" key="1">
                   <FavoriteTopics username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Mentioned Addresses" key="2">
+                <Tabs.TabPane tab="Address Mentions" key="2">
                   <MentionedAddresses username={data.data.author} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Deleted Posts" key="3">

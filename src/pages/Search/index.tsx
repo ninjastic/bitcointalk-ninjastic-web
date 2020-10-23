@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Form,
   Input,
@@ -12,11 +12,11 @@ import {
   BackTop,
   Radio,
   Tabs,
+  Checkbox,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import { Observer } from 'mobx-react';
 import { autorun } from 'mobx';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -35,7 +35,7 @@ import BoardSelect from '../../components/BoardSelect';
 
 import { PageContent } from './styles';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 interface Post {
   post_id: number;
@@ -61,13 +61,90 @@ interface Response {
   data: Data;
 }
 
+const AuthorsTab: React.FC = () => {
+  const store = useSearchStore();
+  const { searchQuery } = store;
+
+  const [showCount, setShowCount] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { data, isError } = useQuery(
+    'posts:Authors',
+    async () => {
+      const {
+        author,
+        content,
+        topic_id,
+        after_date,
+        before_date,
+        board,
+      } = searchQuery;
+
+      setIsLoading(true);
+
+      const { data: responseData } = await api.get('posts/authors', {
+        params: {
+          author,
+          content,
+          topic_id,
+          board,
+          after_date,
+          before_date,
+        },
+      });
+
+      setIsLoading(false);
+
+      return responseData;
+    },
+    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+  );
+
+  if (isLoading) {
+    return (
+      <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
+        <LoadingOutlined style={{ fontSize: 24 }} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <Text>Something wrong happened...</Text>;
+  }
+
+  const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
+      i !== array.length - 1 ? '\n' : ''
+    }`;
+  }, '');
+
+  return (
+    <div>
+      <Title level={3}>
+        List of users ({data?.data.authors?.length || '0'})
+      </Title>
+      <Checkbox
+        onChange={e => setShowCount(e.target.checked)}
+        style={{ marginBottom: 10 }}
+      >
+        Include count
+      </Checkbox>
+      <Input.TextArea
+        value={authorsText}
+        contentEditable={false}
+        autoSize={{ minRows: 3, maxRows: 10 }}
+      />
+    </div>
+  );
+};
+
 const Search: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
 
-  const store = useSearchStore();
   const [postsViewType, setPostsViewType] = useState('normal');
 
+  const store = useSearchStore();
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
 
   autorun(() => {
@@ -298,31 +375,25 @@ const Search: React.FC = () => {
             </Card>
           </Col>
           <Col xs={24} md={24} lg={16}>
-            <Observer>
-              {() => {
-                return (!data || isLoading || isLoadingSearch) && !isError ? (
-                  <Card
-                    title="What do you want to find today?"
-                    loading={isLoading || isFetching || isLoadingSearch}
-                    type="inner"
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text>Do your search on the card on the side</Text>
-                      <Text>or</Text>
-                      <Text>
-                        Just click the button and get the latest posts.
-                      </Text>
-                    </div>
-                  </Card>
-                ) : null;
-              }}
-            </Observer>
+            {(!data || isLoading || isLoadingSearch) && !isError ? (
+              <Card
+                title="What do you want to find today?"
+                loading={isLoading || isFetching || isLoadingSearch}
+                type="inner"
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text>Do your search on the card on the side</Text>
+                  <Text>or</Text>
+                  <Text>Just click the button and get the latest posts.</Text>
+                </div>
+              </Card>
+            ) : null}
             {isError ? (
               <Card>
                 <Text strong key={1}>
@@ -427,6 +498,9 @@ const Search: React.FC = () => {
                       }
                     });
                   })}
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Users" key="2">
+                  <AuthorsTab />
                 </Tabs.TabPane>
               </Tabs>
             ) : null}

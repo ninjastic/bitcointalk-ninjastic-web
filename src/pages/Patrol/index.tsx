@@ -144,7 +144,7 @@ const TopTopicsLineChart: React.FC = () => {
   const { data, isLoading } = useQuery(
     'topTopics',
     async () => {
-      const { data: responseData } = await api.get('/posts/topics');
+      const { data: responseData } = await api.get('/posts/topics/top');
 
       return responseData;
     },
@@ -197,7 +197,7 @@ const TopTopicsTable: React.FC = () => {
   const { data, isLoading } = useQuery(
     'topTopics',
     async () => {
-      const { data: responseData } = await api.get('/posts/topics');
+      const { data: responseData } = await api.get('/posts/topics/top');
 
       return responseData;
     },
@@ -271,7 +271,7 @@ const TopUsersLineChart: React.FC = () => {
   const { data, isLoading } = useQuery(
     'topAuthors',
     async () => {
-      const { data: responseData } = await api.get('/posts/authors');
+      const { data: responseData } = await api.get('/posts/authors/top');
 
       return responseData;
     },
@@ -324,7 +324,7 @@ const TopUsersTable: React.FC = () => {
   const { data, isLoading } = useQuery(
     'topAuthors',
     async () => {
-      const { data: responseData } = await api.get('/posts/authors');
+      const { data: responseData } = await api.get('/posts/authors/top');
 
       return responseData;
     },
