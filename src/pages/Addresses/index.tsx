@@ -65,6 +65,7 @@ const AuthorsTab: React.FC = () => {
   const { searchQuery } = store;
 
   const [showCount, setShowCount] = useState(false);
+  const [showBBCode, setShowBBCode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data, isError } = useQuery(
@@ -108,6 +109,16 @@ const AuthorsTab: React.FC = () => {
   }
 
   const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {
+    if (showBBCode) {
+      const forumProfileURL = '/index.php?action=profile;u=';
+
+      return `${prev}[url=${forumProfileURL}${curr.author_uid}]${
+        curr.author
+      }[/url]${showCount ? ` (${curr.count})` : ''}${
+        i !== array.length - 1 ? '\n' : ''
+      }`;
+    }
+
     return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
       i !== array.length - 1 ? '\n' : ''
     }`;
@@ -123,6 +134,12 @@ const AuthorsTab: React.FC = () => {
         style={{ marginBottom: 10 }}
       >
         Include count
+      </Checkbox>
+      <Checkbox
+        onChange={e => setShowBBCode(e.target.checked)}
+        style={{ marginBottom: 10 }}
+      >
+        BBCode
       </Checkbox>
       <Input.TextArea
         value={authorsText}
