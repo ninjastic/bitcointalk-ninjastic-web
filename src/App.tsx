@@ -13,8 +13,6 @@ const themes = {
   light: `${process.env.PUBLIC_URL}/light-theme.css`,
 };
 
-console.log(localStorage.getItem('ninjastic:isDarkMode'));
-
 function App() {
   return (
     <AppProvider>

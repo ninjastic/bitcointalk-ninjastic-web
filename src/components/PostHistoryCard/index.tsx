@@ -84,7 +84,6 @@ const PostHistoryCard: React.FC<Props> = ({
   };
 
   const handleOnClickContentDiff = (oldValue: string, newValue: string) => {
-    console.log(oldValue, newValue);
     Modal.info({
       title: 'Content difference',
       content: <Diff inputA={oldValue} inputB={newValue} type="sentences" />,
