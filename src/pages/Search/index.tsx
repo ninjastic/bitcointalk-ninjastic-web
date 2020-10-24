@@ -119,25 +119,10 @@ const AuthorsTab: React.FC = () => {
     if (showBBCode) {
       const forumProfileURL = '/index.php?action=profile;u=';
 
-      const queryStringified = queryString.stringify(
-        {
-          author: curr.author,
-          topic_id: searchQuery.topic_id,
-          content: searchQuery.content,
-          after_date: searchQuery.after_date,
-          before_date: searchQuery.before_date,
-          board: searchQuery.board,
-          child_boards: searchQuery.child_boards,
-        },
-        { skipEmptyString: true, skipNull: true },
-      );
-
       let text = '';
       text += `${prev}`;
       text += `[url=${forumProfileURL}${curr.author_uid}]${curr.author}[/url]`;
-      text += showCount
-        ? ` [url=ninjastic.space/addresses?${queryStringified}]${curr.count})[/url]`
-        : '';
+      text += showCount ? ` ${curr.count})` : '';
       text += i !== array.length - 1 ? '\n' : '';
 
       return text;
