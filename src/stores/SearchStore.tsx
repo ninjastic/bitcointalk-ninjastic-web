@@ -16,9 +16,11 @@ interface SearchStoreState {
     address_author: string;
     address_coin: string;
     address_board: string;
+    address_child_boards: boolean;
     after_date: string;
     before_date: string;
     board: string;
+    child_boards: boolean;
   };
   boards: Board[];
   isLoadingSearch: boolean;
@@ -45,9 +47,11 @@ const StoreProvider = ({ children }) => {
       address_author: '',
       address_coin: '',
       address_board: '',
+      address_child_boards: false,
       after_date: '',
       before_date: '',
       board: '',
+      child_boards: false,
     },
     boards: [],
     isLoadingSearch: false,

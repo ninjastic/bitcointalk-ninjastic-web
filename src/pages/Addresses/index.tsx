@@ -76,6 +76,7 @@ const AuthorsTab: React.FC = () => {
         address_author,
         address_coin,
         address_board,
+        address_child_boards,
       } = searchQuery;
 
       setIsLoading(true);
@@ -86,6 +87,7 @@ const AuthorsTab: React.FC = () => {
           author: address_author,
           coin: address_coin,
           board: address_board,
+          child_boards: address_child_boards,
         },
       });
 
@@ -112,11 +114,26 @@ const AuthorsTab: React.FC = () => {
     if (showBBCode) {
       const forumProfileURL = '/index.php?action=profile;u=';
 
-      return `${prev}[url=${forumProfileURL}${curr.author_uid}]${
-        curr.author
-      }[/url]${showCount ? ` (${curr.count})` : ''}${
-        i !== array.length - 1 ? '\n' : ''
-      }`;
+      const queryStringified = queryString.stringify(
+        {
+          address: searchQuery.address,
+          author: curr.author,
+          coin: searchQuery.address_coin,
+          board: searchQuery.address_board,
+          child_boards: searchQuery.address_child_boards,
+        },
+        { skipEmptyString: true, skipNull: true },
+      );
+
+      let text = '';
+      text += `${prev}`;
+      text += `[url=${forumProfileURL}${curr.author_uid}]${curr.author}[/url]`;
+      text += showCount
+        ? ` [url=ninjastic.space/addresses?${queryStringified}](${curr.count})[/url]`
+        : '';
+      text += i !== array.length - 1 ? '\n' : '';
+
+      return text;
     }
 
     return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
@@ -171,6 +188,7 @@ const Addresses: React.FC = () => {
     setValue('address_author', query.author);
     setValue('address_coin', query.coin);
     setValue('address_board', query.board);
+    setValue('address_child_boards', query.child_boards);
   });
 
   const {
@@ -189,15 +207,17 @@ const Addresses: React.FC = () => {
         address_author,
         address_coin,
         address_board,
+        address_child_boards,
       } = searchQuery;
 
       const { data: responseData } = await api.get('addresses', {
         params: {
-          address: address || null,
-          author: address_author || null,
-          coin: address_coin || null,
-          board: address_board || null,
-          last: last || null,
+          address,
+          author: address_author,
+          coin: address_coin,
+          board: address_board,
+          child_boards: address_child_boards,
+          last,
           limit: 50,
         },
       });
@@ -224,10 +244,11 @@ const Addresses: React.FC = () => {
   const searchAddresses = () => {
     const queryStringified = queryString.stringify(
       {
-        address: searchQuery.address || null,
-        author: searchQuery.address_author || null,
-        coin: searchQuery.address_coin || null,
-        board: searchQuery.address_board || null,
+        address: searchQuery.address,
+        author: searchQuery.address_author,
+        coin: searchQuery.address_coin,
+        board: searchQuery.address_board,
+        child_boards: searchQuery.address_child_boards,
       },
       { skipEmptyString: true, skipNull: true },
     );
@@ -335,6 +356,15 @@ const Addresses: React.FC = () => {
                   <Col span={24}>
                     <Form.Item label="Board">
                       <BoardSelect searchQueryField="address_board" />
+                      <Checkbox
+                        style={{ marginTop: 15 }}
+                        defaultChecked={searchQuery.address_child_boards}
+                        onChange={e =>
+                          setValue('address_child_boards', e.target.checked)
+                        }
+                      >
+                        Include child boards
+                      </Checkbox>
                     </Form.Item>
                   </Col>
                   <Col span={24} style={{ textAlign: 'right' }}>

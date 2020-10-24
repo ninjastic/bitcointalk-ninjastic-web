@@ -79,11 +79,19 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
           }}
         >
           {isDarkMode ? (
-            <Button onClick={() => toggleTheme(false)} type="text">
+            <Button
+              onClick={() => toggleTheme(false)}
+              type="text"
+              style={{ marginRight: mode === 'horizontal' ? 10 : 0 }}
+            >
               <BulbFilled />
             </Button>
           ) : (
-            <Button onClick={() => toggleTheme(true)} type="text">
+            <Button
+              onClick={() => toggleTheme(true)}
+              type="text"
+              style={{ marginRight: mode === 'horizontal' ? 10 : 0 }}
+            >
               <StarFilled />
             </Button>
           )}

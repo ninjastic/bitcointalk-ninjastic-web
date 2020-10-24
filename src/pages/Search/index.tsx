@@ -79,6 +79,7 @@ const AuthorsTab: React.FC = () => {
         after_date,
         before_date,
         board,
+        child_boards,
       } = searchQuery;
 
       setIsLoading(true);
@@ -89,6 +90,7 @@ const AuthorsTab: React.FC = () => {
           content,
           topic_id,
           board,
+          child_boards,
           after_date,
           before_date,
         },
@@ -117,11 +119,28 @@ const AuthorsTab: React.FC = () => {
     if (showBBCode) {
       const forumProfileURL = '/index.php?action=profile;u=';
 
-      return `${prev}[url=${forumProfileURL}${curr.author_uid}]${
-        curr.author
-      }[/url]${showCount ? ` (${curr.count})` : ''}${
-        i !== array.length - 1 ? '\n' : ''
-      }`;
+      const queryStringified = queryString.stringify(
+        {
+          author: curr.author,
+          topic_id: searchQuery.topic_id,
+          content: searchQuery.content,
+          after_date: searchQuery.after_date,
+          before_date: searchQuery.before_date,
+          board: searchQuery.board,
+          child_boards: searchQuery.child_boards,
+        },
+        { skipEmptyString: true, skipNull: true },
+      );
+
+      let text = '';
+      text += `${prev}`;
+      text += `[url=${forumProfileURL}${curr.author_uid}]${curr.author}[/url]`;
+      text += showCount
+        ? ` [url=ninjastic.space/addresses?${queryStringified}]${curr.count})[/url]`
+        : '';
+      text += i !== array.length - 1 ? '\n' : '';
+
+      return text;
     }
 
     return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
@@ -173,6 +192,7 @@ const Search: React.FC = () => {
     setValue('after_date', query.after_date);
     setValue('before_date', query.before_date);
     setValue('board', query.board);
+    setValue('child_boards', query.child_boards);
   });
 
   const {
@@ -193,6 +213,7 @@ const Search: React.FC = () => {
         after_date,
         before_date,
         board,
+        child_boards,
       } = searchQuery;
 
       const { data: responseData } = await api.get('posts', {
@@ -201,6 +222,7 @@ const Search: React.FC = () => {
           content,
           topic_id,
           board,
+          child_boards,
           after_date,
           before_date,
           last: lastId,
@@ -233,6 +255,7 @@ const Search: React.FC = () => {
         after_date: searchQuery.after_date,
         before_date: searchQuery.before_date,
         board: searchQuery.board,
+        child_boards: searchQuery.child_boards,
       },
       { skipEmptyString: true, skipNull: true },
     );
@@ -360,6 +383,15 @@ const Search: React.FC = () => {
                   <Col span={24}>
                     <Form.Item label="Board">
                       <BoardSelect searchQueryField="board" />
+                      <Checkbox
+                        style={{ marginTop: 15 }}
+                        defaultChecked={searchQuery.child_boards}
+                        onChange={e =>
+                          setValue('child_boards', e.target.checked)
+                        }
+                      >
+                        Include child boards
+                      </Checkbox>
                     </Form.Item>
                   </Col>
 
