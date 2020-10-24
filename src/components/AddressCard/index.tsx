@@ -27,9 +27,10 @@ interface Address {
 interface Props {
   data: Address;
   number: number;
+  type?: 'content' | 'address';
 }
 
-const AddressCard: React.FC<Props> = ({ data, number }) => {
+const AddressCard: React.FC<Props> = ({ data, number, type = 'content' }) => {
   const icons = [
     {
       coin: 'ETH',
@@ -50,6 +51,8 @@ const AddressCard: React.FC<Props> = ({ data, number }) => {
   return (
     <Collapse>
       <Collapse.Panel
+        showArrow={type === 'content'}
+        disabled={type !== 'content'}
         key={`${data.address}_${data.post_id}`}
         header={
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -74,19 +77,22 @@ const AddressCard: React.FC<Props> = ({ data, number }) => {
                     {data.address}
                   </Link>
                   <div>
-                    by{' '}
+                    <Text>by </Text>
                     <a
                       href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
                     >
                       {data.author}
-                    </a>{' '}
-                    on <Text strong>{formattedDate}</Text>
-                    <div style={{ marginTop: 5 }}>
-                      <Text code>
-                        {data.title.substring(0, 50)}
-                        {data.title.length > 50 ? '...' : ''}
-                      </Text>
-                    </div>
+                    </a>
+                    <Text> on </Text>
+                    <Text strong>{formattedDate}</Text>
+                    {type === 'content' ? (
+                      <div style={{ marginTop: 5 }}>
+                        <Text code>
+                          {data.title.substring(0, 50)}
+                          {data.title.length > 50 ? '...' : ''}
+                        </Text>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -98,14 +104,20 @@ const AddressCard: React.FC<Props> = ({ data, number }) => {
               }}
             >
               <div style={{ textAlign: 'right' }}>
-                <Link to={`/post/${data.post_id}`}>{data.post_id}</Link> (#
-                {number})<div>{data.board_name || '-'}</div>
+                <Link to={`/post/${data.post_id}`}>{data.post_id}</Link>{' '}
+                <Text>
+                  (#
+                  {number})
+                </Text>
+                <div>
+                  <Text>{data.board_name || '-'}</Text>
+                </div>
               </div>
             </div>
           </div>
         }
       >
-        {parse(DOMPurity.sanitize(data.content))}
+        {type === 'content' ? parse(DOMPurity.sanitize(data.content)) : null}
       </Collapse.Panel>
     </Collapse>
   );
