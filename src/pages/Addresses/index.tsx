@@ -188,7 +188,7 @@ const Addresses: React.FC = () => {
     isError,
   } = useInfiniteQuery<Response>(
     `addresses`,
-    async (key, last = '') => {
+    async (key, last = 0) => {
       const {
         address,
         address_author,
