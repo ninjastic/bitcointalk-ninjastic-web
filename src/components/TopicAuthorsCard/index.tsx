@@ -13,9 +13,11 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
   const { isLoading, isError, data } = useQuery(
     `posts:topic:${topicId}:authors`,
     async () => {
-      const { data: responseData } = await api.get(
-        `/posts/topic/${topicId}/authors`,
-      );
+      const { data: responseData } = await api.get('/posts/authors', {
+        params: {
+          topic_id: topicId,
+        },
+      });
 
       return responseData;
     },
@@ -36,7 +38,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
     );
   }
 
-  const tableData = data?.data.map(r => {
+  const tableData = data?.data?.authors.map(r => {
     return {
       key: r.author,
       author: r.author,
@@ -103,7 +105,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
             {isLoading ? (
               <LoadingOutlined />
             ) : (
-              numeral(data?.data.length || 0).format('0,0')
+              numeral(data?.data?.total_results || 0).format('0,0')
             )}
           </Text>
         </Text>
