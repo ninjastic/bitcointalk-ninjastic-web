@@ -95,11 +95,11 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
               <StarFilled />
             </Button>
           )}
-          <Input.Group compact>
+          <Input.Group style={{ display: 'flex' }} compact>
             <Select
               defaultValue={selectDefaultValue}
               onChange={e => setSearchType(e)}
-              style={{ width: 100 }}
+              style={{ width: 130 }}
             >
               <Select.Option value="post">Post ID</Select.Option>
               <Select.Option value="topic">Topic ID</Select.Option>
