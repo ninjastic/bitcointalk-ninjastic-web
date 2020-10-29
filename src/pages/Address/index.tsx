@@ -159,7 +159,7 @@ const Address: React.FC = () => {
                 );
 
                 return (
-                  <Collapse key={entry.post_id}>
+                  <Collapse key={entry.post_id} style={{ marginTop: 15 }}>
                     <Collapse.Panel
                       header={
                         <div

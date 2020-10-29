@@ -27,10 +27,10 @@ interface Address {
 interface Props {
   data: Address;
   number: number;
-  type?: 'content' | 'address';
+  showAddress?: boolean;
 }
 
-const AddressCard: React.FC<Props> = ({ data, number, type = 'content' }) => {
+const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
   const icons = [
     {
       coin: 'ETH',
@@ -51,31 +51,33 @@ const AddressCard: React.FC<Props> = ({ data, number, type = 'content' }) => {
   return (
     <Collapse>
       <Collapse.Panel
-        showArrow={type === 'content'}
-        disabled={type !== 'content'}
         key={`${data.address}_${data.post_id}`}
         header={
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex' }}>
-              <img
-                height={24}
-                width={24}
-                src={icons.find(i => i.coin === data.coin)?.image}
-                alt={data.coin}
-                style={{ marginRight: 5 }}
-              />
+              {showAddress ? (
+                <img
+                  height={24}
+                  width={24}
+                  src={icons.find(i => i.coin === data.coin)?.image}
+                  alt={data.coin}
+                  style={{ marginRight: 5 }}
+                />
+              ) : null}
               <div>
                 <div>
-                  <Link
-                    to={`/address/${data.address}`}
-                    style={{
-                      fontWeight: 500,
-                      fontSize: 16,
-                      wordWrap: 'break-word',
-                    }}
-                  >
-                    {data.address}
-                  </Link>
+                  {showAddress ? (
+                    <Link
+                      to={`/address/${data.address}`}
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 16,
+                        wordWrap: 'break-word',
+                      }}
+                    >
+                      {data.address}
+                    </Link>
+                  ) : null}
                   <div>
                     <Text>by </Text>
                     <a
@@ -85,14 +87,12 @@ const AddressCard: React.FC<Props> = ({ data, number, type = 'content' }) => {
                     </a>
                     <Text> on </Text>
                     <Text strong>{formattedDate}</Text>
-                    {type === 'content' ? (
-                      <div style={{ marginTop: 5 }}>
-                        <Text code>
-                          {data.title.substring(0, 50)}
-                          {data.title.length > 50 ? '...' : ''}
-                        </Text>
-                      </div>
-                    ) : null}
+                    <div style={{ marginTop: 5 }}>
+                      <Text code>
+                        {data.title.substring(0, 50)}
+                        {data.title.length > 50 ? '...' : ''}
+                      </Text>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -117,7 +117,7 @@ const AddressCard: React.FC<Props> = ({ data, number, type = 'content' }) => {
           </div>
         }
       >
-        {type === 'content' ? parse(DOMPurity.sanitize(data.content)) : null}
+        {parse(DOMPurity.sanitize(data.content))}
       </Collapse.Panel>
     </Collapse>
   );

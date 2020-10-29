@@ -5,7 +5,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 
 import api from '../../services/api';
 
-import AddressCard from '../AddressCard';
+import AddressAggregatorCard from '../AddressAggregatorCard/indes';
 
 const { Text } = Typography;
 
@@ -13,7 +13,7 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
   const { data, isLoading, isError } = useQuery(
     `addressesPost:${id}`,
     async () => {
-      const { data: responseData } = await api.get('addresses', {
+      const { data: responseData } = await api.get('addresses/unique', {
         params: {
           post_id: id,
         },
@@ -51,14 +51,15 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
         {!data.data.addresses.length ? (
           <Text>No addresses were found on this post.</Text>
         ) : null}
-        {data.data.addresses?.length
-          ? data.data.addresses.map((address, i) => (
-              <AddressCard
-                key={address.address}
-                data={address}
-                number={i + 1}
-                type="address"
-              />
+        {data?.data
+          ? data.data.addresses?.map(address => (
+              <div style={{ marginTop: 15 }}>
+                <AddressAggregatorCard
+                  key={address.address}
+                  coin={address.coin}
+                  address={address.address}
+                />
+              </div>
             ))
           : null}
       </Collapse.Panel>
