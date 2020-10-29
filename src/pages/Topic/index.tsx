@@ -141,7 +141,7 @@ const Topic: React.FC = () => {
             <Text>Something went wrong...</Text>
           </Card>
         ) : null}
-        {!isLoading && !isError && data[0]?.data.posts.length ? (
+        {!isLoading && !isError ? (
           <Tabs defaultActiveKey="1">
             <TabPane tab="Posts" key="1">
               <div style={{ marginBottom: 15 }}>
