@@ -104,7 +104,8 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
               <Select.Option value="post">Post ID</Select.Option>
               <Select.Option value="topic">Topic ID</Select.Option>
               <Select.Option value="address">Address</Select.Option>
-              <Select.Option value="user">User</Select.Option>
+              <Select.Option value="user">Username</Select.Option>
+              <Select.Option value="user/id">User ID</Select.Option>
             </Select>
             <Input.Search
               onSearch={handleSearch}

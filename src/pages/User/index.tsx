@@ -41,7 +41,8 @@ interface BoardsData {
 }
 
 interface MatchParams {
-  username: string;
+  username?: string;
+  author_uid?: number;
 }
 
 interface BoardsChartProps {
@@ -596,7 +597,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     isError,
   } = useInfiniteQuery<Response>(
     `userAddresses:${username}`,
-    async (key, last = '') => {
+    async (key, last = 0) => {
       const { data: responseData } = await api.get(`/addresses`, {
         params: {
           author: username,
@@ -1007,15 +1008,17 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const User: React.FC = () => {
-  const { username } = useRouteMatch().params as MatchParams;
+  const { username, author_uid } = useRouteMatch().params as MatchParams;
   const history = useHistory();
 
   const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
 
   const { data, isLoading, isError } = useQuery(
-    `user:${username}`,
+    `user:${username || author_uid}`,
     async () => {
-      const { data: responseData } = await api.get(`/users/${username}`);
+      const { data: responseData } = await api.get(
+        username ? `users/${username}` : `users/id/${author_uid}`,
+      );
 
       return responseData;
     },
@@ -1050,19 +1053,6 @@ const User: React.FC = () => {
                       <Title level={3} style={{ margin: 0 }}>
                         {data.data.author}
                       </Title>
-                      {data.data.other_usernames.length > 0 ? (
-                        <div>
-                          <Text style={{ fontSize: 14 }}>
-                            <Text type="secondary">aka </Text>
-                            {data.data.other_usernames?.filter(u => {
-                              return (
-                                u.toLowerCase() !==
-                                data.data.author.toLowerCase()
-                              );
-                            })}
-                          </Text>
-                        </div>
-                      ) : null}
                       <Typography.Link
                         style={{ fontSize: 16 }}
                         href={`https://bitcointalk.org/index.php?action=profile;u=${data.data.author_uid}`}
