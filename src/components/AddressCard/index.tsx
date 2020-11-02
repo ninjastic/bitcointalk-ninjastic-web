@@ -88,10 +88,10 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
                     <Text> on </Text>
                     <Text strong>{formattedDate}</Text>
                     <div style={{ marginTop: 5 }}>
-                      <Text code>
+                      <a href="https://google.com">
                         {data.title.substring(0, 50)}
                         {data.title.length > 50 ? '...' : ''}
-                      </Text>
+                      </a>
                     </div>
                   </div>
                 </div>
