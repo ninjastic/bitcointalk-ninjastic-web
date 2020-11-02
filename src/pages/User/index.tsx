@@ -10,7 +10,6 @@ import {
   Divider,
   Table,
   Image,
-  Collapse,
   Button,
   Radio,
   Tabs,
@@ -32,6 +31,7 @@ import PostsLineChart from '../../components/PostsLineChart';
 import PostsBarChart from '../../components/PostsBarChart';
 
 import { PageContent } from './styles';
+import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
 
 const { Text, Title } = Typography;
 
@@ -111,146 +111,121 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <Collapse>
-        <Collapse.Panel
-          header={isLoading ? <LoadingOutlined /> : 'Deleted Posts'}
-          disabled={isLoading}
-          key={1}
-        />
-      </Collapse>
+      <Card title="Deleted Posts">
+        <LoadingOutlined />
+      </Card>
     );
   }
 
   if (isError) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Deleted Posts" key={1}>
-          <Text type="secondary">Something went wrong...</Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title="Deleted Posts">
+        <Text type="secondary">Something went wrong...</Text>
+      </Card>
     );
   }
 
-  const deletedPostsLength = data.reduce(
-    (p, c) => p + c.data.posts_history.length,
-    0,
-  );
-
-  if (deletedPostsLength === 0) {
+  if (!data[0].data.total_results) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Deleted Posts" key={1}>
-          <Text type="secondary">
-            No deleted posts were found on our database.
-          </Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title={`Deleted Posts (${data[0].data.total_results})`}>
+        <Text type="secondary">No results...</Text>
+      </Card>
     );
   }
 
   return (
-    <Collapse>
-      <Collapse.Panel
-        header={`Deleted Posts (${deletedPostsLength}${
-          deletedPostsLength === 20 ? '+' : ''
-        })`}
-        key={1}
-      >
-        <div style={{ marginBottom: 15 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
+    <Card title={`Deleted Posts (${data[0].data.total_results})`}>
+      <div style={{ marginBottom: 15 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {data && !isLoading ? (
+            <Text>
+              <Text style={{ fontWeight: 500 }}>Results: </Text>
+              <Text>{data[0].data.total_results}</Text>
+            </Text>
+          ) : null}
+          <Radio.Group
+            onChange={e => setPostsViewType(e.target.value)}
+            value={postsViewType}
+            defaultValue="normal"
           >
-            {data && !isLoading ? (
-              <Text>
-                <Text style={{ fontWeight: 500 }}>Results: </Text>
-                <Text>{data[0].data.total_results}</Text>
-              </Text>
-            ) : null}
-            <Radio.Group
-              onChange={e => setPostsViewType(e.target.value)}
-              value={postsViewType}
-              defaultValue="normal"
-            >
-              <Radio.Button value="normal">Normal</Radio.Button>
-              <Radio.Button value="header">Header Only</Radio.Button>
-              <Radio.Button value="compact">Compact</Radio.Button>
-            </Radio.Group>
-          </div>
+            <Radio.Button value="normal">Normal</Radio.Button>
+            <Radio.Button value="header">Header Only</Radio.Button>
+            <Radio.Button value="compact">Compact</Radio.Button>
+          </Radio.Group>
         </div>
-        {data.map((group, groupIndex, array) => {
-          if (!group.data.posts_history.length) {
-            return (
-              <div style={{ textAlign: 'center' }} key="NoResults">
-                <Text type="secondary">No results.</Text>
-              </div>
-            );
-          }
-
+      </div>
+      {data.map((group, groupIndex, array) => {
+        if (!group.data.posts_history.length) {
           return (
-            <div key={groupIndex}>
-              {group.data.posts_history.map((post, i) => {
-                switch (postsViewType) {
-                  case 'normal':
-                    return (
-                      <div style={{ marginBottom: 30 }} key={post.post_id}>
-                        <PostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                        <Divider />
-                      </div>
-                    );
-                  case 'header':
-                    return (
-                      <div key={post.post_id}>
-                        <HeaderPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                          style={{ marginBottom: 15 }}
-                        />
-                      </div>
-                    );
-                  case 'compact':
-                    return (
-                      <ul
-                        key={post.post_id}
-                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                      >
-                        <CompactPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                      </ul>
-                    );
-                  default:
-                    return null;
-                }
-              })}
-              {groupIndex === array.length - 1 ? (
-                <div style={{ marginTop: 15, textAlign: 'center' }}>
-                  {canFetchMore ? (
-                    <Button
-                      size="large"
-                      onClick={() => fetchMore()}
-                      disabled={!!isFetchingMore}
-                      style={{ width: 110 }}
-                    >
-                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                    </Button>
-                  ) : (
-                    <Text>You reached the end!</Text>
-                  )}
-                </div>
-              ) : null}
+            <div style={{ textAlign: 'center' }} key="NoResults">
+              <Text type="secondary">No results.</Text>
             </div>
           );
-        })}
-      </Collapse.Panel>
-    </Collapse>
+        }
+
+        return (
+          <div key={groupIndex}>
+            {group.data.posts_history.map((post, i) => {
+              switch (postsViewType) {
+                case 'normal':
+                  return (
+                    <div style={{ marginBottom: 30 }} key={post.post_id}>
+                      <PostCard data={post} number={groupIndex * 100 + i + 1} />
+                      <Divider />
+                    </div>
+                  );
+                case 'header':
+                  return (
+                    <div key={post.post_id}>
+                      <HeaderPostCard
+                        data={post}
+                        number={groupIndex * 100 + i + 1}
+                        style={{ marginBottom: 15 }}
+                      />
+                    </div>
+                  );
+                case 'compact':
+                  return (
+                    <ul
+                      key={post.post_id}
+                      style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                    >
+                      <CompactPostCard
+                        data={post}
+                        number={groupIndex * 100 + i + 1}
+                      />
+                    </ul>
+                  );
+                default:
+                  return null;
+              }
+            })}
+            {groupIndex === array.length - 1 ? (
+              <div style={{ marginTop: 15, textAlign: 'center' }}>
+                {canFetchMore ? (
+                  <Button
+                    size="large"
+                    onClick={() => fetchMore()}
+                    disabled={!!isFetchingMore}
+                    style={{ width: 110 }}
+                  >
+                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                  </Button>
+                ) : (
+                  <Text>You reached the end!</Text>
+                )}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </Card>
   );
 };
 
@@ -293,146 +268,121 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <Collapse>
-        <Collapse.Panel
-          header={isLoading ? <LoadingOutlined /> : 'Edited Posts'}
-          disabled={isLoading}
-          key={1}
-        />
-      </Collapse>
+      <Card title="Edited Posts">
+        <LoadingOutlined />
+      </Card>
     );
   }
 
   if (isError) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Edited Posts" key={1}>
-          <Text type="secondary">Something went wrong...</Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title="Edited Posts">
+        <Text type="secondary">Something went wrong...</Text>
+      </Card>
     );
   }
 
-  const editedPostsLength = data.reduce(
-    (p, c) => p + c.data.posts_history.length,
-    0,
-  );
-
-  if (editedPostsLength === 0) {
+  if (!data[0].data.total_results) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Edited Posts" key={1}>
-          <Text type="secondary">
-            No edited posts were found on our database.
-          </Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title="Edited Posts">
+        <Text type="secondary">No results...</Text>
+      </Card>
     );
   }
 
   return (
-    <Collapse>
-      <Collapse.Panel
-        header={`Edited Posts (${editedPostsLength}${
-          editedPostsLength === 20 ? '+' : ''
-        })`}
-        key={1}
-      >
-        <div style={{ marginBottom: 15 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
+    <Card title={`Edited Posts (${data[0].data.total_results})`}>
+      <div style={{ marginBottom: 15 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {data && !isLoading ? (
+            <Text>
+              <Text strong>Results: </Text>
+              <Text>{data[0].data.total_results}</Text>
+            </Text>
+          ) : null}
+          <Radio.Group
+            onChange={e => setPostsViewType(e.target.value)}
+            value={postsViewType}
+            defaultValue="normal"
           >
-            {data && !isLoading ? (
-              <Text>
-                <Text strong>Results:</Text>
-                <Text>{data[0].data.total_results}</Text>
-              </Text>
-            ) : null}
-            <Radio.Group
-              onChange={e => setPostsViewType(e.target.value)}
-              value={postsViewType}
-              defaultValue="normal"
-            >
-              <Radio.Button value="normal">Normal</Radio.Button>
-              <Radio.Button value="header">Header Only</Radio.Button>
-              <Radio.Button value="compact">Compact</Radio.Button>
-            </Radio.Group>
-          </div>
+            <Radio.Button value="normal">Normal</Radio.Button>
+            <Radio.Button value="header">Header Only</Radio.Button>
+            <Radio.Button value="compact">Compact</Radio.Button>
+          </Radio.Group>
         </div>
-        {data.map((group, groupIndex, array) => {
-          if (!group.data.posts_history.length) {
-            return (
-              <div style={{ textAlign: 'center' }} key="NoResults">
-                <Text type="secondary">No results.</Text>
-              </div>
-            );
-          }
-
+      </div>
+      {data.map((group, groupIndex, array) => {
+        if (!group.data.posts_history.length) {
           return (
-            <div key={groupIndex}>
-              {group.data.posts_history.map((post, i) => {
-                switch (postsViewType) {
-                  case 'normal':
-                    return (
-                      <div style={{ marginBottom: 30 }} key={post.post_id}>
-                        <PostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                        <Divider />
-                      </div>
-                    );
-                  case 'header':
-                    return (
-                      <div key={post.post_id}>
-                        <HeaderPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                          style={{ marginBottom: 15 }}
-                        />
-                      </div>
-                    );
-                  case 'compact':
-                    return (
-                      <ul
-                        key={post.post_id}
-                        style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                      >
-                        <CompactPostCard
-                          data={post}
-                          number={groupIndex * 100 + i + 1}
-                        />
-                      </ul>
-                    );
-                  default:
-                    return null;
-                }
-              })}
-              {groupIndex === array.length - 1 ? (
-                <div style={{ marginTop: 15, textAlign: 'center' }}>
-                  {canFetchMore ? (
-                    <Button
-                      size="large"
-                      onClick={() => fetchMore()}
-                      disabled={!!isFetchingMore}
-                      style={{ width: 110 }}
-                    >
-                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                    </Button>
-                  ) : (
-                    <Text>You reached the end!</Text>
-                  )}
-                </div>
-              ) : null}
+            <div style={{ textAlign: 'center' }} key="NoResults">
+              <Text type="secondary">No results.</Text>
             </div>
           );
-        })}
-      </Collapse.Panel>
-    </Collapse>
+        }
+
+        return (
+          <div key={groupIndex}>
+            {group.data.posts_history.map((post, i) => {
+              switch (postsViewType) {
+                case 'normal':
+                  return (
+                    <div style={{ marginBottom: 30 }} key={post.post_id}>
+                      <PostCard data={post} number={groupIndex * 100 + i + 1} />
+                      <Divider />
+                    </div>
+                  );
+                case 'header':
+                  return (
+                    <div key={post.post_id}>
+                      <HeaderPostCard
+                        data={post}
+                        number={groupIndex * 100 + i + 1}
+                        style={{ marginBottom: 15 }}
+                      />
+                    </div>
+                  );
+                case 'compact':
+                  return (
+                    <ul
+                      key={post.post_id}
+                      style={{ paddingInlineStart: 20, marginBottom: 0 }}
+                    >
+                      <CompactPostCard
+                        data={post}
+                        number={groupIndex * 100 + i + 1}
+                      />
+                    </ul>
+                  );
+                default:
+                  return null;
+              }
+            })}
+            {groupIndex === array.length - 1 ? (
+              <div style={{ marginTop: 15, textAlign: 'center' }}>
+                {canFetchMore ? (
+                  <Button
+                    size="large"
+                    onClick={() => fetchMore()}
+                    disabled={!!isFetchingMore}
+                    style={{ width: 110 }}
+                  >
+                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                  </Button>
+                ) : (
+                  <Text>You reached the end!</Text>
+                )}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </Card>
   );
 };
 
@@ -624,75 +574,107 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <Collapse>
-        <Collapse.Panel
-          header={isLoading ? <LoadingOutlined /> : 'Address Mentions'}
-          disabled={isLoading}
-          key={1}
-        />
-      </Collapse>
+      <Card title="Address Mentions">
+        <LoadingOutlined />
+      </Card>
     );
   }
 
   if (isError) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Address Mentions" key={1}>
-          <Text type="secondary">Something went wrong...</Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title="Address Mentions">
+        <Text type="secondary">Something went wrong...</Text>
+      </Card>
     );
   }
 
-  if (data.reduce((p, c) => p + c.data.addresses.length, 0) === 0) {
+  if (!data[0]?.data.total_results) {
     return (
-      <Collapse>
-        <Collapse.Panel header="Address Mentions" key={1}>
-          <Text type="secondary">No addresses were found on our database.</Text>
-        </Collapse.Panel>
-      </Collapse>
+      <Card title="Address Mentions">
+        <Text type="secondary">No addresses were found on our database.</Text>
+      </Card>
     );
   }
 
   return (
-    <Collapse>
-      <Collapse.Panel
-        header={`Address Mentions (${data[0]?.data.total_results})`}
-        key={1}
-      >
-        {data.map((group, groupIndex, array) => {
-          return (
-            <div key={groupIndex}>
-              {group.data.addresses.map((address, i) => {
-                return (
-                  <AddressCard
-                    data={address}
-                    number={groupIndex * 20 + i + 1}
-                    key={`${address.address}_${address.post_id}`}
-                  />
-                );
-              })}
-              {groupIndex === array.length - 1 ? (
-                <div style={{ marginTop: 15, textAlign: 'center' }}>
-                  {canFetchMore ? (
-                    <Button
-                      size="large"
-                      onClick={() => fetchMore()}
-                      disabled={!!isFetchingMore}
-                      style={{ width: 110 }}
-                    >
-                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                    </Button>
-                  ) : (
-                    <Text>You reached the end!</Text>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </Collapse.Panel>
-    </Collapse>
+    <Card title={`Address Mentions (${data[0]?.data.total_results})`}>
+      {data.map((group, groupIndex, array) => {
+        return (
+          <div key={groupIndex}>
+            {group.data.addresses.map((address, i) => {
+              return (
+                <AddressCard
+                  data={address}
+                  number={groupIndex * 20 + i + 1}
+                  key={`${address.address}_${address.post_id}`}
+                />
+              );
+            })}
+            {groupIndex === array.length - 1 ? (
+              <div style={{ marginTop: 15, textAlign: 'center' }}>
+                {canFetchMore ? (
+                  <Button
+                    size="large"
+                    onClick={() => fetchMore()}
+                    disabled={!!isFetchingMore}
+                    style={{ width: 110 }}
+                  >
+                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                  </Button>
+                ) : (
+                  <Text>You reached the end!</Text>
+                )}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </Card>
+  );
+};
+
+const UniqueAddresses: React.FC<{ username: string }> = ({ username }) => {
+  const { data, isLoading, isError } = useQuery(
+    `uniqueAddresses:${username}`,
+    async () => {
+      const { data: responseData } = await api.get(`/addresses/unique`, {
+        params: {
+          author: username,
+        },
+      });
+
+      return responseData;
+    },
+    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+  );
+
+  if (isLoading) {
+    return (
+      <Card title="Unique Addresses">
+        <LoadingOutlined />
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return <Card title="Unique Addresses">Something went wrong...</Card>;
+  }
+
+  return (
+    <Card title={`Unique Addresses (${data.data?.addresses.length})`}>
+      {data.data?.addresses
+        ? data.data.addresses.map(address => {
+            return (
+              <AddressAggregatorCard
+                address={address.address}
+                coin={address.coin}
+                key={address.address}
+                count={address.count}
+              />
+            );
+          })
+        : null}
+    </Card>
   );
 };
 
@@ -1111,13 +1093,16 @@ const User: React.FC = () => {
                 <Tabs.TabPane tab="Favorite Topics" key="1">
                   <FavoriteTopics username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Address Mentions" key="2">
+                <Tabs.TabPane tab="Unique Addresses" key="2">
+                  <UniqueAddresses username={data.data.author} />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Address Mentions" key="3">
                   <MentionedAddresses username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Deleted Posts" key="3">
+                <Tabs.TabPane tab="Deleted Posts" key="4">
                   <DeletedPosts username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Edited Posts" key="4">
+                <Tabs.TabPane tab="Edited Posts" key="5">
                   <EditedPosts username={data.data.author} />
                 </Tabs.TabPane>
               </Tabs>

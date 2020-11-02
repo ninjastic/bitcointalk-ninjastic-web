@@ -11,26 +11,13 @@ import imageETH from '../../assets/images/eth.png';
 
 import AddressCard from '../AddressCard';
 
-interface Address {
-  address: string;
-  coin: string;
-  post_id: number;
-  topic_id: number;
-  title: string;
-  author: string;
-  author_uid: number;
-  content: string;
-  date: string;
-  board_id: number;
-  board_name: string;
-}
-
 interface Props {
   address: string;
   coin: 'BTC' | 'ETH';
+  count: number;
 }
 
-const AddressAggregatorCard: React.FC<Props> = ({ address, coin }) => {
+const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
   const icons = [
     {
       coin: 'ETH',
@@ -71,18 +58,16 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin }) => {
                 style={{ marginRight: 5 }}
               />
               <div>
-                <div>
-                  <Link
-                    to={`/address/${address}`}
-                    style={{
-                      fontWeight: 500,
-                      fontSize: 16,
-                      wordWrap: 'break-word',
-                    }}
-                  >
-                    {address}
-                  </Link>
-                </div>
+                <Link
+                  to={`/address/${address}`}
+                  style={{
+                    fontWeight: 500,
+                    fontSize: 16,
+                    wordWrap: 'break-word',
+                  }}
+                >
+                  {address} ({count})
+                </Link>
               </div>
             </div>
           </div>
@@ -99,7 +84,7 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin }) => {
             <AddressCard
               data={record}
               number={index}
-              key={record.address}
+              key={`${record.address}_${record.post_id}`}
               showAddress={false}
             />
           );

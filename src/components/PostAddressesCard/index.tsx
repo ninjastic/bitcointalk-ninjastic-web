@@ -58,6 +58,7 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
                   key={address.address}
                   coin={address.coin}
                   address={address.address}
+                  count={address.count}
                 />
               </div>
             ))
