@@ -188,7 +188,7 @@ const Addresses: React.FC = () => {
     isError,
   } = useInfiniteQuery<Response>(
     `addresses`,
-    async (key, last = 0) => {
+    async (key, last = null) => {
       const {
         address,
         address_author,
@@ -263,7 +263,7 @@ const Addresses: React.FC = () => {
       if (!canFetchMore) {
         return (
           <div style={{ textAlign: 'center', marginTop: 25 }}>
-            <Text>You reached the end!</Text>
+            <Text type="secondary">You reached the end!</Text>
           </div>
         );
       }

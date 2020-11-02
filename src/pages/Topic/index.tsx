@@ -63,7 +63,7 @@ const Topic: React.FC = () => {
     data,
   } = useInfiniteQuery<Response>(
     `posts:topic:${id}`,
-    async (key, lastId = 0) => {
+    async (key, lastId = null) => {
       const { data: responseData } = await api.get('posts', {
         params: {
           topic_id: id,
@@ -98,7 +98,7 @@ const Topic: React.FC = () => {
       if (!canFetchMore) {
         return (
           <div style={{ textAlign: 'center', marginTop: 25 }}>
-            <Text>You reached the end!</Text>
+            <Text type="secondary">You reached the end!</Text>
           </div>
         );
       }

@@ -33,7 +33,7 @@ const LastDeletedPosts: React.FC = () => {
     isFetching,
   } = useInfiniteQuery(
     'lastDeletedPosts',
-    async (key, last = '') => {
+    async (key, last = null) => {
       const { data: responseData } = await api.get(
         `posts/history?deleted=true&last=${last}`,
       );
@@ -66,7 +66,7 @@ const LastDeletedPosts: React.FC = () => {
         <Card loading style={{ marginTop: 30 }} />
       ) : (
         <div style={{ textAlign: 'center', marginTop: 25 }}>
-          <Text>You reached the end!</Text>
+          <Text type="secondary">You reached the end!</Text>
         </div>
       );
     }

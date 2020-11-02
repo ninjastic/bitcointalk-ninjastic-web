@@ -23,7 +23,6 @@ import { LoadingOutlined } from '@ant-design/icons';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
-import AddressCard from '../../components/AddressCard';
 import PostCard from '../../components/PostCard';
 import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
@@ -84,7 +83,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
     isError,
   } = useInfiniteQuery(
     `userDeletedPosts:${username}`,
-    async (key, last = '') => {
+    async (key, last = null) => {
       const { data: responseData } = await api.get('posts/history', {
         params: {
           deleted: true,
@@ -218,7 +217,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
-                  <Text>You reached the end!</Text>
+                  <Text type="secondary">You reached the end!</Text>
                 )}
               </div>
             ) : null}
@@ -241,7 +240,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
     isError,
   } = useInfiniteQuery(
     `userEditedPosts:${username}`,
-    async (key, last = '') => {
+    async (key, last = null) => {
       const { data: responseData } = await api.get(`posts/history`, {
         params: {
           deleted: false,
@@ -375,7 +374,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
-                  <Text>You reached the end!</Text>
+                  <Text type="secondary">You reached the end!</Text>
                 )}
               </div>
             ) : null}
@@ -517,20 +516,12 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
 const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   interface Address {
     address: string;
-    coin: string;
-    post_id: number;
-    topic_id: number;
-    author: string;
-    author_uid: number;
-    title: string;
-    content: string;
-    date: string;
-    board_id: number;
-    board_name: string;
+    coin: 'BTC' | 'ETH';
+    count: number;
   }
 
   interface Data {
-    total_results: number;
+    after_key: string;
     addresses: Address[];
   }
 
@@ -547,8 +538,8 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     isError,
   } = useInfiniteQuery<Response>(
     `userAddresses:${username}`,
-    async (key, last = 0) => {
-      const { data: responseData } = await api.get(`/addresses`, {
+    async (key, last = null) => {
+      const { data: responseData } = await api.get(`/addresses/unique`, {
         params: {
           author: username,
           last,
@@ -563,50 +554,37 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       getFetchMore: lastGroup => {
-        if (lastGroup.data.addresses.length < 20) return false;
+        if (!lastGroup.data.after_key) return false;
 
-        const last =
-          lastGroup.data.addresses[lastGroup.data.addresses.length - 1];
-        return last.post_id;
+        return lastGroup.data.after_key;
       },
     },
   );
 
   if (isLoading) {
-    return (
-      <Card title="Address Mentions">
-        <LoadingOutlined />
-      </Card>
-    );
+    return <LoadingOutlined />;
   }
 
   if (isError) {
-    return (
-      <Card title="Address Mentions">
-        <Text type="secondary">Something went wrong...</Text>
-      </Card>
-    );
+    return <Text type="secondary">Something went wrong...</Text>;
   }
 
-  if (!data[0]?.data.total_results) {
-    return (
-      <Card title="Address Mentions">
-        <Text type="secondary">No addresses were found on our database.</Text>
-      </Card>
-    );
+  if (!data?.length) {
+    return <Text type="secondary">No results...</Text>;
   }
 
   return (
-    <Card title={`Address Mentions (${data[0]?.data.total_results})`}>
+    <div>
       {data.map((group, groupIndex, array) => {
         return (
           <div key={groupIndex}>
-            {group.data.addresses.map((address, i) => {
+            {group.data.addresses.map(address => {
               return (
-                <AddressCard
-                  data={address}
-                  number={groupIndex * 20 + i + 1}
-                  key={`${address.address}_${address.post_id}`}
+                <AddressAggregatorCard
+                  key={address.address}
+                  address={address.address}
+                  coin={address.coin}
+                  count={address.count}
                 />
               );
             })}
@@ -622,24 +600,25 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
-                  <Text>You reached the end!</Text>
+                  <Text type="secondary">You reached the end!</Text>
                 )}
               </div>
             ) : null}
           </div>
         );
       })}
-    </Card>
+    </div>
   );
 };
 
-const UniqueAddresses: React.FC<{ username: string }> = ({ username }) => {
+const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading, isError } = useQuery(
-    `uniqueAddresses:${username}`,
+    `favoriteAddresses:${username}`,
     async () => {
-      const { data: responseData } = await api.get(`/addresses/unique`, {
+      const { data: responseData } = await api.get(`/addresses/unique/top`, {
         params: {
           author: username,
+          limit: 5,
         },
       });
 
@@ -649,32 +628,30 @@ const UniqueAddresses: React.FC<{ username: string }> = ({ username }) => {
   );
 
   if (isLoading) {
-    return (
-      <Card title="Unique Addresses">
-        <LoadingOutlined />
-      </Card>
-    );
+    return <LoadingOutlined />;
   }
 
   if (isError) {
-    return <Card title="Unique Addresses">Something went wrong...</Card>;
+    return <Text type="secondary">Something went wrong...</Text>;
+  }
+
+  if (!data?.data?.addresses?.length) {
+    return <Text type="secondary">No results...</Text>;
   }
 
   return (
-    <Card title={`Unique Addresses (${data.data?.addresses.length})`}>
-      {data.data?.addresses
-        ? data.data.addresses.map(address => {
-            return (
-              <AddressAggregatorCard
-                address={address.address}
-                coin={address.coin}
-                key={address.address}
-                count={address.count}
-              />
-            );
-          })
-        : null}
-    </Card>
+    <div>
+      {data.data.addresses.map(address => {
+        return (
+          <AddressAggregatorCard
+            address={address.address}
+            coin={address.coin}
+            key={address.address}
+            count={address.count}
+          />
+        );
+      })}
+    </div>
   );
 };
 
@@ -1093,16 +1070,18 @@ const User: React.FC = () => {
                 <Tabs.TabPane tab="Favorite Topics" key="1">
                   <FavoriteTopics username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Unique Addresses" key="2">
-                  <UniqueAddresses username={data.data.author} />
+                <Tabs.TabPane tab="Addresses" key="2">
+                  <Card title="Top 5 Favorite Addresses">
+                    <FavoriteAddresses username={data.data.author} />
+                    <Divider />
+                    <Title level={5}>All Mentioned Addresses</Title>
+                    <MentionedAddresses username={data.data.author} />
+                  </Card>
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Address Mentions" key="3">
-                  <MentionedAddresses username={data.data.author} />
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Deleted Posts" key="4">
+                <Tabs.TabPane tab="Deleted Posts" key="3">
                   <DeletedPosts username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Edited Posts" key="5">
+                <Tabs.TabPane tab="Edited Posts" key="4">
                   <EditedPosts username={data.data.author} />
                 </Tabs.TabPane>
               </Tabs>

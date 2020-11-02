@@ -44,7 +44,7 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
   );
 
   return (
-    <Collapse onChange={() => refetch()}>
+    <Collapse onChange={() => (!data?.data ? refetch() : null)}>
       <Collapse.Panel
         key={address}
         header={
