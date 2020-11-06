@@ -88,7 +88,9 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
                     <Text> on </Text>
                     <Text strong>{formattedDate}</Text>
                     <div style={{ marginTop: 5 }}>
-                      <a href="https://google.com">
+                      <a
+                        href={`https://bitcointalk.org/index.php?topic=${data.topic_id}.msg${data.post_id}#msg${data.post_id}`}
+                      >
                         {data.title.substring(0, 50)}
                         {data.title.length > 50 ? '...' : ''}
                       </a>

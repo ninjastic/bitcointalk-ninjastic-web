@@ -29,9 +29,9 @@ import { useSearchStore } from '../../stores/SearchStore';
 import Header from '../../components/Header';
 import AddressCard from '../../components/AddressCard';
 import BoardSelect from '../../components/BoardSelect';
+import CompactAddressCard from '../../components/CompactAddressCard';
 
 import { PageContent } from './styles';
-import CompactAddressCard from '../../components/CompactAddressCard';
 
 const { Text, Title } = Typography;
 const { Option } = Select;

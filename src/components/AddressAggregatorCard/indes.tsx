@@ -14,10 +14,16 @@ import AddressCard from '../AddressCard';
 interface Props {
   address: string;
   coin: 'BTC' | 'ETH';
-  count: number;
+  count?: number;
+  author?: string;
 }
 
-const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
+const AddressAggregatorCard: React.FC<Props> = ({
+  address,
+  coin,
+  count,
+  author,
+}) => {
   const icons = [
     {
       coin: 'ETH',
@@ -32,7 +38,12 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
   const { refetch, data, isLoading, isError } = useQuery(
     `address:${address}:aggregator`,
     async () => {
-      const { data: responseData } = await api.get(`/addresses/${address}`);
+      const { data: responseData } = await api.get(`/addresses`, {
+        params: {
+          address,
+          author,
+        },
+      });
 
       return responseData;
     },
@@ -66,7 +77,7 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
                     wordWrap: 'break-word',
                   }}
                 >
-                  {address} ({count})
+                  {address} {count ? `(${count})` : null}
                 </Link>
               </div>
             </div>
@@ -79,7 +90,7 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count }) => {
           </div>
         ) : null}
         {isError ? 'Something went wrong...' : null}
-        {data?.data?.map((record, index) => {
+        {data?.data?.addresses.map((record, index) => {
           return (
             <AddressCard
               data={record}

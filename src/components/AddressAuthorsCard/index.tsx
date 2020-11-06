@@ -1,73 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { Card, Row, Col, Typography } from 'antd';
+import { Typography, Input, Checkbox } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 import api from '../../services/api';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 interface Props {
   address: string;
 }
 
-const textToColor = (text: string) => {
-  let hash = 0;
-  if (text.length === 0) return hash;
-  for (let i = 0; i < text.length; i += 1) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash);
-    hash &= hash;
-  }
-  const rgb = [0, 0, 0];
-  for (let i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 255;
-    rgb[i] = value;
-  }
-  return `hsl(${rgb[1]},  100%, 75%)`;
-};
-
 const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
+  const [showBBCode, setShowBBCode] = useState(false);
+  const [showCount, setShowCount] = useState(false);
+
   const { data, isLoading, isError } = useQuery(
     `addressesAuthors:${address}`,
     async () => {
-      const { data: responseData } = await api.get(
-        `addresses/${address}/authors`,
-      );
+      const { data: responseData } = await api.get(`addresses/authors`, {
+        params: {
+          address,
+        },
+      });
 
       return responseData;
     },
     { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
   );
 
-  if (isLoading || isError) {
+  if (isLoading) {
     return <LoadingOutlined />;
   }
 
-  return (
-    <Card type="inner" title="Users">
-      <Row gutter={[4, 4]}>
-        {data.data.map(entry => {
-          if (!entry.author) {
-            return (
-              <Text key={1} type="secondary">
-                Something went wrong...
-              </Text>
-            );
-          }
+  if (isError) {
+    return <Text>Something went wrong...</Text>;
+  }
 
-          return (
-            <Col xs={10} lg={4} key={entry.author}>
-              <a
-                href={`https://bitcointalk.org/index.php?action=profile;u=${entry.author_uid}`}
-                style={{ color: `${textToColor(entry.author)}` }}
-              >
-                {entry.author} ({entry.posts_id.length})
-              </a>
-            </Col>
-          );
-        })}
-      </Row>
-    </Card>
+  const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {
+    if (showBBCode) {
+      const forumProfileURL = '/index.php?action=profile;u=';
+
+      let text = '';
+      text += `${prev}`;
+      text += `[url=${forumProfileURL}${curr.author_uid}]${curr.author}[/url]`;
+      text += showCount ? ` ${curr.count})` : '';
+      text += i !== array.length - 1 ? '\n' : '';
+
+      return text;
+    }
+
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
+      i !== array.length - 1 ? '\n' : ''
+    }`;
+  }, '');
+
+  return (
+    <div>
+      <Title level={3}>
+        List of users ({data?.data.authors?.length || '0'})
+      </Title>
+      <Checkbox
+        onChange={e => setShowCount(e.target.checked)}
+        style={{ marginBottom: 10 }}
+      >
+        Include count
+      </Checkbox>
+      <Checkbox
+        onChange={e => setShowBBCode(e.target.checked)}
+        style={{ marginBottom: 10 }}
+      >
+        BBCode
+      </Checkbox>
+      <Input.TextArea
+        value={authorsText}
+        contentEditable={false}
+        autoSize={{ minRows: 3, maxRows: 10 }}
+      />
+    </div>
   );
 };
 

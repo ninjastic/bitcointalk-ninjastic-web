@@ -1,17 +1,19 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { format, addMinutes } from 'date-fns';
-import { useRouteMatch, useHistory, Link } from 'react-router-dom';
-import { Typography, Card, Button, Collapse, Tooltip, Row, Col } from 'antd';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import { Typography, Card, Button, Row, Col, Tabs } from 'antd';
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import parse from 'html-react-parser';
-import DOMPurity from 'dompurify';
-
-import Header from '../../components/Header';
 
 import api from '../../services/api';
 
+import Header from '../../components/Header';
+import AddressCard from '../../components/AddressCard';
+import AddressDetailsETH from '../../components/AddressDetailsETH';
+import AddressTransactionsETH from '../../components/AddressTransactionsETH';
+import AddressAuthorsCard from '../../components/AddressAuthorsCard';
+
 import { PageContent } from './styles';
+import AddressDetailsBTC from '../../components/AddressDetailsBTC';
 
 const { Text, Title } = Typography;
 
@@ -107,129 +109,71 @@ const Address: React.FC = () => {
           </Card>
         ) : null}
         {!isLoading && data?.data.total_results ? (
-          <div>
-            <Card
-              title={
+          <Card
+            title={
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <div>
-                      <span
-                        style={{
-                          fontWeight: 500,
-                          fontSize: 16,
-                          wordWrap: 'break-word',
-                        }}
-                      >
-                        {data.data.addresses[0].address}
-                      </span>
-                    </div>
+                  <div>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 16,
+                        wordWrap: 'break-word',
+                      }}
+                    >
+                      {data.data.addresses[0].address}
+                    </span>
                   </div>
                 </div>
-              }
-              type="inner"
-            >
-              <Card title="Authors" style={{ marginBottom: 10 }}>
-                <Row gutter={[4, 4]}>
-                  {authors.map(a => {
-                    return (
-                      <Col xs={10} lg={4} key={a.author}>
-                        <Link
-                          to={`/user/${a.author}`}
-                          style={{ fontWeight: 500 }}
-                        >
-                          {a.author} ({a.count})
-                        </Link>
-                      </Col>
-                    );
-                  })}
-                </Row>
-              </Card>
-              {data.data.addresses.map(entry => {
-                const date = new Date(entry.date);
-                const formattedDate = format(
-                  addMinutes(date, date.getTimezoneOffset()),
-                  'yyyy-MM-dd HH:mm:ss',
-                );
-
-                return (
-                  <Collapse key={entry.post_id} style={{ marginTop: 15 }}>
-                    <Collapse.Panel
-                      header={
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <div
-                            style={{ display: 'flex', flexDirection: 'column' }}
-                          >
-                            <div>
-                              <a
-                                href={`https://bitcointalk.org/index.php?topic=${entry.topic_id}.msg${entry.post_id}#msg${entry.post_id}`}
-                                style={{
-                                  fontWeight: 500,
-                                  wordWrap: 'break-word',
-                                }}
-                              >
-                                {entry.title}
-                              </a>
-                            </div>
-                            <span style={{ fontWeight: 400 }}>
-                              posted by{' '}
-                              <a
-                                style={{
-                                  fontWeight: 500,
-                                }}
-                                href={`https://bitcointalk.org/index.php?action=profile;u=${entry.author_uid}`}
-                              >
-                                {entry.author}
-                              </a>
-                              {entry.archive ? ' and scraped on ' : ' on '}
-                              <span style={{ fontWeight: 500 }}>
-                                {formattedDate} UTC{' '}
-                              </span>
-                              {entry.archive ? (
-                                <Tooltip title="This post was scraped by Loyce at this date. This may or may not represent the time and date the post was made.">
-                                  <span
-                                    style={{
-                                      borderBottom: '1px dotted white',
-                                      cursor: 'pointer',
-                                    }}
-                                  >
-                                    (archived)
-                                  </span>
-                                </Tooltip>
-                              ) : null}
-                            </span>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <Link to={`/post/${entry.post_id}`}>
-                              {entry.post_id}
-                            </Link>
-                            <div>{entry.board_name}</div>
-                          </div>
+              </div>
+            }
+            type="inner"
+          >
+            <Row gutter={[24, 24]}>
+              <Col xs={24} md={7} lg={7}>
+                {data.data.addresses[0].coin === 'ETH' ? (
+                  <AddressDetailsETH address={data.data.addresses[0].address} />
+                ) : (
+                  <AddressDetailsBTC address={data.data.addresses[0].address} />
+                )}
+              </Col>
+              <Col xs={24} md={17} lg={17}>
+                <Tabs defaultActiveKey="1">
+                  <Tabs.TabPane key="1" tab="Mentions">
+                    {data.data.addresses.map((entry, index) => {
+                      return (
+                        <div style={{ marginBottom: 10 }}>
+                          <AddressCard
+                            key={entry.address}
+                            data={entry}
+                            number={index}
+                            showAddress={false}
+                          />
                         </div>
-                      }
-                      key={entry.post_id}
-                    >
-                      <div className="post">
-                        {parse(DOMPurity.sanitize(entry.content))}
-                      </div>
-                    </Collapse.Panel>
-                  </Collapse>
-                );
-              })}
-            </Card>
-          </div>
+                      );
+                    })}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane key="2" tab="Authors">
+                    <AddressAuthorsCard
+                      address={data.data.addresses[0].address}
+                    />
+                  </Tabs.TabPane>
+                  {data.data.addresses[0].coin === 'ETH' ? (
+                    <Tabs.TabPane key="3" tab="Token Transactions">
+                      <AddressTransactionsETH
+                        address={data.data.addresses[0].address}
+                      />
+                    </Tabs.TabPane>
+                  ) : null}
+                </Tabs>
+              </Col>
+            </Row>
+          </Card>
         ) : null}
       </PageContent>
     </>

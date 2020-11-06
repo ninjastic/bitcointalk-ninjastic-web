@@ -68,7 +68,7 @@ const StoreProvider = ({ children }) => {
       store.isLoadingAddress = value;
     },
     setValue: (type, value) => {
-      store.searchQuery[type] = value;
+      store.searchQuery[type] = value || null;
     },
     setBoards: (data: Board[]) => {
       store.boards = data;

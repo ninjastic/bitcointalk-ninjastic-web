@@ -585,6 +585,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
                   address={address.address}
                   coin={address.coin}
                   count={address.count}
+                  author={username}
                 />
               );
             })}
@@ -648,6 +649,7 @@ const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
             coin={address.coin}
             key={address.address}
             count={address.count}
+            author={username}
           />
         );
       })}
