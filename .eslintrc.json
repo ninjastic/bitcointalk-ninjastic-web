@@ -42,7 +42,8 @@
          "import/prefer-default-export": "off",
          "no-bitwise": "off",
          "no-underscore-dangle": "off",
-         "react/no-array-index-key": "off"
+         "react/no-array-index-key": "off",
+         "react/require-default-props": "off"
     },
     "settings": {
         "import/resolver": {

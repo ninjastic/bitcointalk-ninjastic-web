@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ConfigProvider, Card, Tooltip } from 'antd';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
 import { format, addMinutes } from 'date-fns';
+import MarkJs from 'mark.js';
 
 import direction from '../../services/direction';
 
@@ -23,10 +24,12 @@ interface Post {
 interface Props {
   data: Post;
   number?: number;
+  hightlight?: string;
 }
 
-const PostCard: React.FC<Props> = ({ data, number }) => {
+const PostCard: React.FC<Props> = ({ data, number, hightlight }) => {
   const postDirection = direction(data.content);
+  const ref = useRef(null);
 
   const date = new Date(data.date);
   const formattedDate = format(
@@ -35,6 +38,16 @@ const PostCard: React.FC<Props> = ({ data, number }) => {
   );
 
   const postNumber = number ? ` (#${number})` : null;
+
+  useEffect(() => {
+    const hightlightInstance = new MarkJs(ref.current);
+
+    if (hightlight) {
+      hightlightInstance.mark(hightlight);
+    } else {
+      hightlightInstance.unmark();
+    }
+  }, [ref.current, hightlight]);
 
   return (
     <ConfigProvider direction={postDirection}>
@@ -96,7 +109,9 @@ const PostCard: React.FC<Props> = ({ data, number }) => {
         }
         type="inner"
       >
-        <div className="post">{parse(DOMPurity.sanitize(data.content))}</div>
+        <div ref={ref} className="post">
+          {parse(DOMPurity.sanitize(data.content))}
+        </div>
       </Card>
     </ConfigProvider>
   );

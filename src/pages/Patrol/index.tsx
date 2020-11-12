@@ -4,7 +4,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Divider, Card, Typography, Tabs, Row, Col, Table } from 'antd';
 import { Link } from 'react-router-dom';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import { format, addMinutes } from 'date-fns';
+import { format, addMinutes, sub } from 'date-fns';
 import {
   ResponsiveContainer,
   LineChart,
@@ -371,7 +371,11 @@ const TopUsersTable: React.FC = () => {
   );
 };
 
-const TopBoardsLineChart: React.FC = () => {
+const TopBoardsLineChart: React.FC<{
+  from?: string;
+  to?: string;
+  interval?: string;
+}> = ({ from = null, to = null, interval = '1h' }) => {
   const COLORS = [
     'var(--primary-color)',
     '#FF5733',
@@ -391,9 +395,15 @@ const TopBoardsLineChart: React.FC = () => {
   };
 
   const { data, isLoading } = useQuery(
-    'topBoards',
+    `topBoards:${from}:${to}:${interval}`,
     async () => {
-      const { data: responseData } = await api.get('/boards/top');
+      const { data: responseData } = await api.get('/boards/top', {
+        params: {
+          from,
+          to,
+          interval,
+        },
+      });
 
       return responseData;
     },
@@ -494,6 +504,8 @@ const TopBoardsTable: React.FC = () => {
 };
 
 const Patrol: React.FC = () => {
+  const oneYearAgo = sub(new Date(), { years: 1 });
+
   return (
     <>
       <Header />
@@ -519,7 +531,12 @@ const Patrol: React.FC = () => {
                 <TopUsersTable />
               </Col>
             </Row>
-            <Divider />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Last Deleted Posts" key="2">
+            <LastDeletedPosts />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane tab="Board Stats" key="3">
             <Row gutter={[24, 24]}>
               <Col span={24}>
                 <Title level={3}>Top 10 Boards in the last 24 hours</Title>
@@ -528,10 +545,13 @@ const Patrol: React.FC = () => {
               <Col span={24}>
                 <TopBoardsTable />
               </Col>
+              <Col span={24}>
+                <TopBoardsLineChart
+                  from={oneYearAgo.toISOString()}
+                  interval="30d"
+                />
+              </Col>
             </Row>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Last Deleted Posts" key="2">
-            <LastDeletedPosts />
           </Tabs.TabPane>
         </Tabs>
       </PageContent>

@@ -13,6 +13,7 @@ import {
   Radio,
   Tabs,
   Checkbox,
+  Switch,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
@@ -163,6 +164,7 @@ const Search: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
 
+  const [hightlight, setHightlight] = useState(true);
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const store = useSearchStore();
@@ -447,24 +449,37 @@ const Search: React.FC = () => {
                       }}
                     >
                       {data && !isLoading && !isLoadingSearch ? (
-                        <Text>
+                        <div>
                           <Text style={{ fontWeight: 500 }}>
                             Total results:
                           </Text>{' '}
-                          {numeral(data[0].data.total_results || 0).format(
-                            '0,0',
-                          )}
-                        </Text>
+                          <Text>
+                            {numeral(data[0].data.total_results || 0).format(
+                              '0,0',
+                            )}
+                          </Text>
+                        </div>
                       ) : null}
-                      <Radio.Group
-                        onChange={e => setPostsViewType(e.target.value)}
-                        value={postsViewType}
-                        defaultValue="normal"
-                      >
-                        <Radio.Button value="normal">Normal</Radio.Button>
-                        <Radio.Button value="header">Header Only</Radio.Button>
-                        <Radio.Button value="compact">Compact</Radio.Button>
-                      </Radio.Group>
+                      <div>
+                        <Switch
+                          style={{ marginRight: 5 }}
+                          defaultChecked={hightlight}
+                          checked={hightlight}
+                          onChange={value => setHightlight(value)}
+                        />
+                        <Text style={{ marginRight: 10 }}>Hightlight</Text>
+                        <Radio.Group
+                          onChange={e => setPostsViewType(e.target.value)}
+                          value={postsViewType}
+                          defaultValue="normal"
+                        >
+                          <Radio.Button value="normal">Normal</Radio.Button>
+                          <Radio.Button value="header">
+                            Header Only
+                          </Radio.Button>
+                          <Radio.Button value="compact">Compact</Radio.Button>
+                        </Radio.Group>
+                      </div>
                     </div>
                   </div>
                   {data.map((group, groupIndex) => {
@@ -489,6 +504,9 @@ const Search: React.FC = () => {
                               <PostCard
                                 data={post}
                                 number={groupIndex * 100 + i + 1}
+                                hightlight={
+                                  hightlight ? searchQuery.content : null
+                                }
                               />
                               <Divider />
                               {i === array.length - 1 ? (

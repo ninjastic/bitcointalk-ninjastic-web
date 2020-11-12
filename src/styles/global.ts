@@ -77,6 +77,11 @@ const GlobalStyle = createGlobalStyle`
         word-break: break-word;
     }
 
+    .post mark {
+        background-color: #ffe58f;
+        padding: 0;
+    }
+
     .ant-card-head-title {
         white-space: pre-wrap;
     }
