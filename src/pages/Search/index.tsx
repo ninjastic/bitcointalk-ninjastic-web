@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import {
-  Form,
-  Input,
-  Button,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Divider,
-  BackTop,
-  Radio,
-  Tabs,
-  Checkbox,
-  Switch,
-} from 'antd';
+import { Form, Input, Button, Card, Row, Col, Typography, Divider, BackTop, Radio, Tabs, Checkbox, Switch } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
@@ -73,15 +59,7 @@ const AuthorsTab: React.FC = () => {
   const { data, isError } = useQuery(
     'posts:Authors',
     async () => {
-      const {
-        author,
-        content,
-        topic_id,
-        after_date,
-        before_date,
-        board,
-        child_boards,
-      } = searchQuery;
+      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery;
 
       setIsLoading(true);
 
@@ -129,33 +107,19 @@ const AuthorsTab: React.FC = () => {
       return text;
     }
 
-    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
-      i !== array.length - 1 ? '\n' : ''
-    }`;
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${i !== array.length - 1 ? '\n' : ''}`;
   }, '');
 
   return (
     <div>
-      <Title level={3}>
-        List of users ({data?.data.authors?.length || '0'})
-      </Title>
-      <Checkbox
-        onChange={e => setShowCount(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Title level={3}>List of users ({data?.data.authors?.length || '0'})</Title>
+      <Checkbox onChange={e => setShowCount(e.target.checked)} style={{ marginBottom: 10 }}>
         Include count
       </Checkbox>
-      <Checkbox
-        onChange={e => setShowBBCode(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Checkbox onChange={e => setShowBBCode(e.target.checked)} style={{ marginBottom: 10 }}>
         BBCode
       </Checkbox>
-      <Input.TextArea
-        value={authorsText}
-        contentEditable={false}
-        autoSize={{ minRows: 3, maxRows: 10 }}
-      />
+      <Input.TextArea value={authorsText} contentEditable={false} autoSize={{ minRows: 3, maxRows: 10 }} />
     </div>
   );
 };
@@ -182,26 +146,10 @@ const Search: React.FC = () => {
     setValue('child_boards', query.child_boards);
   });
 
-  const {
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-    fetchMore,
-    canFetchMore,
-    data,
-  } = useInfiniteQuery<Response>(
+  const { isLoading, isFetching, isError, refetch, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     'posts',
     async (key, lastId = null) => {
-      const {
-        author,
-        content,
-        topic_id,
-        after_date,
-        before_date,
-        board,
-        child_boards,
-      } = searchQuery;
+      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery;
 
       const { data: responseData } = await api.get('posts', {
         params: {
@@ -260,11 +208,9 @@ const Search: React.FC = () => {
   };
 
   const handleChangeDateRange = e => {
-    const from =
-      e && e[0] ? zonedTimeToUtc(new Date(e[0]), 'UTC').toISOString() : '';
+    const from = e && e[0] ? zonedTimeToUtc(new Date(e[0]), 'UTC').toISOString() : '';
 
-    const to =
-      e && e[1] ? zonedTimeToUtc(new Date(e[1]), 'UTC').toISOString() : '';
+    const to = e && e[1] ? zonedTimeToUtc(new Date(e[1]), 'UTC').toISOString() : '';
 
     setValue('after_date', from);
     setValue('before_date', to);
@@ -298,17 +244,11 @@ const Search: React.FC = () => {
   };
 
   const afterDate = searchQuery.after_date
-    ? addMinutes(
-        new Date(searchQuery.after_date),
-        new Date(searchQuery.after_date).getTimezoneOffset(),
-      )
+    ? addMinutes(new Date(searchQuery.after_date), new Date(searchQuery.after_date).getTimezoneOffset())
     : null;
 
   const beforeDate = searchQuery.before_date
-    ? addMinutes(
-        new Date(searchQuery.before_date),
-        new Date(searchQuery.before_date).getTimezoneOffset(),
-      )
+    ? addMinutes(new Date(searchQuery.before_date), new Date(searchQuery.before_date).getTimezoneOffset())
     : null;
 
   return (
@@ -326,9 +266,7 @@ const Search: React.FC = () => {
                         placeholder="TryNinja"
                         defaultValue={searchQuery.author}
                         onKeyDown={handleKeyDown}
-                        onChange={e =>
-                          setValue('author', e.target.value.trim())
-                        }
+                        onChange={e => setValue('author', e.target.value.trim())}
                       />
                     </Form.Item>
                   </Col>
@@ -373,9 +311,7 @@ const Search: React.FC = () => {
                       <Checkbox
                         style={{ marginTop: 15 }}
                         defaultChecked={searchQuery.child_boards}
-                        onChange={e =>
-                          setValue('child_boards', e.target.checked)
-                        }
+                        onChange={e => setValue('child_boards', e.target.checked)}
                       >
                         Include child boards
                       </Checkbox>
@@ -387,19 +323,13 @@ const Search: React.FC = () => {
                       <Button
                         type="primary"
                         icon={
-                          isFetching ||
-                          isLoading ||
-                          (isLoadingSearch && !isError) ? (
+                          isFetching || isLoading || (isLoadingSearch && !isError) ? (
                             <LoadingOutlined style={{}} />
                           ) : (
                             <SearchOutlined />
                           )
                         }
-                        disabled={
-                          isFetching ||
-                          isLoading ||
-                          (isLoadingSearch && !isError)
-                        }
+                        disabled={isFetching || isLoading || (isLoadingSearch && !isError)}
                         onClick={searchPosts}
                       >
                         Search
@@ -441,42 +371,32 @@ const Search: React.FC = () => {
               <Tabs defaultActiveKey="1">
                 <Tabs.TabPane tab="Results" key="1">
                   <div style={{ marginBottom: 15 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       {data && !isLoading && !isLoadingSearch ? (
                         <div>
-                          <Text style={{ fontWeight: 500 }}>
-                            Total results:
-                          </Text>{' '}
-                          <Text>
-                            {numeral(data[0].data.total_results || 0).format(
-                              '0,0',
-                            )}
-                          </Text>
+                          <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
+                          <Text>{numeral(data[0].data.total_results || 0).format('0,0')}</Text>
                         </div>
                       ) : null}
                       <div>
-                        <Switch
-                          style={{ marginRight: 5 }}
-                          defaultChecked={hightlight}
-                          checked={hightlight}
-                          onChange={value => setHightlight(value)}
-                        />
-                        <Text style={{ marginRight: 10 }}>Hightlight</Text>
+                        {searchQuery.content ? (
+                          <>
+                            <Switch
+                              style={{ marginRight: 5 }}
+                              defaultChecked={hightlight}
+                              checked={hightlight}
+                              onChange={value => setHightlight(value)}
+                            />
+                            <Text style={{ marginRight: 10 }}>Hightlight</Text>
+                          </>
+                        ) : null}
                         <Radio.Group
                           onChange={e => setPostsViewType(e.target.value)}
                           value={postsViewType}
                           defaultValue="normal"
                         >
                           <Radio.Button value="normal">Normal</Radio.Button>
-                          <Radio.Button value="header">
-                            Header Only
-                          </Radio.Button>
+                          <Radio.Button value="header">Header Only</Radio.Button>
                           <Radio.Button value="compact">Compact</Radio.Button>
                         </Radio.Group>
                       </div>
@@ -497,21 +417,14 @@ const Search: React.FC = () => {
                       switch (postsViewType) {
                         case 'normal':
                           return (
-                            <div
-                              style={{ marginBottom: 30 }}
-                              key={post.post_id}
-                            >
+                            <div style={{ marginBottom: 30 }} key={post.post_id}>
                               <PostCard
                                 data={post}
                                 number={groupIndex * 100 + i + 1}
-                                hightlight={
-                                  hightlight ? searchQuery.content : null
-                                }
+                                hightlight={hightlight ? searchQuery.content : null}
                               />
                               <Divider />
-                              {i === array.length - 1 ? (
-                                <LoadingMore groupIndex={groupIndex} />
-                              ) : null}
+                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                             </div>
                           );
                         case 'header':
@@ -522,9 +435,7 @@ const Search: React.FC = () => {
                                 number={groupIndex * 100 + i + 1}
                                 style={{ marginBottom: 15 }}
                               />
-                              {i === array.length - 1 ? (
-                                <LoadingMore groupIndex={groupIndex} />
-                              ) : null}
+                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                             </div>
                           );
                         case 'compact':
@@ -536,13 +447,8 @@ const Search: React.FC = () => {
                                 marginBottom: 0,
                               }}
                             >
-                              <CompactPostCard
-                                data={post}
-                                number={groupIndex * 100 + i + 1}
-                              />
-                              {i === array.length - 1 ? (
-                                <LoadingMore groupIndex={groupIndex} onlyIcon />
-                              ) : null}
+                              <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
                             </ul>
                           );
                         default:

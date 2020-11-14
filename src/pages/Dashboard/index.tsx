@@ -2,23 +2,8 @@ import React from 'react';
 import { Typography, Row, Col, Divider, Statistic } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  isValid,
-  format,
-  addMinutes,
-  sub,
-  startOfDay,
-  endOfDay,
-} from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { isValid, format, addMinutes, sub, startOfDay, endOfDay } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 
 import api from '../../services/api';
@@ -37,10 +22,7 @@ const PostsTodayCard: React.FC = () => {
     async () => {
       const currentDate = new Date();
 
-      const currentDateUTC = addMinutes(
-        currentDate,
-        currentDate.getTimezoneOffset(),
-      );
+      const currentDateUTC = addMinutes(currentDate, currentDate.getTimezoneOffset());
       const yesterdayDateUTC = sub(currentDateUTC, { days: 1 });
 
       const { data: responseData } = await api.get(
@@ -57,11 +39,7 @@ const PostsTodayCard: React.FC = () => {
   }, 0);
 
   return (
-    <Statistic
-      title="Posts 24h"
-      value={totalCount}
-      valueRender={value => (isLoading ? <LoadingOutlined /> : value)}
-    />
+    <Statistic title="Posts 24h" value={totalCount} valueRender={value => (isLoading ? <LoadingOutlined /> : value)} />
   );
 };
 
@@ -103,10 +81,7 @@ const PostsLast24HoursGraph: React.FC = () => {
           label="{timeTaken}"
           labelFormatter={value => {
             const date = new Date(value);
-            const formatted = format(
-              addMinutes(date, date.getTimezoneOffset()),
-              'HH:mm',
-            );
+            const formatted = format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm');
 
             return `${isValid(new Date(value)) ? formatted : null} (UTC)`;
           }}
@@ -143,14 +118,7 @@ const PostsPerDayGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return (
-    <PostsLineChart
-      data={data?.data}
-      loading={isLoading}
-      dateFormat="MM/dd"
-      size="small"
-    />
-  );
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
 };
 
 const PostsPerMonthGraph: React.FC = () => {
@@ -178,14 +146,7 @@ const PostsPerMonthGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return (
-    <PostsLineChart
-      data={data?.data}
-      loading={isLoading}
-      dateFormat="yyyy/MM"
-      size="small"
-    />
-  );
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="yyyy/MM" size="small" />;
 };
 
 const Dashboard: React.FC = () => {

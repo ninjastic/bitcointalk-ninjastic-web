@@ -10,14 +10,7 @@ import AddressAggregatorCard from '../AddressAggregatorCard/indes';
 const { Text } = Typography;
 
 const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
-  const {
-    data,
-    isLoading,
-    isError,
-    canFetchMore,
-    isFetchingMore,
-    fetchMore,
-  } = useInfiniteQuery(
+  const { data, isLoading, isError, canFetchMore, isFetchingMore, fetchMore } = useInfiniteQuery(
     `addressesPost:${id}`,
     async (key, last = null) => {
       const { data: responseData } = await api.get('addresses/unique', {
@@ -91,12 +84,7 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
               {groupIndex === array.length - 1 ? (
                 <div style={{ marginTop: 15, textAlign: 'center' }}>
                   {canFetchMore ? (
-                    <Button
-                      size="large"
-                      onClick={() => fetchMore()}
-                      disabled={!!isFetchingMore}
-                      style={{ width: 110 }}
-                    >
+                    <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
                       {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                     </Button>
                   ) : (

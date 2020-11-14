@@ -19,14 +19,7 @@ const AlertMessage: React.FC = () => {
     return null;
   }
 
-  return (
-    <Alert
-      message={data.data}
-      type="info"
-      showIcon
-      style={{ marginBottom: 15 }}
-    />
-  );
+  return <Alert message={data.data} type="info" showIcon style={{ marginBottom: 15 }} />;
 };
 
 export default AlertMessage;

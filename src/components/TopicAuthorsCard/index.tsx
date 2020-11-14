@@ -62,13 +62,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       dataIndex: 'author',
       key: 'author',
       render: (text, record) => {
-        return (
-          <a
-            href={`https://bitcointalk.org/index.php?action=profile;u=${record.author_uid}`}
-          >
-            {text}
-          </a>
-        );
+        return <a href={`https://bitcointalk.org/index.php?action=profile;u=${record.author_uid}`}>{text}</a>;
       },
     },
     {
@@ -89,9 +83,7 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       dataIndex: 'author',
       key: 'view-posts',
       render: text => {
-        return (
-          <Link to={`/search?author=${text}&topic_id=${topicId}`}>View</Link>
-        );
+        return <Link to={`/search?author=${text}&topic_id=${topicId}`}>View</Link>;
       },
     },
   ];
@@ -101,24 +93,11 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       <div style={{ marginTop: 5, marginBottom: 15 }}>
         <Text>
           <Text style={{ fontWeight: 500 }}>Users: </Text>
-          <Text>
-            {isLoading ? (
-              <LoadingOutlined />
-            ) : (
-              numeral(data?.data?.total_results || 0).format('0,0')
-            )}
-          </Text>
+          <Text>{isLoading ? <LoadingOutlined /> : numeral(data?.data?.total_results || 0).format('0,0')}</Text>
         </Text>
       </div>
       <Card title="Users participating on the topic">
-        <Table
-          dataSource={tableData}
-          columns={columns}
-          size="small"
-          loading={isLoading}
-          pagination={false}
-          bordered
-        />
+        <Table dataSource={tableData} columns={columns} size="small" loading={isLoading} pagination={false} bordered />
       </Card>
     </div>
   );

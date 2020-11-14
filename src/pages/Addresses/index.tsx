@@ -71,13 +71,7 @@ const AuthorsTab: React.FC = () => {
   const { data, isError } = useQuery(
     'addresses:Authors',
     async () => {
-      const {
-        address,
-        address_author,
-        address_coin,
-        address_board,
-        address_child_boards,
-      } = searchQuery;
+      const { address, address_author, address_coin, address_board, address_child_boards } = searchQuery;
 
       setIsLoading(true);
 
@@ -123,33 +117,19 @@ const AuthorsTab: React.FC = () => {
       return text;
     }
 
-    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
-      i !== array.length - 1 ? '\n' : ''
-    }`;
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${i !== array.length - 1 ? '\n' : ''}`;
   }, '');
 
   return (
     <div>
-      <Title level={3}>
-        List of users ({data?.data.authors?.length || '0'})
-      </Title>
-      <Checkbox
-        onChange={e => setShowCount(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Title level={3}>List of users ({data?.data.authors?.length || '0'})</Title>
+      <Checkbox onChange={e => setShowCount(e.target.checked)} style={{ marginBottom: 10 }}>
         Include count
       </Checkbox>
-      <Checkbox
-        onChange={e => setShowBBCode(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Checkbox onChange={e => setShowBBCode(e.target.checked)} style={{ marginBottom: 10 }}>
         BBCode
       </Checkbox>
-      <Input.TextArea
-        value={authorsText}
-        contentEditable={false}
-        autoSize={{ minRows: 3, maxRows: 10 }}
-      />
+      <Input.TextArea value={authorsText} contentEditable={false} autoSize={{ minRows: 3, maxRows: 10 }} />
     </div>
   );
 };
@@ -161,12 +141,7 @@ const Addresses: React.FC = () => {
 
   const [viewType, setViewType] = useState('normal');
 
-  const {
-    setValue,
-    searchQuery,
-    isLoadingAddress,
-    setIsLoadingAddress,
-  } = store;
+  const { setValue, searchQuery, isLoadingAddress, setIsLoadingAddress } = store;
 
   autorun(() => {
     const query = queryString.parse(search);
@@ -178,24 +153,10 @@ const Addresses: React.FC = () => {
     setValue('address_child_boards', query.child_boards);
   });
 
-  const {
-    isLoading,
-    isFetching,
-    refetch,
-    fetchMore,
-    canFetchMore,
-    data,
-    isError,
-  } = useInfiniteQuery<Response>(
+  const { isLoading, isFetching, refetch, fetchMore, canFetchMore, data, isError } = useInfiniteQuery<Response>(
     `addresses`,
     async (key, last = null) => {
-      const {
-        address,
-        address_author,
-        address_coin,
-        address_board,
-        address_child_boards,
-      } = searchQuery;
+      const { address, address_author, address_coin, address_board, address_child_boards } = searchQuery;
 
       const { data: responseData } = await api.get('addresses', {
         params: {
@@ -221,8 +182,7 @@ const Addresses: React.FC = () => {
       getFetchMore: lastGroup => {
         if (lastGroup.data.addresses.length < 50) return false;
 
-        const last =
-          lastGroup.data.addresses[lastGroup.data.addresses.length - 1];
+        const last = lastGroup.data.addresses[lastGroup.data.addresses.length - 1];
         return last.post_id;
       },
     },
@@ -307,9 +267,7 @@ const Addresses: React.FC = () => {
                             placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
                             onKeyDown={handleKeyDown}
                             defaultValue={searchQuery.address}
-                            onChange={e =>
-                              setValue('address', e.target.value.trim())
-                            }
+                            onChange={e => setValue('address', e.target.value.trim())}
                           />
                         )}
                       </Observer>
@@ -322,9 +280,7 @@ const Addresses: React.FC = () => {
                         placeholder="TryNinja"
                         onKeyDown={handleKeyDown}
                         defaultValue={searchQuery.address_author}
-                        onChange={e =>
-                          setValue('address_author', e.target.value.trim())
-                        }
+                        onChange={e => setValue('address_author', e.target.value.trim())}
                       />
                     </Form.Item>
                   </Col>
@@ -346,9 +302,7 @@ const Addresses: React.FC = () => {
                       <Checkbox
                         style={{ marginTop: 15 }}
                         defaultChecked={searchQuery.address_child_boards}
-                        onChange={e =>
-                          setValue('address_child_boards', e.target.checked)
-                        }
+                        onChange={e => setValue('address_child_boards', e.target.checked)}
                       >
                         Include child boards
                       </Checkbox>
@@ -359,19 +313,13 @@ const Addresses: React.FC = () => {
                       <Button
                         type="primary"
                         icon={
-                          isFetching ||
-                          isLoading ||
-                          (isLoadingAddress && !isError) ? (
+                          isFetching || isLoading || (isLoadingAddress && !isError) ? (
                             <LoadingOutlined style={{}} />
                           ) : (
                             <SearchOutlined />
                           )
                         }
-                        disabled={
-                          isFetching ||
-                          isLoading ||
-                          (isLoadingAddress && !isError)
-                        }
+                        disabled={isFetching || isLoading || (isLoadingAddress && !isError)}
                         onClick={searchAddresses}
                       >
                         Search
@@ -400,9 +348,7 @@ const Addresses: React.FC = () => {
                     >
                       <Text>Do your search on the card on the side</Text>
                       <Text>or</Text>
-                      <Text style={{ textAlign: 'center' }}>
-                        Just click the button and get the latest addresses.
-                      </Text>
+                      <Text style={{ textAlign: 'center' }}>Just click the button and get the latest addresses.</Text>
                     </div>
                   </Card>
                 ) : null;
@@ -426,19 +372,11 @@ const Addresses: React.FC = () => {
                     >
                       {data && !isLoading ? (
                         <Text>
-                          <Text style={{ fontWeight: 500 }}>
-                            Total results:
-                          </Text>{' '}
-                          {numeral(data[0].data.total_results || 0).format(
-                            '0,0',
-                          )}
+                          <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
+                          {numeral(data[0].data.total_results || 0).format('0,0')}
                         </Text>
                       ) : null}
-                      <Radio.Group
-                        onChange={e => setViewType(e.target.value)}
-                        value={viewType}
-                        defaultValue="normal"
-                      >
+                      <Radio.Group onChange={e => setViewType(e.target.value)} value={viewType} defaultValue="normal">
                         <Radio.Button value="normal">Normal</Radio.Button>
                         <Radio.Button value="compact">Compact</Radio.Button>
                       </Radio.Group>
@@ -458,17 +396,9 @@ const Addresses: React.FC = () => {
                       switch (viewType) {
                         case 'normal':
                           return (
-                            <div
-                              style={{ marginBottom: 15 }}
-                              key={`${record.address}_${record.post_id}`}
-                            >
-                              <AddressCard
-                                data={record}
-                                number={groupIndex * 50 + i + 1}
-                              />
-                              {i === array.length - 1 ? (
-                                <LoadingMore groupIndex={groupIndex} />
-                              ) : null}
+                            <div style={{ marginBottom: 15 }} key={`${record.address}_${record.post_id}`}>
+                              <AddressCard data={record} number={groupIndex * 50 + i + 1} />
+                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                             </div>
                           );
                         case 'compact':
@@ -480,13 +410,8 @@ const Addresses: React.FC = () => {
                                 marginBottom: 0,
                               }}
                             >
-                              <CompactAddressCard
-                                data={record}
-                                number={groupIndex * 100 + i + 1}
-                              />
-                              {i === array.length - 1 ? (
-                                <LoadingMore groupIndex={groupIndex} onlyIcon />
-                              ) : null}
+                              <CompactAddressCard data={record} number={groupIndex * 100 + i + 1} />
+                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
                             </ul>
                           );
                         default:

@@ -40,10 +40,7 @@ const Routes: React.FC = () => {
         <Route path="/topic/:id" component={Topic} />
         <Route path="/addresses" component={Addresses} />
         <Route path="/address/:address" component={Address} />
-        <Route
-          path={['/user/id/:author_uid', '/user/:username']}
-          component={User}
-        />
+        <Route path={['/user/id/:author_uid', '/user/:username']} component={User} />
         <Route path="/patrol" component={Patrol} />
         <Route path="*" component={NotFoundPage} />
       </Switch>

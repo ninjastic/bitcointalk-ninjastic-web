@@ -18,11 +18,7 @@ function App() {
     <AppProvider>
       <ThemeSwitcherProvider
         themeMap={themes}
-        defaultTheme={
-          localStorage.getItem('ninjastic:isDarkMode') === 'true'
-            ? 'dark'
-            : 'light'
-        }
+        defaultTheme={localStorage.getItem('ninjastic:isDarkMode') === 'true' ? 'dark' : 'light'}
       >
         <Routes />
         <GlobalStyles />

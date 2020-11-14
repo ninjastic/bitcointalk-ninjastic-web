@@ -148,26 +148,17 @@ const Address: React.FC = () => {
                     {data.data.addresses.map((entry, index) => {
                       return (
                         <div style={{ marginBottom: 10 }}>
-                          <AddressCard
-                            key={entry.address}
-                            data={entry}
-                            number={index}
-                            showAddress={false}
-                          />
+                          <AddressCard key={entry.address} data={entry} number={index} showAddress={false} />
                         </div>
                       );
                     })}
                   </Tabs.TabPane>
                   <Tabs.TabPane key="2" tab="Authors">
-                    <AddressAuthorsCard
-                      address={data.data.addresses[0].address}
-                    />
+                    <AddressAuthorsCard address={data.data.addresses[0].address} />
                   </Tabs.TabPane>
                   {data.data.addresses[0].coin === 'ETH' ? (
                     <Tabs.TabPane key="3" tab="Token Transactions">
-                      <AddressTransactionsETH
-                        address={data.data.addresses[0].address}
-                      />
+                      <AddressTransactionsETH address={data.data.addresses[0].address} />
                     </Tabs.TabPane>
                   ) : null}
                 </Tabs>

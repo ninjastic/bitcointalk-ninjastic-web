@@ -50,33 +50,19 @@ const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
       return text;
     }
 
-    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${
-      i !== array.length - 1 ? '\n' : ''
-    }`;
+    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${i !== array.length - 1 ? '\n' : ''}`;
   }, '');
 
   return (
     <div>
-      <Title level={3}>
-        List of users ({data?.data.authors?.length || '0'})
-      </Title>
-      <Checkbox
-        onChange={e => setShowCount(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Title level={3}>List of users ({data?.data.authors?.length || '0'})</Title>
+      <Checkbox onChange={e => setShowCount(e.target.checked)} style={{ marginBottom: 10 }}>
         Include count
       </Checkbox>
-      <Checkbox
-        onChange={e => setShowBBCode(e.target.checked)}
-        style={{ marginBottom: 10 }}
-      >
+      <Checkbox onChange={e => setShowBBCode(e.target.checked)} style={{ marginBottom: 10 }}>
         BBCode
       </Checkbox>
-      <Input.TextArea
-        value={authorsText}
-        contentEditable={false}
-        autoSize={{ minRows: 3, maxRows: 10 }}
-      />
+      <Input.TextArea value={authorsText} contentEditable={false} autoSize={{ minRows: 3, maxRows: 10 }} />
     </div>
   );
 };

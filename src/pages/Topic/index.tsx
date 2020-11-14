@@ -54,14 +54,7 @@ const Topic: React.FC = () => {
 
   const { id } = useRouteMatch().params as MatchParams;
 
-  const {
-    isLoading,
-    isFetching,
-    isError,
-    fetchMore,
-    canFetchMore,
-    data,
-  } = useInfiniteQuery<Response>(
+  const { isLoading, isFetching, isError, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     `posts:topic:${id}`,
     async (key, lastId = null) => {
       const { data: responseData } = await api.get('posts', {
@@ -153,8 +146,7 @@ const Topic: React.FC = () => {
                   }}
                 >
                   <Text>
-                    <Text strong>Posts:</Text>{' '}
-                    {numeral(data[0].data.total_results || 0).format('0,0')}
+                    <Text strong>Posts:</Text> {numeral(data[0].data.total_results || 0).format('0,0')}
                   </Text>
                   <Radio.Group
                     onChange={e => setPostsViewType(e.target.value)}
@@ -170,10 +162,7 @@ const Topic: React.FC = () => {
               {data.map((group, groupIndex) => {
                 if (!group.data.posts.length) {
                   return (
-                    <Card
-                      style={{ marginTop: 15, textAlign: 'center' }}
-                      key="NotFound"
-                    >
+                    <Card style={{ marginTop: 15, textAlign: 'center' }} key="NotFound">
                       <Text type="secondary" style={{ fontSize: 16 }} key={1}>
                         No results...
                       </Text>
@@ -186,42 +175,23 @@ const Topic: React.FC = () => {
                     case 'normal':
                       return (
                         <div style={{ marginBottom: 30 }} key={post.post_id}>
-                          <PostCard
-                            data={post}
-                            number={groupIndex * 100 + i + 1}
-                          />
+                          <PostCard data={post} number={groupIndex * 100 + i + 1} />
                           <Divider />
-                          {i === array.length - 1 ? (
-                            <LoadingMore groupIndex={groupIndex} />
-                          ) : null}
+                          {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                         </div>
                       );
                     case 'header':
                       return (
                         <div key={post.post_id}>
-                          <HeaderPostCard
-                            data={post}
-                            number={groupIndex * 100 + i + 1}
-                            style={{ marginBottom: 15 }}
-                          />
-                          {i === array.length - 1 ? (
-                            <LoadingMore groupIndex={groupIndex} />
-                          ) : null}
+                          <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
+                          {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                         </div>
                       );
                     case 'compact':
                       return (
-                        <ul
-                          key={post.post_id}
-                          style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                        >
-                          <CompactPostCard
-                            data={post}
-                            number={groupIndex * 100 + i + 1}
-                          />
-                          {i === array.length - 1 ? (
-                            <LoadingMore groupIndex={groupIndex} onlyIcon />
-                          ) : null}
+                        <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
+                          <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+                          {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
                         </ul>
                       );
                     default:

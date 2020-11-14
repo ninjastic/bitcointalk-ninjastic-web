@@ -33,9 +33,7 @@ interface SearchStoreState {
   setBoards: (boards: Board[]) => void;
 }
 
-const StoreContext = React.createContext<SearchStoreState>(
-  {} as SearchStoreState,
-);
+const StoreContext = React.createContext<SearchStoreState>({} as SearchStoreState);
 
 const StoreProvider = ({ children }) => {
   const store = useLocalStore(() => ({
@@ -75,9 +73,7 @@ const StoreProvider = ({ children }) => {
     },
   }));
 
-  return (
-    <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
-  );
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
 
 const useSearchStore = (): SearchStoreState => {

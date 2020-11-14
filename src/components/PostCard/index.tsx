@@ -32,10 +32,7 @@ const PostCard: React.FC<Props> = ({ data, number, hightlight }) => {
   const ref = useRef(null);
 
   const date = new Date(data.date);
-  const formattedDate = format(
-    addMinutes(date, date.getTimezoneOffset()),
-    'yyyy-MM-dd HH:mm:ss',
-  );
+  const formattedDate = format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
 
   const postNumber = number ? ` (#${number})` : null;
 

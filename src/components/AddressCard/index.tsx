@@ -43,10 +43,7 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
   ];
 
   const date = new Date(data.date);
-  const formattedDate = format(
-    addMinutes(date, date.getTimezoneOffset()),
-    "yyyy-MM-dd HH:mm:ss 'UTC'",
-  );
+  const formattedDate = format(addMinutes(date, date.getTimezoneOffset()), "yyyy-MM-dd HH:mm:ss 'UTC'");
 
   return (
     <Collapse>
@@ -80,11 +77,7 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
                   ) : null}
                   <div>
                     <Text>by </Text>
-                    <a
-                      href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}
-                    >
-                      {data.author}
-                    </a>
+                    <a href={`https://bitcointalk.org/index.php?action=profile;u=${data.author_uid}`}>{data.author}</a>
                     <Text> on </Text>
                     <Text strong>{formattedDate}</Text>
                     <div style={{ marginTop: 5 }}>

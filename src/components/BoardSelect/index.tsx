@@ -33,9 +33,7 @@ const BoardSelect: React.FC<Props> = ({ searchQueryField }) => {
 
   autorun(() => {
     if (searchQuery[searchQueryField] && boards && !boardTitle) {
-      const foundBoard = boards.find(
-        board => board.board_id === Number(searchQuery[searchQueryField]),
-      );
+      const foundBoard = boards.find(board => board.board_id === Number(searchQuery[searchQueryField]));
 
       if (foundBoard) setBoardTitle(foundBoard.name);
     }

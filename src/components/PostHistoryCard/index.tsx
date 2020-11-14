@@ -20,12 +20,7 @@ interface Props {
   postBoardId: number;
 }
 
-const PostHistoryCard: React.FC<Props> = ({
-  id,
-  postTitle,
-  postContent,
-  postBoardId,
-}) => {
+const PostHistoryCard: React.FC<Props> = ({ id, postTitle, postContent, postBoardId }) => {
   const store = useSearchStore();
 
   const { boards, setBoards } = store;
@@ -92,20 +87,10 @@ const PostHistoryCard: React.FC<Props> = ({
   };
 
   return (
-    <Collapse
-      activeKey={`edit-${id}`}
-      style={{ marginTop: 15 }}
-      className="collapse-format"
-    >
-      <Collapse.Panel
-        header="Post Changes History"
-        key={`edit-${id}`}
-        showArrow={false}
-      >
+    <Collapse activeKey={`edit-${id}`} style={{ marginTop: 15 }} className="collapse-format">
+      <Collapse.Panel header="Post Changes History" key={`edit-${id}`} showArrow={false}>
         {isError ? <Text>Something went wrong...</Text> : null}
-        {!data.data.post_history.length ? (
-          <Text>No edit history was found for this post.</Text>
-        ) : null}
+        {!data.data.post_history.length ? <Text>No edit history was found for this post.</Text> : null}
         {data.data.next_check ? (
           <Text>
             <Text style={{ fontWeight: 500 }}>Next check:</Text> {nextCheck}
@@ -114,12 +99,9 @@ const PostHistoryCard: React.FC<Props> = ({
         {data.data.post_history.length ? (
           <Timeline mode="left" style={{ marginTop: 5 }}>
             {data.data.post_history.map(post_history => {
-              const titleChanged =
-                post_history.title && postTitle !== post_history.title;
-              const contentChanged =
-                post_history.content && postContent !== post_history.content;
-              const boardIdChanged =
-                post_history.board_id && postBoardId !== post_history.board_id;
+              const titleChanged = post_history.title && postTitle !== post_history.title;
+              const contentChanged = post_history.content && postContent !== post_history.content;
+              const boardIdChanged = post_history.board_id && postBoardId !== post_history.board_id;
 
               return (
                 <div key={post_history.id}>
@@ -137,12 +119,7 @@ const PostHistoryCard: React.FC<Props> = ({
                         <Text code>{post_history.title}</Text>
                         <Typography.Link
                           style={{ marginLeft: 3 }}
-                          onClick={() =>
-                            handleOnClickTitleDiff(
-                              postTitle,
-                              post_history.title,
-                            )
-                          }
+                          onClick={() => handleOnClickTitleDiff(postTitle, post_history.title)}
                         >
                           [difference]
                         </Typography.Link>
@@ -152,16 +129,9 @@ const PostHistoryCard: React.FC<Props> = ({
                   {boardIdChanged ? (
                     <Timeline.Item color="green">
                       <Text>Board changed from </Text>
-                      <Text code>
-                        {boards.find(b => b.board_id === postBoardId)?.name}
-                      </Text>
+                      <Text code>{boards.find(b => b.board_id === postBoardId)?.name}</Text>
                       <Text> to </Text>
-                      <Text code>
-                        {
-                          boards.find(b => b.board_id === post_history.board_id)
-                            ?.name
-                        }
-                      </Text>
+                      <Text code>{boards.find(b => b.board_id === post_history.board_id)?.name}</Text>
                     </Timeline.Item>
                   ) : null}
                   {contentChanged ? (
@@ -169,20 +139,13 @@ const PostHistoryCard: React.FC<Props> = ({
                       <Text>Content was edited</Text>
                       <Typography.Link
                         style={{ marginLeft: 3 }}
-                        onClick={() =>
-                          handleOnClickContentDiff(
-                            postContent,
-                            post_history.content,
-                          )
-                        }
+                        onClick={() => handleOnClickContentDiff(postContent, post_history.content)}
                       >
                         [difference]
                       </Typography.Link>
                       <Collapse key="edited" style={{ marginTop: 3 }}>
                         <Collapse.Panel header="NEW CONTENT" key="edited">
-                          <div className="post">
-                            {parse(DOMPurity.sanitize(post_history.content))}
-                          </div>
+                          <div className="post">{parse(DOMPurity.sanitize(post_history.content))}</div>
                         </Collapse.Panel>
                       </Collapse>
                     </Timeline.Item>

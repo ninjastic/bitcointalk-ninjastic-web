@@ -45,10 +45,7 @@ interface Params {
   transaction: Transaction;
 }
 
-const AddressTransactionCardETH: React.FC<Params> = ({
-  rootAddress,
-  transaction,
-}) => {
+const AddressTransactionCardETH: React.FC<Params> = ({ rootAddress, transaction }) => {
   const to = transaction.to.toLowerCase();
   const from = transaction.from.toLowerCase();
 
@@ -58,23 +55,15 @@ const AddressTransactionCardETH: React.FC<Params> = ({
   const { data, isLoading, isError } = useQuery<QueryData>(
     `address:${address}`,
     async () => {
-      const { data: responseData } = await api.get(
-        `/addresses/unique?address=${address}`,
-      );
+      const { data: responseData } = await api.get(`/addresses/unique?address=${address}`);
 
       return responseData;
     },
     { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
   );
 
-  const value =
-    Number(transaction.value) /
-    Number('1'.padEnd(Number(transaction.tokenInfo.decimals), '0')) /
-    10;
-  const formattedDate = format(
-    fromUnixTime(transaction.timestamp),
-    "yyyy-MM-dd HH:mm:ss 'UTC'",
-  );
+  const value = Number(transaction.value) / Number('1'.padEnd(Number(transaction.tokenInfo.decimals), '0')) / 10;
+  const formattedDate = format(fromUnixTime(transaction.timestamp), "yyyy-MM-dd HH:mm:ss 'UTC'");
 
   return (
     <Card key={transaction.transactionHash} style={{ marginBottom: 10 }}>
@@ -103,11 +92,7 @@ const AddressTransactionCardETH: React.FC<Params> = ({
       )}
       <div>
         <Text>{formattedDate}</Text>{' '}
-        <a
-          href={`http://etherscan.io/tx/${transaction.transactionHash}`}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={`http://etherscan.io/tx/${transaction.transactionHash}`} target="_blank" rel="noreferrer">
           (tx)
         </a>
       </div>

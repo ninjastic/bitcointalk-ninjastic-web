@@ -40,10 +40,7 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
   if (isLoading) {
     return (
       <Collapse>
-        <Collapse.Panel
-          header={<LoadingOutlined style={{ fontSize: 16 }} />}
-          key={ids}
-        />
+        <Collapse.Panel header={<LoadingOutlined style={{ fontSize: 16 }} />} key={ids} />
       </Collapse>
     );
   }
@@ -62,15 +59,8 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
                 justifyContent: 'center',
               }}
             >
-              <span>
-                Error loading {postsId.length} posts. Showing only unorganized
-                links.
-              </span>
-              <Button
-                type="ghost"
-                onClick={() => refetch()}
-                style={{ float: 'right', marginLeft: 'auto' }}
-              >
+              <span>Error loading {postsId.length} posts. Showing only unorganized links.</span>
+              <Button type="ghost" onClick={() => refetch()} style={{ float: 'right', marginLeft: 'auto' }}>
                 Retry
               </Button>
             </div>

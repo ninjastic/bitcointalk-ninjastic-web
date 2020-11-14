@@ -18,12 +18,7 @@ interface Props {
   author?: string;
 }
 
-const AddressAggregatorCard: React.FC<Props> = ({
-  address,
-  coin,
-  count,
-  author,
-}) => {
+const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, author }) => {
   const icons = [
     {
       coin: 'ETH',
@@ -92,12 +87,7 @@ const AddressAggregatorCard: React.FC<Props> = ({
         {isError ? 'Something went wrong...' : null}
         {data?.data?.addresses.map((record, index) => {
           return (
-            <AddressCard
-              data={record}
-              number={index}
-              key={`${record.address}_${record.post_id}`}
-              showAddress={false}
-            />
+            <AddressCard data={record} number={index} key={`${record.address}_${record.post_id}`} showAddress={false} />
           );
         })}
       </Collapse.Panel>

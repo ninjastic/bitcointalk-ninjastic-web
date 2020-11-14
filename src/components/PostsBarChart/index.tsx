@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Bar,
-} from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from 'recharts';
 import { format, addMinutes } from 'date-fns';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useMediaQuery } from 'react-responsive';
@@ -33,9 +25,7 @@ const PostsBarChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
   const isSmallScreen = useMediaQuery({ query: '(max-width: 850px)' });
 
   if (loading) {
-    return (
-      <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />
-    );
+    return <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />;
   }
 
   return (
@@ -44,10 +34,7 @@ const PostsBarChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
         <CartesianGrid strokeDasharray="3 3" />
         <Bar dataKey="doc_count" fill="var(--primary-color)" />
         <YAxis dataKey="doc_count" allowDecimals={false} />
-        <XAxis
-          dataKey="key_as_string"
-          tickFormatter={value => formatDate(value, dateFormat)}
-        />
+        <XAxis dataKey="key_as_string" tickFormatter={value => formatDate(value, dateFormat)} />
         <Tooltip
           contentStyle={{ backgroundColor: 'var(--popover-background)' }}
           label="{timeTaken}"

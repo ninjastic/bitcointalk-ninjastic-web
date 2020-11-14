@@ -96,11 +96,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
             </Button>
           )}
           <Input.Group style={{ display: 'flex' }} compact>
-            <Select
-              defaultValue={selectDefaultValue}
-              onChange={e => setSearchType(e)}
-              style={{ width: 130 }}
-            >
+            <Select defaultValue={selectDefaultValue} onChange={e => setSearchType(e)} style={{ width: 130 }}>
               <Select.Option value="post">Post ID</Select.Option>
               <Select.Option value="topic">Topic ID</Select.Option>
               <Select.Option value="address">Address</Select.Option>
@@ -126,10 +122,7 @@ const Header: React.FC = () => {
   const isSmallScreen = useMediaQuery({ query: '(max-width: 850px)' });
 
   return (
-    <div
-      className="ant-menu ant-menu-horizontal"
-      style={{ marginBottom: 20, height: 48 }}
-    >
+    <div className="ant-menu ant-menu-horizontal" style={{ marginBottom: 20, height: 48 }}>
       {!isSmallScreen ? <HeaderMenu mode="horizontal" /> : null}
       {isSmallScreen ? (
         <div style={{ marginLeft: 5, marginTop: 5 }}>

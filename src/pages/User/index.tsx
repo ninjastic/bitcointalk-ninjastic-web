@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Typography,
-  Divider,
-  Table,
-  Image,
-  Button,
-  Radio,
-  Tabs,
-} from 'antd';
+import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs } from 'antd';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { sub, addMinutes, startOfDay, endOfDay } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
@@ -74,14 +62,7 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
 const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
   const [postsViewType, setPostsViewType] = useState('normal');
 
-  const {
-    data,
-    isLoading,
-    fetchMore,
-    isFetchingMore,
-    canFetchMore,
-    isError,
-  } = useInfiniteQuery(
+  const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
     `userDeletedPosts:${username}`,
     async (key, last = null) => {
       const { data: responseData } = await api.get('posts/history', {
@@ -101,9 +82,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
       getFetchMore: lastGroup => {
         if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.data.posts_history[
-          lastGroup.data.posts_history.length - 1
-        ].created_at;
+        return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
       },
     },
   );
@@ -148,11 +127,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
               <Text>{data[0].data.total_results}</Text>
             </Text>
           ) : null}
-          <Radio.Group
-            onChange={e => setPostsViewType(e.target.value)}
-            value={postsViewType}
-            defaultValue="normal"
-          >
+          <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
             <Radio.Button value="normal">Normal</Radio.Button>
             <Radio.Button value="header">Header Only</Radio.Button>
             <Radio.Button value="compact">Compact</Radio.Button>
@@ -182,23 +157,13 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
                 case 'header':
                   return (
                     <div key={post.post_id}>
-                      <HeaderPostCard
-                        data={post}
-                        number={groupIndex * 100 + i + 1}
-                        style={{ marginBottom: 15 }}
-                      />
+                      <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
                     </div>
                   );
                 case 'compact':
                   return (
-                    <ul
-                      key={post.post_id}
-                      style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                    >
-                      <CompactPostCard
-                        data={post}
-                        number={groupIndex * 100 + i + 1}
-                      />
+                    <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
+                      <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
                     </ul>
                   );
                 default:
@@ -208,12 +173,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
             {groupIndex === array.length - 1 ? (
               <div style={{ marginTop: 15, textAlign: 'center' }}>
                 {canFetchMore ? (
-                  <Button
-                    size="large"
-                    onClick={() => fetchMore()}
-                    disabled={!!isFetchingMore}
-                    style={{ width: 110 }}
-                  >
+                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
@@ -231,14 +191,7 @@ const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
 const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
   const [postsViewType, setPostsViewType] = useState('normal');
 
-  const {
-    data,
-    isLoading,
-    fetchMore,
-    isFetchingMore,
-    canFetchMore,
-    isError,
-  } = useInfiniteQuery(
+  const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
     `userEditedPosts:${username}`,
     async (key, last = null) => {
       const { data: responseData } = await api.get(`posts/history`, {
@@ -258,9 +211,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
       getFetchMore: lastGroup => {
         if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.data.posts_history[
-          lastGroup.data.posts_history.length - 1
-        ].created_at;
+        return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
       },
     },
   );
@@ -305,11 +256,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
               <Text>{data[0].data.total_results}</Text>
             </Text>
           ) : null}
-          <Radio.Group
-            onChange={e => setPostsViewType(e.target.value)}
-            value={postsViewType}
-            defaultValue="normal"
-          >
+          <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
             <Radio.Button value="normal">Normal</Radio.Button>
             <Radio.Button value="header">Header Only</Radio.Button>
             <Radio.Button value="compact">Compact</Radio.Button>
@@ -339,23 +286,13 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
                 case 'header':
                   return (
                     <div key={post.post_id}>
-                      <HeaderPostCard
-                        data={post}
-                        number={groupIndex * 100 + i + 1}
-                        style={{ marginBottom: 15 }}
-                      />
+                      <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
                     </div>
                   );
                 case 'compact':
                   return (
-                    <ul
-                      key={post.post_id}
-                      style={{ paddingInlineStart: 20, marginBottom: 0 }}
-                    >
-                      <CompactPostCard
-                        data={post}
-                        number={groupIndex * 100 + i + 1}
-                      />
+                    <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
+                      <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
                     </ul>
                   );
                 default:
@@ -365,12 +302,7 @@ const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
             {groupIndex === array.length - 1 ? (
               <div style={{ marginTop: 15, textAlign: 'center' }}>
                 {canFetchMore ? (
-                  <Button
-                    size="large"
-                    onClick={() => fetchMore()}
-                    disabled={!!isFetchingMore}
-                    style={{ width: 110 }}
-                  >
+                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
@@ -419,10 +351,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
     async () => {
       const [from, to] = getDatePeriod(period);
 
-      const { data: responseData } = await api.get(
-        `/users/${username}/topics`,
-        { params: { from, to } },
-      );
+      const { data: responseData } = await api.get(`/users/${username}/topics`, { params: { from, to } });
 
       return responseData;
     },
@@ -440,11 +369,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
-      render: (text, record) => (
-        <a href={`https://bitcointalk.org/index.php?topic=${record.topic_id}`}>
-          {text}
-        </a>
-      ),
+      render: (text, record) => <a href={`https://bitcointalk.org/index.php?topic=${record.topic_id}`}>{text}</a>,
     },
     {
       title: 'Posts',
@@ -490,11 +415,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
           justifyContent: 'flex-end',
         }}
       >
-        <Radio.Group
-          defaultValue="all-time"
-          value={period}
-          onChange={e => setPeriod(e.target.value)}
-        >
+        <Radio.Group defaultValue="all-time" value={period} onChange={e => setPeriod(e.target.value)}>
           <Radio.Button value="all-time">All time</Radio.Button>
           <Radio.Button value="30-days">30 days</Radio.Button>
           <Radio.Button value="7-days">7 days</Radio.Button>
@@ -529,14 +450,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
     data: Data;
   }
 
-  const {
-    data,
-    isLoading,
-    fetchMore,
-    isFetchingMore,
-    canFetchMore,
-    isError,
-  } = useInfiniteQuery<Response>(
+  const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery<Response>(
     `userAddresses:${username}`,
     async (key, last = null) => {
       const { data: responseData } = await api.get(`/addresses/unique`, {
@@ -592,12 +506,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
             {groupIndex === array.length - 1 ? (
               <div style={{ marginTop: 15, textAlign: 'center' }}>
                 {canFetchMore ? (
-                  <Button
-                    size="large"
-                    onClick={() => fetchMore()}
-                    disabled={!!isFetchingMore}
-                    style={{ width: 110 }}
-                  >
+                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
                   </Button>
                 ) : (
@@ -668,14 +577,7 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return (
-    <PostsLineChart
-      data={data?.data}
-      loading={isLoading}
-      dateFormat="MM/dd"
-      size="small"
-    />
-  );
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
 };
 
 const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
@@ -695,14 +597,7 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return (
-    <PostsLineChart
-      data={data?.data}
-      loading={isLoading}
-      dateFormat="MM/dd"
-      size="small"
-    />
-  );
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
 };
 
 const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
@@ -723,9 +618,7 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return (
-    <PostsBarChart data={data?.data} loading={isLoading} dateFormat="MM/dd" />
-  );
+  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="MM/dd" />;
 };
 
 const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
@@ -764,14 +657,8 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
         <defs>
           {data.map((_, index) => (
             <linearGradient id={`myGradient${index}`} key={index}>
-              <stop
-                offset="0%"
-                stopColor={COLORS[index % COLORS.length].start}
-              />
-              <stop
-                offset="100%"
-                stopColor={COLORS[index % COLORS.length].end}
-              />
+              <stop offset="0%" stopColor={COLORS[index % COLORS.length].start} />
+              <stop offset="100%" stopColor={COLORS[index % COLORS.length].end} />
             </linearGradient>
           ))}
         </defs>
@@ -789,10 +676,7 @@ const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
           label={entry => entry.name}
         >
           {data.map((board, index) => (
-            <Cell
-              key={`cell-${board.name}`}
-              fill={`url(#myGradient${index})`}
-            />
+            <Cell key={`cell-${board.name}`} fill={`url(#myGradient${index})`} />
           ))}
         </Pie>
         <Tooltip
@@ -815,9 +699,7 @@ const BoardsTable: React.FC<{
   const tableData = data
     ? data.boards.map(board => ({
         ...board,
-        percentage: `${Math.floor(
-          (Number(board.count) / data.total_results_with_board) * 100,
-        )}%`,
+        percentage: `${Math.floor((Number(board.count) / data.total_results_with_board) * 100)}%`,
       }))
     : [];
 
@@ -909,10 +791,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
     async () => {
       const [from, to] = getDatePeriod(period);
 
-      const { data: responseData } = await api.get(
-        `/users/${username}/boards`,
-        { params: { from, to } },
-      );
+      const { data: responseData } = await api.get(`/users/${username}/boards`, { params: { from, to } });
 
       return responseData;
     },
@@ -938,11 +817,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         <Text strong style={{ fontSize: 24 }}>
           Boards Activity
         </Text>
-        <Radio.Group
-          defaultValue="all-time"
-          value={period}
-          onChange={e => setPeriod(e.target.value)}
-        >
+        <Radio.Group defaultValue="all-time" value={period} onChange={e => setPeriod(e.target.value)}>
           <Radio.Button value="all-time">All time</Radio.Button>
           <Radio.Button value="30-days">30 days</Radio.Button>
           <Radio.Button value="7-days">7 days</Radio.Button>
@@ -956,13 +831,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         />
       </Col>
       <Col xs={24} lg={12}>
-        <BoardsTable
-          username={username}
-          data={data?.data}
-          loading={isLoading || isFetching}
-          from={from}
-          to={to}
-        />
+        <BoardsTable username={username} data={data?.data} loading={isLoading || isFetching} from={from} to={to} />
       </Col>
     </>
   );
@@ -977,9 +846,7 @@ const User: React.FC = () => {
   const { data, isLoading, isError } = useQuery(
     `user:${username || author_uid}`,
     async () => {
-      const { data: responseData } = await api.get(
-        username ? `users/${username}` : `users/id/${author_uid}`,
-      );
+      const { data: responseData } = await api.get(username ? `users/${username}` : `users/id/${author_uid}`);
 
       return responseData;
     },
@@ -991,9 +858,7 @@ const User: React.FC = () => {
       <Header />
       {isLoading || isError || !data?.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          {!isLoading && !isError && !data?.data ? (
-            <Text>This user could not be found on our database.</Text>
-          ) : null}
+          {!isLoading && !isError && !data?.data ? <Text>This user could not be found on our database.</Text> : null}
           {!isLoading && isError ? <Text>Something went wrong...</Text> : null}
           {isLoading ? <LoadingOutlined style={{ fontSize: 50 }} /> : null}
         </div>
@@ -1039,11 +904,7 @@ const User: React.FC = () => {
                 title="Links"
                 value={null}
                 valueRender={() => (
-                  <Button
-                    onClick={() => history.push(`/search?author=${username}`)}
-                  >
-                    Search Posts
-                  </Button>
+                  <Button onClick={() => history.push(`/search?author=${username}`)}>Search Posts</Button>
                 )}
               />
             </Col>

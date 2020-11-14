@@ -38,14 +38,11 @@ const AddressTransactionsETH: React.FC<Params> = ({ address }) => {
   const { data, isLoading, isError } = useQuery(
     `address:${address}:transactions`,
     async () => {
-      const { data: responseData } = await api.get<QueryData>(
-        `/addresses/${address}/details`,
-        {
-          params: {
-            route: 'getAddressHistory',
-          },
+      const { data: responseData } = await api.get<QueryData>(`/addresses/${address}/details`, {
+        params: {
+          route: 'getAddressHistory',
         },
-      );
+      });
 
       return responseData;
     },
@@ -67,13 +64,7 @@ const AddressTransactionsETH: React.FC<Params> = ({ address }) => {
   return (
     <div>
       {data.data.operations.map(operation => {
-        return (
-          <TransactionCard
-            key={operation.transactionHash}
-            rootAddress={address}
-            transaction={operation}
-          />
-        );
+        return <TransactionCard key={operation.transactionHash} rootAddress={address} transaction={operation} />;
       })}
       {data.data.operations.length >= 10 ? (
         <a

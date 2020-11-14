@@ -30,10 +30,7 @@ const CompactAddressCard: React.FC<Props> = ({ data, number }) => {
   const postDirection = direction(data.content);
 
   const date = new Date(data.date);
-  const formattedDate = format(
-    addMinutes(date, date.getTimezoneOffset()),
-    'yyyy-MM-dd HH:mm:ss',
-  );
+  const formattedDate = format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
 
   const postNumber = number ? ` (#${number})` : null;
 

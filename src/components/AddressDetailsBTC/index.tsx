@@ -15,9 +15,7 @@ const AddressDetailsBTC: React.FC<Params> = ({ address }) => {
   const { data, isLoading, isError } = useQuery(
     `address:${address}:details`,
     async () => {
-      const { data: responseData } = await api.get(
-        `/addresses/${address}/details`,
-      );
+      const { data: responseData } = await api.get(`/addresses/${address}/details`);
 
       return responseData;
     },
@@ -38,11 +36,7 @@ const AddressDetailsBTC: React.FC<Params> = ({ address }) => {
       {isLoading ? (
         <LoadingOutlined />
       ) : (
-        <Text>
-          {Number(data.data.data.confirmed_balance) +
-            Number(data.data.data.unconfirmed_balance)}{' '}
-          BTC
-        </Text>
+        <Text>{Number(data.data.data.confirmed_balance) + Number(data.data.data.unconfirmed_balance)} BTC</Text>
       )}
     </div>
   );

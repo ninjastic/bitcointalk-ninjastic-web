@@ -5,15 +5,7 @@ import { Divider, Card, Typography, Tabs, Row, Col, Table } from 'antd';
 import { Link } from 'react-router-dom';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { format, addMinutes, sub } from 'date-fns';
-import {
-  ResponsiveContainer,
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Line,
-} from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
 
 import api from '../../services/api';
 
@@ -25,18 +17,10 @@ import { PageContent } from './styles';
 const { Text, Title } = Typography;
 
 const LastDeletedPosts: React.FC = () => {
-  const {
-    data,
-    isLoading,
-    canFetchMore,
-    fetchMore,
-    isFetching,
-  } = useInfiniteQuery(
+  const { data, isLoading, canFetchMore, fetchMore, isFetching } = useInfiniteQuery(
     'lastDeletedPosts',
     async (key, last = null) => {
-      const { data: responseData } = await api.get(
-        `posts/history?deleted=true&last=${last}`,
-      );
+      const { data: responseData } = await api.get(`posts/history?deleted=true&last=${last}`);
 
       return responseData;
     },
@@ -47,9 +31,7 @@ const LastDeletedPosts: React.FC = () => {
       getFetchMore: lastGroup => {
         if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.data.posts_history[
-          lastGroup.data.posts_history.length - 1
-        ].created_at;
+        return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
       },
     },
   );
@@ -91,9 +73,7 @@ const LastDeletedPosts: React.FC = () => {
           marginBottom: 20,
         }}
       >
-        <Text style={{ fontSize: 24, fontWeight: 500 }}>
-          Last Deleted Posts
-        </Text>
+        <Text style={{ fontSize: 24, fontWeight: 500 }}>Last Deleted Posts</Text>
         <Text type="secondary">within 5 minutes of created</Text>
       </div>
       {data &&
@@ -111,9 +91,7 @@ const LastDeletedPosts: React.FC = () => {
               <div style={{ marginBottom: 30 }} key={post.post_id}>
                 <PostCard data={post} number={groupIndex * 100 + i + 1} />
                 <Divider />
-                {i === array.length - 1 ? (
-                  <LoadingMoreCard groupIndex={groupIndex} />
-                ) : null}
+                {i === array.length - 1 ? <LoadingMoreCard groupIndex={groupIndex} /> : null}
               </div>
             );
           });
@@ -215,11 +193,7 @@ const TopTopicsTable: React.FC = () => {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
-      render: (text, record) => (
-        <a href={`https://bitcointalk.org/index.php?topic=${record.topic_id}`}>
-          {text}
-        </a>
-      ),
+      render: (text, record) => <a href={`https://bitcointalk.org/index.php?topic=${record.topic_id}`}>{text}</a>,
     },
     {
       title: 'Posts',
@@ -546,10 +520,7 @@ const Patrol: React.FC = () => {
                 <TopBoardsTable />
               </Col>
               <Col span={24}>
-                <TopBoardsLineChart
-                  from={oneYearAgo.toISOString()}
-                  interval="30d"
-                />
+                <TopBoardsLineChart from={oneYearAgo.toISOString()} interval="30d" />
               </Col>
             </Row>
           </Tabs.TabPane>

@@ -15,14 +15,11 @@ const AddressDetailsETH: React.FC<Params> = ({ address }) => {
   const { data, isLoading, isError } = useQuery(
     `address:${address}:details`,
     async () => {
-      const { data: responseData } = await api.get(
-        `/addresses/${address}/details`,
-        {
-          params: {
-            route: 'getAddressInfo',
-          },
+      const { data: responseData } = await api.get(`/addresses/${address}/details`, {
+        params: {
+          route: 'getAddressInfo',
         },
-      );
+      });
 
       return responseData;
     },
@@ -38,21 +35,13 @@ const AddressDetailsETH: React.FC<Params> = ({ address }) => {
   }
 
   const tokensFiltered = data?.data?.tokens?.filter((token, index, array) => {
-    return (
-      array
-        .map(mapObj => mapObj.tokenInfo.owner)
-        .indexOf(token.tokenInfo.owner) === index && token.tokenInfo.name
-    );
+    return array.map(mapObj => mapObj.tokenInfo.owner).indexOf(token.tokenInfo.owner) === index && token.tokenInfo.name;
   });
 
   return (
     <div>
       <Title level={4}>Balance:</Title>
-      {isLoading ? (
-        <LoadingOutlined />
-      ) : (
-        <Text>{data.data.ETH.balance} ETH</Text>
-      )}
+      {isLoading ? <LoadingOutlined /> : <Text>{data.data.ETH.balance} ETH</Text>}
 
       <Title level={4}>Tokens:</Title>
       <div style={{ maxHeight: 300, overflowY: 'auto' }}>
@@ -60,10 +49,7 @@ const AddressDetailsETH: React.FC<Params> = ({ address }) => {
           <LoadingOutlined />
         ) : (
           tokensFiltered?.map(token => {
-            const balance =
-              token.balance /
-              Number('1'.padEnd(Math.min(token.tokenInfo.decimals, 30), '0')) /
-              10;
+            const balance = token.balance / Number('1'.padEnd(Math.min(token.tokenInfo.decimals, 30), '0')) / 10;
             return (
               <div key={token.tokenInfo.address}>
                 <Text strong>- {token.tokenInfo.name}: </Text>
