@@ -20,7 +20,12 @@ const LastDeletedPosts: React.FC = () => {
   const { data, isLoading, canFetchMore, fetchMore, isFetching } = useInfiniteQuery(
     'lastDeletedPosts',
     async (key, last = null) => {
-      const { data: responseData } = await api.get(`posts/history?deleted=true&last=${last}`);
+      const { data: responseData } = await api.get('posts/history', {
+        params: {
+          deleted: true,
+          last,
+        },
+      });
 
       return responseData;
     },
