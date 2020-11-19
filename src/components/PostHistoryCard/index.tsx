@@ -65,8 +65,8 @@ const PostHistoryCard: React.FC<Props> = ({ id, postTitle, postContent, postBoar
     );
   }
 
-  const nextCheck = data?.next_check
-    ? formatDistanceToNow(data.next_check, {
+  const nextCheck = data?.data?.next_check
+    ? formatDistanceToNow(data.data.next_check, {
         addSuffix: true,
       })
     : null;
@@ -92,9 +92,9 @@ const PostHistoryCard: React.FC<Props> = ({ id, postTitle, postContent, postBoar
         {isError ? <Text>Something went wrong...</Text> : null}
         {!data.data.post_history.length ? <Text>No edit history was found for this post.</Text> : null}
         {data.data.next_check ? (
-          <Text>
-            <Text style={{ fontWeight: 500 }}>Next check:</Text> {nextCheck}
-          </Text>
+          <div>
+            <Text style={{ fontWeight: 500 }}>Next check:</Text> {nextCheck || '?'}
+          </div>
         ) : null}
         {data.data.post_history.length ? (
           <Timeline mode="left" style={{ marginTop: 5 }}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, Input, Button, Select, Drawer } from 'antd';
-import { BulbFilled, MenuOutlined, StarFilled } from '@ant-design/icons';
+import { BulbFilled, MenuOutlined } from '@ant-design/icons';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import { useThemeSwitcher } from 'react-css-theme-switcher';
@@ -84,7 +84,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
               type="text"
               style={{ marginRight: mode === 'horizontal' ? 10 : 0 }}
             >
-              <BulbFilled />
+              <BulbFilled color="#fff" />
             </Button>
           ) : (
             <Button
@@ -92,7 +92,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
               type="text"
               style={{ marginRight: mode === 'horizontal' ? 10 : 0 }}
             >
-              <StarFilled />
+              <BulbFilled color="#000" />
             </Button>
           )}
           <Input.Group style={{ display: 'flex' }} compact>
