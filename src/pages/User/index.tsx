@@ -904,7 +904,7 @@ const User: React.FC = () => {
                 title="Links"
                 value={null}
                 valueRender={() => (
-                  <Button onClick={() => history.push(`/search?author=${username}`)}>Search Posts</Button>
+                  <Button onClick={() => history.push(`/search?author=${data.data?.author}`)}>Search Posts</Button>
                 )}
               />
             </Col>
