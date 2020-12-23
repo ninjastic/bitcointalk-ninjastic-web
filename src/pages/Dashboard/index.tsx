@@ -160,7 +160,7 @@ const Dashboard: React.FC = () => {
             <PostsTodayCard />
           </Col>
           <Col xs={12} lg={8}>
-            <Statistic title="Archived Posts" value="43 mil+" />
+            <Statistic title="Archived Posts" value="44 mil+" />
           </Col>
         </Row>
         <Divider />

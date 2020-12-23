@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import { Form, Input, Button, Card, Row, Col, Typography, Divider, BackTop, Radio, Tabs, Checkbox, Switch } from 'antd';
+import { Form, Input, Button, Card, Row, Col, Typography, Divider, BackTop, Radio, Tabs, Checkbox } from 'antd';
 import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
@@ -128,7 +128,7 @@ const Search: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
 
-  const [hightlight, setHightlight] = useState(true);
+  const [hightlight] = useState(false);
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const store = useSearchStore();
@@ -379,7 +379,7 @@ const Search: React.FC = () => {
                         </div>
                       ) : null}
                       <div>
-                        {searchQuery.content ? (
+                        {/* {searchQuery.content ? (
                           <>
                             <Switch
                               style={{ marginRight: 5 }}
@@ -389,7 +389,7 @@ const Search: React.FC = () => {
                             />
                             <Text style={{ marginRight: 10 }}>Hightlight</Text>
                           </>
-                        ) : null}
+                        ) : null} */}
                         <Radio.Group
                           onChange={e => setPostsViewType(e.target.value)}
                           value={postsViewType}
