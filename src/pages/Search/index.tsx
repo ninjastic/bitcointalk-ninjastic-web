@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import { Form, Input, Button, Card, Row, Col, Typography, Divider, BackTop, Radio, Tabs, Checkbox } from 'antd';
-import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Divider,
+  BackTop,
+  Radio,
+  Tabs,
+  Checkbox,
+  Tooltip,
+} from 'antd';
+import { SearchOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { autorun } from 'mobx';
@@ -283,7 +297,26 @@ const Search: React.FC = () => {
                     </Form.Item>
                   </Col>
                   <Col span={24}>
-                    <Form.Item label="Content">
+                    <Form.Item
+                      label={
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography style={{ marginRight: 5 }}>Content</Typography>
+                          <Tooltip
+                            title={
+                              <div>
+                                <article>+ for AND operations</article>
+                                <article>| for OR operations</article>
+                                <article>- to negate a word/phrase/precedence</article>
+                                <article>&quot; wraps a phrase (for exact matches)</article>
+                                <article>( and ) for precedence</article>
+                              </div>
+                            }
+                          >
+                            <InfoCircleOutlined />
+                          </Tooltip>
+                        </div>
+                      }
+                    >
                       <Input
                         placeholder="Bitcoin"
                         maxLength={550}
