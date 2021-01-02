@@ -1,8 +1,12 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from 'recharts';
-import { format, addMinutes } from 'date-fns';
+import ReactApexCharts from 'react-apexcharts';
+import numeral from 'numeral';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useMediaQuery } from 'react-responsive';
+import { renderToString } from 'react-dom/server';
+import { fromUnixTime, format } from 'date-fns';
+import { Card } from 'antd';
+
+import { useSearchStore } from '../../stores/SearchStore';
 
 interface Data {
   key_as_string: string;
@@ -16,37 +20,79 @@ interface Params {
   dateFormat: string;
 }
 
-const formatDate = (value: string, dateFormat: string) => {
-  const date = new Date(value);
-  return format(addMinutes(date, date.getTimezoneOffset()), dateFormat);
-};
-
 const PostsBarChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
-  const isSmallScreen = useMediaQuery({ query: '(max-width: 850px)' });
+  const { isDarkMode } = useSearchStore();
 
   if (loading) {
-    return <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />;
+    return <LoadingOutlined style={{ fontSize: 42, margin: '42px 0 20px 0', textAlign: 'center', width: '100%' }} />;
   }
 
-  return (
-    <ResponsiveContainer width="100%" aspect={isSmallScreen ? 2 / 1 : 2 / 0.5}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <Bar dataKey="doc_count" fill="var(--primary-color)" />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <XAxis dataKey="key_as_string" tickFormatter={value => formatDate(value, dateFormat)} />
-        <Tooltip
-          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
-          label="{timeTaken}"
-          formatter={value => [value, 'Posts']}
-          labelFormatter={(value: string) => {
-            const date = formatDate(value, dateFormat);
-            return `${date} (UTC)`;
-          }}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+  const dataNormalized = data.map(d => {
+    return {
+      y: d.doc_count,
+      x: d.key,
+    };
+  });
+
+  const series = [
+    {
+      name: 'Posts',
+      data: dataNormalized,
+    },
+  ];
+
+  const options = {
+    chart: {
+      type: 'bar',
+      stacked: false,
+      height: 350,
+      background: 'var(--body-background)',
+      zoom: {
+        type: 'x',
+        enabled: false,
+        autoScaleYaxis: true,
+      },
+    },
+    colors: ['var(--primary-color)'],
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        datetimeUTC: true,
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter(val: number) {
+          return val.toFixed(0);
+        },
+      },
+      title: {
+        text: 'Posts',
+      },
+      forceNiceScale: true,
+      max: Math.max(...series[0].data.map(d => d.y)) + 1,
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    tooltip: {
+      custom: ({ series: s, seriesIndex, dataPointIndex }) => {
+        const date = fromUnixTime(series[0].data[dataPointIndex].x / 1000);
+        const dateString = format(date, dateFormat);
+
+        return renderToString(
+          <Card size="small" title={dateString}>
+            Posts: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
+          </Card>,
+        );
+      },
+    },
+    theme: {
+      mode: isDarkMode ? 'dark' : 'light',
+    },
+  };
+
+  return <ReactApexCharts options={options} series={series} type="bar" height="350" />;
 };
 
 export default PostsBarChart;

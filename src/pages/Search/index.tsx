@@ -304,6 +304,7 @@ const Search: React.FC = () => {
                           <Tooltip
                             title={
                               <div>
+                                <article style={{ fontWeight: 500 }}>Advanced search:</article>
                                 <article>+ for AND operations</article>
                                 <article>| for OR operations</article>
                                 <article>- to negate a word/phrase/precedence</article>

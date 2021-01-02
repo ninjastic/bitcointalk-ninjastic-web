@@ -1,8 +1,12 @@
 import React from 'react';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
-import { format, addMinutes } from 'date-fns';
+import ReactApexCharts from 'react-apexcharts';
+import numeral from 'numeral';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useMediaQuery } from 'react-responsive';
+import { renderToString } from 'react-dom/server';
+import { fromUnixTime, format } from 'date-fns';
+import { Card } from 'antd';
+
+import { useSearchStore } from '../../stores/SearchStore';
 
 interface Data {
   key_as_string: string;
@@ -14,40 +18,98 @@ interface Params {
   data: Data[];
   loading: boolean;
   dateFormat: string;
-  size: 'small' | 'large';
 }
 
-const formatDate = (value: string, dateFormat: string) => {
-  const date = new Date(value);
-  return format(addMinutes(date, date.getTimezoneOffset()), dateFormat);
-};
-
-const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat, size }) => {
-  const isSmallScreen = useMediaQuery({ query: '(max-width: 850px)' });
+const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
+  const { isDarkMode } = useSearchStore();
 
   if (loading) {
-    return <LoadingOutlined style={{ fontSize: 24, margin: '30px 0 20px 0' }} />;
+    return <LoadingOutlined style={{ fontSize: 42, margin: '42px 0 20px 0', textAlign: 'center', width: '100%' }} />;
   }
 
-  return (
-    <ResponsiveContainer width="100%" aspect={!isSmallScreen && size === 'large' ? 2 / 0.5 : 2 / 1}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <Line dataKey="doc_count" stroke="var(--primary-color)" type="monotone" />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <XAxis dataKey="key_as_string" tickFormatter={value => formatDate(value, dateFormat)} />
-        <Tooltip
-          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
-          label="{timeTaken}"
-          formatter={value => [value, 'Posts']}
-          labelFormatter={(value: string) => {
-            const date = formatDate(value, dateFormat);
-            return `${date} (UTC)`;
-          }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
+  const dataNormalized = data.map(d => {
+    return {
+      y: d.doc_count,
+      x: d.key,
+    };
+  });
+
+  const series = [
+    {
+      name: 'Posts',
+      data: dataNormalized,
+    },
+  ];
+
+  const options = {
+    chart: {
+      type: 'area',
+      stacked: false,
+      height: 350,
+      background: 'var(--body-background)',
+      zoom: {
+        type: 'x',
+        enabled: false,
+        autoScaleYaxis: true,
+      },
+      toolbar: {
+        autoSelected: 'zoom',
+      },
+    },
+    colors: ['var(--primary-color)'],
+    stroke: {
+      width: 2.5,
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: isDarkMode ? 'dark' : 'light',
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0.25,
+        opacityTo: 0,
+        stops: [0, 90, 100],
+      },
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        datetimeUTC: true,
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter(val: number) {
+          return val.toFixed(0);
+        },
+      },
+      title: {
+        text: 'Posts',
+      },
+      forceNiceScale: true,
+      max: Math.max(...series[0].data.map(d => d.y)) + 1,
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    tooltip: {
+      custom: ({ series: s, seriesIndex, dataPointIndex }) => {
+        const date = fromUnixTime(series[0].data[dataPointIndex].x / 1000);
+        const dateString = format(date, dateFormat);
+
+        return renderToString(
+          <Card size="small" title={dateString}>
+            Posts: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
+          </Card>,
+        );
+      },
+    },
+    theme: {
+      mode: isDarkMode ? 'dark' : 'light',
+    },
+  };
+
+  return <ReactApexCharts options={options} series={series} type="area" height="350" />;
 };
 
 export default PostsLineChart;

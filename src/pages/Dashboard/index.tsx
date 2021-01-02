@@ -2,9 +2,8 @@ import React from 'react';
 import { Typography, Row, Col, Divider, Statistic } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { isValid, format, addMinutes, sub, startOfDay, endOfDay } from 'date-fns';
-import { useMediaQuery } from 'react-responsive';
+import { addMinutes, sub, startOfDay, endOfDay, startOfMonth, endOfHour } from 'date-fns';
+import { format } from 'date-fns-tz';
 
 import api from '../../services/api';
 
@@ -13,6 +12,7 @@ import AlertMessage from '../../components/AlertMessage';
 import PostsLineChart from '../../components/PostsLineChart';
 
 import { PageContent } from './styles';
+import PostsBarChart from '../../components/PostsBarChart';
 
 const { Title } = Typography;
 
@@ -25,9 +25,12 @@ const PostsTodayCard: React.FC = () => {
       const currentDateUTC = addMinutes(currentDate, currentDate.getTimezoneOffset());
       const yesterdayDateUTC = sub(currentDateUTC, { days: 1 });
 
-      const { data: responseData } = await api.get(
-        `/posts/count?from=${yesterdayDateUTC.toISOString()}&to=${currentDateUTC.toISOString()}`,
-      );
+      const { data: responseData } = await api.get('/posts/count', {
+        params: {
+          from: yesterdayDateUTC.toISOString(),
+          to: currentDateUTC.toISOString(),
+        },
+      });
 
       return responseData;
     },
@@ -44,53 +47,24 @@ const PostsTodayCard: React.FC = () => {
 };
 
 const PostsLast24HoursGraph: React.FC = () => {
-  const isSmallScreen = useMediaQuery({ query: '(max-width: 991px)' });
-
   const { data, isLoading } = useQuery(
     'postsPerHourLast24h',
     async () => {
-      const { data: responseData } = await api.get('/posts/count');
+      const date = new Date();
+
+      const fromDate = sub(date, { days: 1 });
+      const toDate = sub(endOfHour(date), { hours: 1 });
+
+      const { data: responseData } = await api.get('/posts/count', {
+        params: { from: fromDate, to: toDate, interval: '1h' },
+      });
 
       return responseData;
     },
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  if (isLoading) {
-    return (
-      <div style={{ margin: '30px 0 20px 0' }}>
-        <LoadingOutlined style={{ fontSize: 24 }} />
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" aspect={2 / (isSmallScreen ? 1 : 0.5)}>
-      <BarChart data={data?.data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="key_as_string"
-          tickFormatter={value => {
-            const date = new Date(value);
-            return format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm');
-          }}
-        />
-        <YAxis dataKey="doc_count" allowDecimals={false} />
-        <Tooltip
-          contentStyle={{ backgroundColor: 'var(--popover-background)' }}
-          label="{timeTaken}"
-          labelFormatter={value => {
-            const date = new Date(value);
-            const formatted = format(addMinutes(date, date.getTimezoneOffset()), 'HH:mm');
-
-            return `${isValid(new Date(value)) ? formatted : null} (UTC)`;
-          }}
-          formatter={value => [value, 'Posts']}
-        />
-        <Bar dataKey="doc_count" fill="var(--primary-color)" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="HH:mm" />;
 };
 
 const PostsPerDayGraph: React.FC = () => {
@@ -99,14 +73,13 @@ const PostsPerDayGraph: React.FC = () => {
     async () => {
       const date = new Date();
 
-      const dateUTC = addMinutes(date, date.getTimezoneOffset());
-      const lastWeekDateUTC = sub(startOfDay(dateUTC), { months: 1 });
-      const yesterdayDateUTC = sub(endOfDay(dateUTC), { days: 1 });
+      const fromDate = sub(startOfDay(date), { months: 2 });
+      const toDate = sub(endOfDay(date), { days: 1 });
 
       const { data: responseData } = await api.get('/posts/count', {
         params: {
-          from: lastWeekDateUTC.toISOString(),
-          to: yesterdayDateUTC.toISOString(),
+          from: fromDate,
+          to: toDate.toISOString(),
           interval: '1d',
         },
       });
@@ -118,7 +91,7 @@ const PostsPerDayGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
 };
 
 const PostsPerMonthGraph: React.FC = () => {
@@ -127,15 +100,14 @@ const PostsPerMonthGraph: React.FC = () => {
     async () => {
       const date = new Date();
 
-      const dateUTC = addMinutes(date, date.getTimezoneOffset());
-      const lastWeekDateUTC = sub(startOfDay(dateUTC), { years: 1 });
-      const yesterdayDateUTC = sub(endOfDay(dateUTC), { days: 1 });
+      const lastYearMonth = startOfMonth(sub(date, { years: 2 }));
+      const currentMonth = startOfMonth(date);
 
       const { data: responseData } = await api.get('/posts/count', {
         params: {
-          from: lastWeekDateUTC.toISOString(),
-          to: yesterdayDateUTC.toISOString(),
-          interval: '30d',
+          from: format(lastYearMonth, "yyyy-MM-dd'T'HH:mm:ss"),
+          to: format(currentMonth, "yyyy-MM-dd'T'HH:mm:ss"),
+          interval: '1M',
         },
       });
 
@@ -146,7 +118,7 @@ const PostsPerMonthGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="yyyy/MM" size="small" />;
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MMM yyyy" />;
 };
 
 const Dashboard: React.FC = () => {
@@ -158,9 +130,6 @@ const Dashboard: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col xs={12} lg={8}>
             <PostsTodayCard />
-          </Col>
-          <Col xs={12} lg={8}>
-            <Statistic title="Archived Posts" value="44 mil+" />
           </Col>
         </Row>
         <Divider />

@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs } from 'antd';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { sub, addMinutes, startOfDay, endOfDay } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
+import { LoadingOutlined } from '@ant-design/icons';
 import queryString from 'query-string';
 
-import { LoadingOutlined } from '@ant-design/icons';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
@@ -16,26 +15,16 @@ import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
 import PostsLineChart from '../../components/PostsLineChart';
 import PostsBarChart from '../../components/PostsBarChart';
-
-import { PageContent } from './styles';
+import BoardsPieChart from '../../components/BoardsPieChart';
 import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
 
-const { Text, Title } = Typography;
+import { PageContent } from './styles';
 
-interface BoardsData {
-  name: string;
-  count: number;
-}
+const { Text, Title } = Typography;
 
 interface MatchParams {
   username?: string;
   author_uid?: number;
-}
-
-interface BoardsChartProps {
-  data: BoardsData[];
-  total: number;
-  loading?: boolean;
 }
 
 const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
@@ -47,14 +36,14 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
 
   return (
     <Image
-      src={`https://bitcointalk.org/useravatars/avatar_${author_uid}.png`}
+      src={`https://bitcointalk.org/useravatars/avatar_${author_uid}.jpg`}
       alt="User avatar"
       onLoad={onLoad}
       style={{
         marginRight: 15,
         display: avatarSuccess ? 'initial' : 'none',
       }}
-      fallback={`https://bitcointalk.org/useravatars/avatar_${author_uid}.jpg`}
+      fallback={`https://bitcointalk.org/useravatars/avatar_${author_uid}.png`}
     />
   );
 };
@@ -577,7 +566,7 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
 };
 
 const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
@@ -597,7 +586,7 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MM/dd" size="small" />;
+  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
 };
 
 const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
@@ -609,7 +598,7 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
       const { data: responseData } = await api.get(`/users/${username}/posts`, {
         params: {
           from: oneYearAgo,
-          interval: '7d',
+          interval: '1w',
         },
       });
 
@@ -618,75 +607,7 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="MM/dd" />;
-};
-
-const BoardsChart: React.FC<BoardsChartProps> = ({ data, total, loading }) => {
-  const COLORS = [
-    { start: '#ED213A', end: '#93291E' },
-    { start: '#525252', end: '#3d72b4' },
-    { start: '#00B4DB', end: '#0083B0' },
-    { start: '#ffb347', end: '#ffcc33' },
-    { start: '#CB356B', end: '#BD3F32' },
-    { start: '#fd746c', end: '#ff9068' },
-    { start: '#f46b45', end: '#eea849' },
-    { start: '#11998e', end: '#38ef7d' },
-    { start: '#396afc', end: '#2948ff' },
-    { start: '#7F00FF', end: '#E100FF' },
-  ];
-
-  if (loading) {
-    return (
-      <div style={{ height: 100, textAlign: 'center', marginTop: 50 }}>
-        <LoadingOutlined style={{ fontSize: 36 }} />
-      </div>
-    );
-  }
-
-  if (!data?.length) {
-    return (
-      <div style={{ height: 100, textAlign: 'center', marginTop: 30 }}>
-        <Text type="secondary">No data</Text>
-      </div>
-    );
-  }
-
-  return (
-    <ResponsiveContainer width="100%" aspect={2 / 1.3}>
-      <PieChart margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
-        <defs>
-          {data.map((_, index) => (
-            <linearGradient id={`myGradient${index}`} key={index}>
-              <stop offset="0%" stopColor={COLORS[index % COLORS.length].start} />
-              <stop offset="100%" stopColor={COLORS[index % COLORS.length].end} />
-            </linearGradient>
-          ))}
-        </defs>
-        <Pie
-          isAnimationActive={false}
-          data={data}
-          startAngle={360}
-          endAngle={0}
-          innerRadius={60}
-          outerRadius={80}
-          fill="var(--primary-color)"
-          paddingAngle={5}
-          dataKey="count"
-          nameKey="name"
-          label={entry => entry.name}
-        >
-          {data.map((board, index) => (
-            <Cell key={`cell-${board.name}`} fill={`url(#myGradient${index})`} />
-          ))}
-        </Pie>
-        <Tooltip
-          formatter={value => {
-            return <span>{((Number(value) / total) * 100).toFixed(0)}%</span>;
-          }}
-        />
-      </PieChart>
-    </ResponsiveContainer>
-  );
+  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
 };
 
 const BoardsTable: React.FC<{
@@ -824,11 +745,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         </Radio.Group>
       </Col>
       <Col xs={24} lg={12}>
-        <BoardsChart
-          data={data?.data?.boards}
-          total={data?.data?.total_results_with_board}
-          loading={isLoading || isFetching}
-        />
+        <BoardsPieChart data={data?.data?.boards} loading={isLoading || isFetching} />
       </Col>
       <Col xs={24} lg={12}>
         <BoardsTable username={username} data={data?.data} loading={isLoading || isFetching} from={from} to={to} />
