@@ -988,7 +988,7 @@ const User: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    history.push(`/user/${username}?${userTab}`);
+    history.push(`?${userTab}`);
   }, [userTab]);
 
   const { data, isLoading, isError } = useQuery(
