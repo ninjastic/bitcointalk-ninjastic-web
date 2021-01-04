@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
-import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs } from 'antd';
-import { sub, addMinutes, startOfDay, endOfDay } from 'date-fns';
+import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs, Select } from 'antd';
+import { sub, addMinutes, startOfDay, endOfDay, format } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 import { LoadingOutlined } from '@ant-design/icons';
 import queryString from 'query-string';
@@ -10,10 +10,10 @@ import queryString from 'query-string';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
-import PostCard from '../../components/PostCard';
-import HeaderPostCard from '../../components/HeaderPostCard';
-import CompactPostCard from '../../components/CompactPostCard';
-import PostsLineChart from '../../components/PostsLineChart';
+// import PostCard from '../../components/PostCard';
+// import HeaderPostCard from '../../components/HeaderPostCard';
+// import CompactPostCard from '../../components/CompactPostCard';
+import LineChart from '../../components/LineChart';
 import PostsBarChart from '../../components/PostsBarChart';
 import BoardsPieChart from '../../components/BoardsPieChart';
 import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
@@ -48,263 +48,263 @@ const UserAvatar: React.FC<{ author_uid: number }> = ({ author_uid }) => {
   );
 };
 
-const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
-  const [postsViewType, setPostsViewType] = useState('normal');
+// const DeletedPosts: React.FC<{ username: string }> = ({ username }) => {
+//   const [postsViewType, setPostsViewType] = useState('normal');
 
-  const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
-    `userDeletedPosts:${username}`,
-    async (key, last = null) => {
-      const { data: responseData } = await api.get('posts/history', {
-        params: {
-          deleted: true,
-          author: username,
-          last,
-        },
-      });
+//   const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
+//     `userDeletedPosts:${username}`,
+//     async (key, last = null) => {
+//       const { data: responseData } = await api.get('posts/history', {
+//         params: {
+//           deleted: true,
+//           author: username,
+//           last,
+//         },
+//       });
 
-      return responseData;
-    },
-    {
-      retry: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      getFetchMore: lastGroup => {
-        if (lastGroup.data.posts_history.length < 20) return false;
+//       return responseData;
+//     },
+//     {
+//       retry: false,
+//       refetchOnWindowFocus: false,
+//       refetchOnMount: false,
+//       getFetchMore: lastGroup => {
+//         if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
-      },
-    },
-  );
+//         return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
+//       },
+//     },
+//   );
 
-  if (isLoading) {
-    return (
-      <Card title="Deleted Posts">
-        <LoadingOutlined />
-      </Card>
-    );
-  }
+//   if (isLoading) {
+//     return (
+//       <Card title="Deleted Posts">
+//         <LoadingOutlined />
+//       </Card>
+//     );
+//   }
 
-  if (isError) {
-    return (
-      <Card title="Deleted Posts">
-        <Text type="secondary">Something went wrong...</Text>
-      </Card>
-    );
-  }
+//   if (isError) {
+//     return (
+//       <Card title="Deleted Posts">
+//         <Text type="secondary">Something went wrong...</Text>
+//       </Card>
+//     );
+//   }
 
-  if (!data[0].data.total_results) {
-    return (
-      <Card title={`Deleted Posts (${data[0].data.total_results})`}>
-        <Text type="secondary">No results...</Text>
-      </Card>
-    );
-  }
+//   if (!data[0].data.total_results) {
+//     return (
+//       <Card title={`Deleted Posts (${data[0].data.total_results})`}>
+//         <Text type="secondary">No results...</Text>
+//       </Card>
+//     );
+//   }
 
-  return (
-    <Card title={`Deleted Posts (${data[0].data.total_results})`}>
-      <div style={{ marginBottom: 15 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          {data && !isLoading ? (
-            <Text>
-              <Text style={{ fontWeight: 500 }}>Results: </Text>
-              <Text>{data[0].data.total_results}</Text>
-            </Text>
-          ) : null}
-          <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
-            <Radio.Button value="normal">Normal</Radio.Button>
-            <Radio.Button value="header">Header Only</Radio.Button>
-            <Radio.Button value="compact">Compact</Radio.Button>
-          </Radio.Group>
-        </div>
-      </div>
-      {data.map((group, groupIndex, array) => {
-        if (!group.data.posts_history.length) {
-          return (
-            <div style={{ textAlign: 'center' }} key="NoResults">
-              <Text type="secondary">No results.</Text>
-            </div>
-          );
-        }
+//   return (
+//     <Card title={`Deleted Posts (${data[0].data.total_results})`}>
+//       <div style={{ marginBottom: 15 }}>
+//         <div
+//           style={{
+//             display: 'flex',
+//             alignItems: 'center',
+//             justifyContent: 'space-between',
+//           }}
+//         >
+//           {data && !isLoading ? (
+//             <Text>
+//               <Text style={{ fontWeight: 500 }}>Results: </Text>
+//               <Text>{data[0].data.total_results}</Text>
+//             </Text>
+//           ) : null}
+//           <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
+//             <Radio.Button value="normal">Normal</Radio.Button>
+//             <Radio.Button value="header">Header Only</Radio.Button>
+//             <Radio.Button value="compact">Compact</Radio.Button>
+//           </Radio.Group>
+//         </div>
+//       </div>
+//       {data.map((group, groupIndex, array) => {
+//         if (!group.data.posts_history.length) {
+//           return (
+//             <div style={{ textAlign: 'center' }} key="NoResults">
+//               <Text type="secondary">No results.</Text>
+//             </div>
+//           );
+//         }
 
-        return (
-          <div key={groupIndex}>
-            {group.data.posts_history.map((post, i) => {
-              switch (postsViewType) {
-                case 'normal':
-                  return (
-                    <div style={{ marginBottom: 30 }} key={post.post_id}>
-                      <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                      <Divider />
-                    </div>
-                  );
-                case 'header':
-                  return (
-                    <div key={post.post_id}>
-                      <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
-                    </div>
-                  );
-                case 'compact':
-                  return (
-                    <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
-                      <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
-                    </ul>
-                  );
-                default:
-                  return null;
-              }
-            })}
-            {groupIndex === array.length - 1 ? (
-              <div style={{ marginTop: 15, textAlign: 'center' }}>
-                {canFetchMore ? (
-                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
-                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                  </Button>
-                ) : (
-                  <Text type="secondary">You reached the end!</Text>
-                )}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </Card>
-  );
-};
+//         return (
+//           <div key={groupIndex}>
+//             {group.data.posts_history.map((post, i) => {
+//               switch (postsViewType) {
+//                 case 'normal':
+//                   return (
+//                     <div style={{ marginBottom: 30 }} key={post.post_id}>
+//                       <PostCard data={post} number={groupIndex * 100 + i + 1} />
+//                       <Divider />
+//                     </div>
+//                   );
+//                 case 'header':
+//                   return (
+//                     <div key={post.post_id}>
+//                       <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
+//                     </div>
+//                   );
+//                 case 'compact':
+//                   return (
+//                     <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
+//                       <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+//                     </ul>
+//                   );
+//                 default:
+//                   return null;
+//               }
+//             })}
+//             {groupIndex === array.length - 1 ? (
+//               <div style={{ marginTop: 15, textAlign: 'center' }}>
+//                 {canFetchMore ? (
+//                   <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
+//                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+//                   </Button>
+//                 ) : (
+//                   <Text type="secondary">You reached the end!</Text>
+//                 )}
+//               </div>
+//             ) : null}
+//           </div>
+//         );
+//       })}
+//     </Card>
+//   );
+// };
 
-const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
-  const [postsViewType, setPostsViewType] = useState('normal');
+// const EditedPosts: React.FC<{ username: string }> = ({ username }) => {
+//   const [postsViewType, setPostsViewType] = useState('normal');
 
-  const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
-    `userEditedPosts:${username}`,
-    async (key, last = null) => {
-      const { data: responseData } = await api.get(`posts/history`, {
-        params: {
-          deleted: false,
-          author: username,
-          last,
-        },
-      });
+//   const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery(
+//     `userEditedPosts:${username}`,
+//     async (key, last = null) => {
+//       const { data: responseData } = await api.get(`posts/history`, {
+//         params: {
+//           deleted: false,
+//           author: username,
+//           last,
+//         },
+//       });
 
-      return responseData;
-    },
-    {
-      retry: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      getFetchMore: lastGroup => {
-        if (lastGroup.data.posts_history.length < 20) return false;
+//       return responseData;
+//     },
+//     {
+//       retry: false,
+//       refetchOnWindowFocus: false,
+//       refetchOnMount: false,
+//       getFetchMore: lastGroup => {
+//         if (lastGroup.data.posts_history.length < 20) return false;
 
-        return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
-      },
-    },
-  );
+//         return lastGroup.data.posts_history[lastGroup.data.posts_history.length - 1].created_at;
+//       },
+//     },
+//   );
 
-  if (isLoading) {
-    return (
-      <Card title="Edited Posts">
-        <LoadingOutlined />
-      </Card>
-    );
-  }
+//   if (isLoading) {
+//     return (
+//       <Card title="Edited Posts">
+//         <LoadingOutlined />
+//       </Card>
+//     );
+//   }
 
-  if (isError) {
-    return (
-      <Card title="Edited Posts">
-        <Text type="secondary">Something went wrong...</Text>
-      </Card>
-    );
-  }
+//   if (isError) {
+//     return (
+//       <Card title="Edited Posts">
+//         <Text type="secondary">Something went wrong...</Text>
+//       </Card>
+//     );
+//   }
 
-  if (!data[0].data.total_results) {
-    return (
-      <Card title="Edited Posts">
-        <Text type="secondary">No results...</Text>
-      </Card>
-    );
-  }
+//   if (!data[0].data.total_results) {
+//     return (
+//       <Card title="Edited Posts">
+//         <Text type="secondary">No results...</Text>
+//       </Card>
+//     );
+//   }
 
-  return (
-    <Card title={`Edited Posts (${data[0].data.total_results})`}>
-      <div style={{ marginBottom: 15 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          {data && !isLoading ? (
-            <Text>
-              <Text strong>Results: </Text>
-              <Text>{data[0].data.total_results}</Text>
-            </Text>
-          ) : null}
-          <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
-            <Radio.Button value="normal">Normal</Radio.Button>
-            <Radio.Button value="header">Header Only</Radio.Button>
-            <Radio.Button value="compact">Compact</Radio.Button>
-          </Radio.Group>
-        </div>
-      </div>
-      {data.map((group, groupIndex, array) => {
-        if (!group.data.posts_history.length) {
-          return (
-            <div style={{ textAlign: 'center' }} key="NoResults">
-              <Text type="secondary">No results.</Text>
-            </div>
-          );
-        }
+//   return (
+//     <Card title={`Edited Posts (${data[0].data.total_results})`}>
+//       <div style={{ marginBottom: 15 }}>
+//         <div
+//           style={{
+//             display: 'flex',
+//             alignItems: 'center',
+//             justifyContent: 'space-between',
+//           }}
+//         >
+//           {data && !isLoading ? (
+//             <Text>
+//               <Text strong>Results: </Text>
+//               <Text>{data[0].data.total_results}</Text>
+//             </Text>
+//           ) : null}
+//           <Radio.Group onChange={e => setPostsViewType(e.target.value)} value={postsViewType} defaultValue="normal">
+//             <Radio.Button value="normal">Normal</Radio.Button>
+//             <Radio.Button value="header">Header Only</Radio.Button>
+//             <Radio.Button value="compact">Compact</Radio.Button>
+//           </Radio.Group>
+//         </div>
+//       </div>
+//       {data.map((group, groupIndex, array) => {
+//         if (!group.data.posts_history.length) {
+//           return (
+//             <div style={{ textAlign: 'center' }} key="NoResults">
+//               <Text type="secondary">No results.</Text>
+//             </div>
+//           );
+//         }
 
-        return (
-          <div key={groupIndex}>
-            {group.data.posts_history.map((post, i) => {
-              switch (postsViewType) {
-                case 'normal':
-                  return (
-                    <div style={{ marginBottom: 30 }} key={post.post_id}>
-                      <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                      <Divider />
-                    </div>
-                  );
-                case 'header':
-                  return (
-                    <div key={post.post_id}>
-                      <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
-                    </div>
-                  );
-                case 'compact':
-                  return (
-                    <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
-                      <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
-                    </ul>
-                  );
-                default:
-                  return null;
-              }
-            })}
-            {groupIndex === array.length - 1 ? (
-              <div style={{ marginTop: 15, textAlign: 'center' }}>
-                {canFetchMore ? (
-                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
-                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                  </Button>
-                ) : (
-                  <Text type="secondary">You reached the end!</Text>
-                )}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </Card>
-  );
-};
+//         return (
+//           <div key={groupIndex}>
+//             {group.data.posts_history.map((post, i) => {
+//               switch (postsViewType) {
+//                 case 'normal':
+//                   return (
+//                     <div style={{ marginBottom: 30 }} key={post.post_id}>
+//                       <PostCard data={post} number={groupIndex * 100 + i + 1} />
+//                       <Divider />
+//                     </div>
+//                   );
+//                 case 'header':
+//                   return (
+//                     <div key={post.post_id}>
+//                       <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} style={{ marginBottom: 15 }} />
+//                     </div>
+//                   );
+//                 case 'compact':
+//                   return (
+//                     <ul key={post.post_id} style={{ paddingInlineStart: 20, marginBottom: 0 }}>
+//                       <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+//                     </ul>
+//                   );
+//                 default:
+//                   return null;
+//               }
+//             })}
+//             {groupIndex === array.length - 1 ? (
+//               <div style={{ marginTop: 15, textAlign: 'center' }}>
+//                 {canFetchMore ? (
+//                   <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
+//                     {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+//                   </Button>
+//                 ) : (
+//                   <Text type="secondary">You reached the end!</Text>
+//                 )}
+//               </div>
+//             ) : null}
+//           </div>
+//         );
+//       })}
+//     </Card>
+//   );
+// };
 
 const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
   const [period, setPeriod] = useState('all-time');
@@ -340,11 +340,17 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
     async () => {
       const [from, to] = getDatePeriod(period);
 
-      const { data: responseData } = await api.get(`/users/${username}/topics`, { params: { from, to } });
+      const { data: responseData } = await api.get(`/users/${username}/topics`, {
+        params: {
+          from,
+          to,
+          limit: 10,
+        },
+      });
 
       return responseData;
     },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
   useEffect(() => {
@@ -401,9 +407,10 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
         style={{
           marginBottom: 10,
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
         }}
       >
+        <Title level={3}>Favorite Topics</Title>
         <Radio.Group defaultValue="all-time" value={period} onChange={e => setPeriod(e.target.value)}>
           <Radio.Button value="all-time">All time</Radio.Button>
           <Radio.Button value="30-days">30 days</Radio.Button>
@@ -523,7 +530,7 @@ const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
 
       return responseData;
     },
-    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+    { refetchOnMount: false, refetchOnWindowFocus: false },
   );
 
   if (isLoading) {
@@ -563,21 +570,21 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
 
       return responseData;
     },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
+  return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading } = useQuery(
     `userPostsMonth:${username}`,
     async () => {
-      const oneMonthAgo = sub(new Date(), { months: 1 }).toISOString();
+      const fromDate = format(sub(new Date(), { months: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get(`/users/${username}/posts`, {
         params: {
-          from: oneMonthAgo,
+          from: fromDate,
         },
       });
 
@@ -586,28 +593,99 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
+  return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading } = useQuery(
     `userPostsYear:${username}`,
     async () => {
-      const oneYearAgo = sub(new Date(), { years: 1 }).toISOString();
+      const fromDate = format(sub(new Date(), { years: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get(`/users/${username}/posts`, {
         params: {
-          from: oneYearAgo,
+          from: fromDate,
           interval: '1w',
         },
       });
 
       return responseData;
     },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
   return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
+};
+
+const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ username, type }) => {
+  const { data, isLoading } = useQuery(
+    `userMerits:${username}:${type}`,
+    async () => {
+      const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
+
+      const { data: responseDate } = await api.get(`/users/${username}/merits`, {
+        params: {
+          from: fromDate,
+          type,
+          interval: '1d',
+        },
+      });
+
+      return responseDate;
+    },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  return <LineChart data={data?.data} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
+};
+
+const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, type }) => {
+  const { data, isLoading } = useQuery(
+    `userMeritsTable:${username}:${type}`,
+    async () => {
+      const { data: responseData } = await api.get('merits', {
+        params: {
+          [type]: username,
+        },
+      });
+
+      return responseData;
+    },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  const columns = [
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+    },
+    {
+      title: type === 'receiver' ? 'From' : 'To',
+      dataIndex: 'receiver',
+      key: 'receiver',
+      render: (text, record) => {
+        const counterparty = username.toLowerCase() === text.toLowerCase() ? record.sender : record.receiver;
+        return <Link to={`/user/${counterparty}`}>{counterparty}</Link>;
+      },
+    },
+    {
+      title: 'Post',
+      dataIndex: 'post_id',
+      key: 'post_id',
+      render: (text, record) => {
+        return <Link to={`/post/${text}`}>{record.title}</Link>;
+      },
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: text => <Text>{format(new Date(text), 'dd/MM/yyyy HH:mm:ss')}</Text>,
+    },
+  ];
+
+  return <Table bordered size="small" columns={columns} loading={isLoading} dataSource={data?.data.merits} />;
 };
 
 const BoardsTable: React.FC<{
@@ -716,7 +794,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
 
       return responseData;
     },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
   useEffect(() => {
@@ -758,6 +836,8 @@ const User: React.FC = () => {
   const { username, author_uid } = useRouteMatch().params as MatchParams;
   const history = useHistory();
 
+  const [meritType, setMeritType] = useState('receiver');
+
   const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
 
   const { data, isLoading, isError } = useQuery(
@@ -767,7 +847,7 @@ const User: React.FC = () => {
 
       return responseData;
     },
-    { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
   return (
@@ -826,44 +906,73 @@ const User: React.FC = () => {
               />
             </Col>
           </Row>
-          <Divider />
-          <Row gutter={[24, 24]} align="stretch">
-            <BoardsActivityRow username={data.data.author} />
-          </Row>
-          <Divider />
           <Row gutter={[24, 24]}>
-            <Col xs={24} lg={12}>
-              <Title level={3}>Posts in the last 7 days</Title>
-              <PostsWeekChart username={data.data.author} />
-            </Col>
-            <Col xs={24} lg={12}>
-              <Title level={3}>Posts in the last month</Title>
-              <PostsMonthChart username={data.data.author} />
-            </Col>
-            <Divider />
-            <Col span={24}>
-              <Title level={3}>Posts per week (last year)</Title>
-              <PostsYearChart username={data.data.author} />
-            </Col>
             <Col span={24}>
               <Tabs defaultActiveKey="1">
-                <Tabs.TabPane tab="Favorite Topics" key="1">
+                <Tabs.TabPane tab="Overview" key="1">
+                  <Row gutter={[24, 24]} align="stretch">
+                    <BoardsActivityRow username={data.data.author} />
+                  </Row>
+                  <Divider />
+                  <Row gutter={[24, 24]}>
+                    <Col xs={24} lg={12}>
+                      <Title level={3}>Posts in the last 7 days</Title>
+                      <PostsWeekChart username={data.data.author} />
+                    </Col>
+                    <Col xs={24} lg={12}>
+                      <Title level={3}>Posts in the last month</Title>
+                      <PostsMonthChart username={data.data.author} />
+                    </Col>
+                    <Divider />
+                    <Col span={24}>
+                      <Title level={3}>Posts per week (last year)</Title>
+                      <PostsYearChart username={data.data.author} />
+                    </Col>
+                  </Row>
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Merits" key="2">
+                  <Row gutter={[24, 24]}>
+                    <Col span={24} lg={12}>
+                      <Title level={3}>Merits received (last 3 months)</Title>
+                      <MeritsLineChart username={data.data.author} type="receiver" />
+                    </Col>
+                    <Col span={24} lg={12}>
+                      <Title level={3}>Merits sent (last 3 months)</Title>
+                      <MeritsLineChart username={data.data.author} type="sender" />
+                    </Col>
+                    <Col span={24}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Title level={3}>Merit Transactions</Title>
+                        <Select
+                          placeholder="Type"
+                          defaultValue={meritType}
+                          onChange={e => setMeritType(e)}
+                          style={{ width: 200 }}
+                        >
+                          <Select.Option value="receiver">Received</Select.Option>
+                          <Select.Option value="sender">Sent</Select.Option>
+                        </Select>
+                      </div>
+                      <MeritsTable username={data.data.author} type={meritType} />
+                    </Col>
+                  </Row>
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Topics" key="3">
                   <FavoriteTopics username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Addresses" key="2">
-                  <Card title="Top 5 Favorite Addresses">
-                    <FavoriteAddresses username={data.data.author} />
-                    <Divider />
-                    <Title level={5}>All Mentioned Addresses</Title>
-                    <MentionedAddresses username={data.data.author} />
-                  </Card>
+                <Tabs.TabPane tab="Addresses" key="4">
+                  <Title level={5}>Top 5 Favorite Addresses</Title>
+                  <FavoriteAddresses username={data.data.author} />
+                  <Divider />
+                  <Title level={5}>All Mentioned Addresses</Title>
+                  <MentionedAddresses username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Deleted Posts" key="3">
+                {/* <Tabs.TabPane tab="Deleted Posts" key="5">
                   <DeletedPosts username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Edited Posts" key="4">
+                <Tabs.TabPane tab="Edited Posts" key="6">
                   <EditedPosts username={data.data.author} />
-                </Tabs.TabPane>
+                </Tabs.TabPane> */}
               </Tabs>
             </Col>
           </Row>

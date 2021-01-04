@@ -9,7 +9,7 @@ import api from '../../services/api';
 
 import Header from '../../components/Header';
 import AlertMessage from '../../components/AlertMessage';
-import PostsLineChart from '../../components/PostsLineChart';
+import LineChart from '../../components/LineChart';
 
 import { PageContent } from './styles';
 import PostsBarChart from '../../components/PostsBarChart';
@@ -91,7 +91,7 @@ const PostsPerDayGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
+  return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const PostsPerMonthGraph: React.FC = () => {
@@ -118,7 +118,7 @@ const PostsPerMonthGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return <PostsLineChart data={data?.data} loading={isLoading} dateFormat="MMM yyyy" />;
+  return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="MMM yyyy" />;
 };
 
 const Dashboard: React.FC = () => {

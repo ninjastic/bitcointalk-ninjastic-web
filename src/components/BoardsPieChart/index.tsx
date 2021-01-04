@@ -83,9 +83,6 @@ const BoardsPieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
       {
         breakpoint: 480,
         options: {
-          chart: {
-            width: 200,
-          },
           legend: {
             position: 'bottom',
           },

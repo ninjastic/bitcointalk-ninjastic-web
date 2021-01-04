@@ -17,10 +17,11 @@ interface Data {
 interface Params {
   data: Data[];
   loading: boolean;
+  name: string;
   dateFormat: string;
 }
 
-const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
+const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
   const { isDarkMode } = useSearchStore();
 
   if (loading) {
@@ -36,7 +37,7 @@ const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
 
   const series = [
     {
-      name: 'Posts',
+      name,
       data: dataNormalized,
     },
   ];
@@ -55,6 +56,10 @@ const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
       toolbar: {
         autoSelected: 'zoom',
       },
+    },
+    title: {
+      text: `Total: ${data.reduce((prev, curr) => prev + curr.doc_count, 0)}`,
+      align: 'left',
     },
     colors: ['var(--primary-color)'],
     stroke: {
@@ -84,7 +89,7 @@ const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
         },
       },
       title: {
-        text: 'Posts',
+        text: name,
       },
       forceNiceScale: true,
       max: Math.max(...series[0].data.map(d => d.y)) + 1,
@@ -99,7 +104,7 @@ const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
 
         return renderToString(
           <Card size="small" title={dateString}>
-            Posts: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
+            {name}: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
           </Card>,
         );
       },
@@ -112,4 +117,4 @@ const PostsLineChart: React.FC<Params> = ({ data, loading, dateFormat }) => {
   return <ReactApexCharts options={options} series={series} type="area" height="350" />;
 };
 
-export default PostsLineChart;
+export default LineChart;
