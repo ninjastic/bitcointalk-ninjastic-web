@@ -564,7 +564,7 @@ const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
 };
 
 const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     `user:${username}:posts:week`,
     async () => {
       const { data: responseData } = await api.get(`/users/${username}/posts`);
@@ -574,11 +574,15 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
     { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
+
   return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     `userPostsMonth:${username}`,
     async () => {
       const fromDate = format(sub(new Date(), { months: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
@@ -594,11 +598,15 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
     { retry: false, refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
+
   return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     `userPostsYear:${username}`,
     async () => {
       const fromDate = format(sub(new Date(), { years: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
@@ -615,11 +623,15 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
     { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
+
   return <BarChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ username, type }) => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     `userMerits:${username}:${type}`,
     async () => {
       const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
@@ -636,6 +648,10 @@ const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ usernam
     },
     { refetchOnWindowFocus: false, refetchOnMount: false },
   );
+
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
 
   return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
 };
@@ -727,6 +743,63 @@ const MeritFriendsTable: React.FC<{ username: string }> = ({ username }) => {
       key: 'key',
       render: text => {
         return <Link to={`/user/${text}`}>{text}</Link>;
+      },
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'count',
+      key: 'count',
+    },
+  ];
+
+  return (
+    <Table
+      bordered
+      size="small"
+      columns={columns}
+      loading={isLoading}
+      dataSource={data?.data}
+      pagination={false}
+      rowKey="key"
+    />
+  );
+};
+
+const MeritBoardsTable: React.FC<{ username: string }> = ({ username }) => {
+  const { data, isLoading } = useQuery(
+    `userMeritsBoards:${username}`,
+    async () => {
+      const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
+
+      const { data: responseData } = await api.get('/merits/boards', {
+        params: {
+          receiver: username,
+          after_date: fromDate,
+          limit: 5,
+        },
+      });
+
+      return responseData;
+    },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  const columns = [
+    {
+      title: '#',
+      dataIndex: 'number',
+      key: 'number',
+      width: 50,
+      render: (_, r, i) => {
+        return <Text>{i + 1}</Text>;
+      },
+    },
+    {
+      title: 'Board',
+      dataIndex: 'board_id',
+      key: 'board_id',
+      render: (text, record) => {
+        return <Link to={`https://bitcointalk.org/index.php?board=${text}`}>{record.board_name}</Link>;
       },
     },
     {
@@ -1020,7 +1093,7 @@ const User: React.FC = () => {
                     </Col>
                     <Col span={24}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Title level={3}>Merit Transactions</Title>
+                        <Title level={3}>Latest Merit Transactions</Title>
                         <Select
                           placeholder="Type"
                           defaultValue={meritType}
@@ -1036,6 +1109,10 @@ const User: React.FC = () => {
                     <Col span={12}>
                       <Title level={3}>Top merit fans (last 3 months)</Title>
                       <MeritFriendsTable username={data.data.author} />
+                    </Col>
+                    <Col span={12}>
+                      <Title level={3}>Top merited boards (last 3 months)</Title>
+                      <MeritBoardsTable username={data.data.author} />
                     </Col>
                   </Row>
                 </Tabs.TabPane>

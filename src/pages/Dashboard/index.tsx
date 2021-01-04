@@ -14,7 +14,7 @@ import LineChart from '../../components/LineChart';
 import { PageContent } from './styles';
 import BarChart from '../../components/BarChart';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const PostsTodayCard: React.FC = () => {
   const { data, isLoading } = useQuery(
@@ -68,12 +68,16 @@ const MeritsTodayCard: React.FC = () => {
   }, 0);
 
   return (
-    <Statistic title="Merits 24h" value={totalCount} valueRender={value => (isLoading ? <LoadingOutlined /> : value)} />
+    <Statistic
+      title="Merit Tx 24h"
+      value={totalCount}
+      valueRender={value => (isLoading ? <LoadingOutlined /> : value)}
+    />
   );
 };
 
 const PostsLast24HoursGraph: React.FC = () => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     'postsPerHourLast24h',
     async () => {
       const date = new Date();
@@ -90,11 +94,15 @@ const PostsLast24HoursGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
+
   return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="HH:mm" />;
 };
 
 const PostsPerDayGraph: React.FC = () => {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     'postsPerDay',
     async () => {
       const fromDate = format(sub(startOfDay(new Date()), { months: 2 }), "yyyy-MM-dd'T'HH:mm:ss");
@@ -114,6 +122,10 @@ const PostsPerDayGraph: React.FC = () => {
     },
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
+
+  if (isError) {
+    return <Text>Something went wrong</Text>;
+  }
 
   return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
