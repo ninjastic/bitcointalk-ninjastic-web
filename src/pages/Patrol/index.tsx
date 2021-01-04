@@ -483,7 +483,7 @@ const TopBoardsTable: React.FC = () => {
 };
 
 const Patrol: React.FC = () => {
-  const oneYearAgo = sub(new Date(), { years: 1 });
+  const fromDate = format(sub(new Date(), { years: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
   return (
     <>
@@ -525,7 +525,7 @@ const Patrol: React.FC = () => {
                 <TopBoardsTable />
               </Col>
               <Col span={24}>
-                <TopBoardsLineChart from={oneYearAgo.toISOString()} interval="30d" />
+                <TopBoardsLineChart from={fromDate} interval="30d" />
               </Col>
             </Row>
           </Tabs.TabPane>

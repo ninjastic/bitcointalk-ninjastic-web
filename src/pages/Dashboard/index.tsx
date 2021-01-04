@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Row, Col, Divider, Statistic } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
-import { addMinutes, sub, startOfDay, endOfDay, startOfMonth, endOfHour } from 'date-fns';
+import { sub, startOfDay, endOfDay, startOfMonth, endOfHour } from 'date-fns';
 import { format } from 'date-fns-tz';
 
 import api from '../../services/api';
@@ -12,7 +12,7 @@ import AlertMessage from '../../components/AlertMessage';
 import LineChart from '../../components/LineChart';
 
 import { PageContent } from './styles';
-import PostsBarChart from '../../components/PostsBarChart';
+import BarChart from '../../components/BarChart';
 
 const { Title } = Typography;
 
@@ -20,15 +20,13 @@ const PostsTodayCard: React.FC = () => {
   const { data, isLoading } = useQuery(
     'postsPerHourToday',
     async () => {
-      const currentDate = new Date();
-
-      const currentDateUTC = addMinutes(currentDate, currentDate.getTimezoneOffset());
-      const yesterdayDateUTC = sub(currentDateUTC, { days: 1 });
+      const fromDate = format(sub(new Date(), { days: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const toDate = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/posts/count', {
         params: {
-          from: yesterdayDateUTC.toISOString(),
-          to: currentDateUTC.toISOString(),
+          from: fromDate,
+          to: toDate,
         },
       });
 
@@ -43,6 +41,34 @@ const PostsTodayCard: React.FC = () => {
 
   return (
     <Statistic title="Posts 24h" value={totalCount} valueRender={value => (isLoading ? <LoadingOutlined /> : value)} />
+  );
+};
+
+const MeritsTodayCard: React.FC = () => {
+  const { data, isLoading } = useQuery(
+    'meritsPerHourToday',
+    async () => {
+      const fromDate = format(sub(new Date(), { days: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const toDate = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss");
+
+      const { data: responseData } = await api.get('/merits/count', {
+        params: {
+          from: fromDate,
+          to: toDate,
+        },
+      });
+
+      return responseData;
+    },
+    { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
+  );
+
+  const totalCount = data?.data?.reduce((prev, current) => {
+    return prev + current.doc_count;
+  }, 0);
+
+  return (
+    <Statistic title="Merits 24h" value={totalCount} valueRender={value => (isLoading ? <LoadingOutlined /> : value)} />
   );
 };
 
@@ -64,22 +90,20 @@ const PostsLast24HoursGraph: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="HH:mm" />;
+  return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="HH:mm" />;
 };
 
 const PostsPerDayGraph: React.FC = () => {
   const { data, isLoading } = useQuery(
     'postsPerDay',
     async () => {
-      const date = new Date();
-
-      const fromDate = sub(startOfDay(date), { months: 2 });
-      const toDate = sub(endOfDay(date), { days: 1 });
+      const fromDate = format(sub(startOfDay(new Date()), { months: 2 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const toDate = format(sub(endOfDay(new Date()), { days: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/posts/count', {
         params: {
           from: fromDate,
-          to: toDate.toISOString(),
+          to: toDate,
           interval: '1d',
         },
       });
@@ -98,15 +122,13 @@ const PostsPerMonthGraph: React.FC = () => {
   const { data, isLoading } = useQuery(
     'postsPerMonth',
     async () => {
-      const date = new Date();
-
-      const lastYearMonth = startOfMonth(sub(date, { years: 2 }));
-      const currentMonth = startOfMonth(date);
+      const fromDate = format(sub(startOfMonth(new Date()), { years: 2 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const toDate = format(startOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/posts/count', {
         params: {
-          from: format(lastYearMonth, "yyyy-MM-dd'T'HH:mm:ss"),
-          to: format(currentMonth, "yyyy-MM-dd'T'HH:mm:ss"),
+          from: fromDate,
+          to: toDate,
           interval: '1M',
         },
       });
@@ -130,6 +152,9 @@ const Dashboard: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col xs={12} lg={8}>
             <PostsTodayCard />
+          </Col>
+          <Col xs={12} lg={8}>
+            <MeritsTodayCard />
           </Col>
         </Row>
         <Divider />

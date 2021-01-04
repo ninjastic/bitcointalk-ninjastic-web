@@ -53,9 +53,6 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
         enabled: false,
         autoScaleYaxis: true,
       },
-      toolbar: {
-        autoSelected: 'zoom',
-      },
     },
     title: {
       text: `Total: ${data.reduce((prev, curr) => prev + curr.doc_count, 0)}`,

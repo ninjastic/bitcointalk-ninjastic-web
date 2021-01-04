@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useRouteMatch, Link } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs, Select } from 'antd';
 import { sub, addMinutes, startOfDay, endOfDay, format } from 'date-fns';
@@ -14,8 +14,9 @@ import Header from '../../components/Header';
 // import HeaderPostCard from '../../components/HeaderPostCard';
 // import CompactPostCard from '../../components/CompactPostCard';
 import LineChart from '../../components/LineChart';
-import PostsBarChart from '../../components/PostsBarChart';
+import BarChart from '../../components/BarChart';
 import BoardsPieChart from '../../components/BoardsPieChart';
+// import TreeMap from '../../components/TreeMap';
 import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
 
 import { PageContent } from './styles';
@@ -614,7 +615,7 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
     { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <PostsBarChart data={data?.data} loading={isLoading} dateFormat="dd MMM yyyy" />;
+  return <BarChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ username, type }) => {
@@ -636,7 +637,7 @@ const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ usernam
     { refetchOnWindowFocus: false, refetchOnMount: false },
   );
 
-  return <LineChart data={data?.data} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
+  return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
 };
 
 const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, type }) => {
@@ -686,7 +687,66 @@ const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, t
     },
   ];
 
-  return <Table bordered size="small" columns={columns} loading={isLoading} dataSource={data?.data.merits} />;
+  return (
+    <Table bordered size="small" columns={columns} loading={isLoading} dataSource={data?.data.merits} rowKey="id" />
+  );
+};
+
+const MeritFriendsTable: React.FC<{ username: string }> = ({ username }) => {
+  const { data, isLoading } = useQuery(
+    `userMeritsFriends:${username}`,
+    async () => {
+      const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
+
+      const { data: responseData } = await api.get('/merits/fans', {
+        params: {
+          receiver: username,
+          after_date: fromDate,
+          limit: 5,
+        },
+      });
+
+      return responseData;
+    },
+    { refetchOnWindowFocus: false, refetchOnMount: false },
+  );
+
+  const columns = [
+    {
+      title: '#',
+      dataIndex: 'number',
+      key: 'number',
+      width: 50,
+      render: (_, r, i) => {
+        return <Text>{i + 1}</Text>;
+      },
+    },
+    {
+      title: 'Username',
+      dataIndex: 'key',
+      key: 'key',
+      render: text => {
+        return <Link to={`/user/${text}`}>{text}</Link>;
+      },
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'count',
+      key: 'count',
+    },
+  ];
+
+  return (
+    <Table
+      bordered
+      size="small"
+      columns={columns}
+      loading={isLoading}
+      dataSource={data?.data}
+      pagination={false}
+      rowKey="key"
+    />
+  );
 };
 
 const BoardsTable: React.FC<{
@@ -764,7 +824,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
     let from = null;
     let to = null;
 
-    const dateUTC = addMinutes(new Date(), new Date().getTimezoneOffset());
+    const date = new Date();
 
     switch (datePeriod) {
       case 'all-time':
@@ -772,12 +832,12 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         to = null;
         break;
       case '30-days':
-        from = sub(startOfDay(dateUTC), { months: 1 }).toISOString();
-        to = endOfDay(dateUTC).toISOString();
+        from = format(sub(startOfDay(date), { months: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+        to = format(endOfDay(date), "yyyy-MM-dd'T'HH:mm:ss");
         break;
       case '7-days':
-        from = sub(startOfDay(dateUTC), { weeks: 1 }).toISOString();
-        to = endOfDay(dateUTC).toISOString();
+        from = format(sub(startOfDay(date), { weeks: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+        to = format(endOfDay(date), "yyyy-MM-dd'T'HH:mm:ss");
         break;
       default:
         break;
@@ -835,11 +895,28 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
 
 const User: React.FC = () => {
   const { username, author_uid } = useRouteMatch().params as MatchParams;
+
+  const { search } = useLocation();
   const history = useHistory();
 
+  const [userTab, setUserTab] = useState('');
   const [meritType, setMeritType] = useState('receiver');
 
   const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
+
+  useEffect(() => {
+    const query = queryString.parse(search);
+
+    Object.keys(query).forEach(k => {
+      if (k) {
+        setUserTab(k);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    history.push(`/user/${username}?${userTab}`);
+  }, [userTab]);
 
   const { data, isLoading, isError } = useQuery(
     `user:${username || author_uid}`,
@@ -909,8 +986,8 @@ const User: React.FC = () => {
           </Row>
           <Row gutter={[24, 24]}>
             <Col span={24}>
-              <Tabs defaultActiveKey="1">
-                <Tabs.TabPane tab="Overview" key="1">
+              <Tabs defaultActiveKey={userTab} onChange={e => setUserTab(e)}>
+                <Tabs.TabPane tab="Overview" key="">
                   <Row gutter={[24, 24]} align="stretch">
                     <BoardsActivityRow username={data.data.author} />
                   </Row>
@@ -931,7 +1008,7 @@ const User: React.FC = () => {
                     </Col>
                   </Row>
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Merits" key="2">
+                <Tabs.TabPane tab="Merits" key="merits">
                   <Row gutter={[24, 24]}>
                     <Col span={24} lg={12}>
                       <Title level={3}>Merits received (last 3 months)</Title>
@@ -956,12 +1033,16 @@ const User: React.FC = () => {
                       </div>
                       <MeritsTable username={data.data.author} type={meritType} />
                     </Col>
+                    <Col span={12}>
+                      <Title level={3}>Top merit fans (last 3 months)</Title>
+                      <MeritFriendsTable username={data.data.author} />
+                    </Col>
                   </Row>
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Topics" key="3">
+                <Tabs.TabPane tab="Topics" key="topics">
                   <FavoriteTopics username={data.data.author} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Addresses" key="4">
+                <Tabs.TabPane tab="Addresses" key="addresses">
                   <Title level={5}>Top 5 Favorite Addresses</Title>
                   <FavoriteAddresses username={data.data.author} />
                   <Divider />
