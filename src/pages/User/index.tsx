@@ -643,9 +643,10 @@ const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, t
   const { data, isLoading } = useQuery(
     `userMeritsTable:${username}:${type}`,
     async () => {
-      const { data: responseData } = await api.get('merits', {
+      const { data: responseData } = await api.get('/merits', {
         params: {
           [type]: username,
+          limit: 150,
         },
       });
 
