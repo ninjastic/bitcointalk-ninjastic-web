@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Row, Col, Divider, Statistic } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
-import { sub, startOfDay, endOfDay, startOfMonth, endOfHour } from 'date-fns';
+import { sub, startOfDay, endOfDay, startOfMonth, startOfHour, endOfHour } from 'date-fns';
 import { format } from 'date-fns-tz';
 
 import api from '../../services/api';
@@ -63,14 +63,10 @@ const MeritsTodayCard: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  const totalCount = data?.data?.reduce((prev, current) => {
-    return prev + current.doc_count;
-  }, 0);
-
   return (
     <Statistic
-      title="Merit Tx 24h"
-      value={totalCount}
+      title="Merits 24h"
+      value={data?.data?.total_sum_merits}
       valueRender={value => (isLoading ? <LoadingOutlined /> : value)}
     />
   );
@@ -82,8 +78,8 @@ const PostsLast24HoursGraph: React.FC = () => {
     async () => {
       const date = new Date();
 
-      const fromDate = sub(date, { days: 1 });
-      const toDate = sub(endOfHour(date), { hours: 1 });
+      const fromDate = format(sub(startOfHour(date), { days: 1, hours: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const toDate = format(sub(endOfHour(date), { hours: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/posts/count', {
         params: { from: fromDate, to: toDate, interval: '1h' },
@@ -98,7 +94,14 @@ const PostsLast24HoursGraph: React.FC = () => {
     return <Text>Something went wrong</Text>;
   }
 
-  return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="HH:mm" />;
+  const dataNormalized = data?.data?.map(d => {
+    return {
+      y: d.doc_count,
+      x: d.key,
+    };
+  });
+
+  return <BarChart data={dataNormalized} loading={isLoading} name="Posts" dateFormat="HH:mm" />;
 };
 
 const PostsPerDayGraph: React.FC = () => {

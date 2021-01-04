@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import { Card, Row, Col, Statistic, Typography, Divider, Table, Image, Button, Radio, Tabs, Select } from 'antd';
-import { sub, addMinutes, startOfDay, endOfDay, format } from 'date-fns';
+import { sub, addMinutes, startOfDay, endOfDay, format, startOfWeek } from 'date-fns';
 import { useMediaQuery } from 'react-responsive';
 import { LoadingOutlined } from '@ant-design/icons';
 import queryString from 'query-string';
@@ -609,7 +609,7 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading, isError } = useQuery(
     `userPostsYear:${username}`,
     async () => {
-      const fromDate = format(sub(new Date(), { years: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const fromDate = format(sub(startOfWeek(new Date()), { years: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get(`/users/${username}/posts`, {
         params: {
@@ -627,7 +627,17 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
     return <Text>Something went wrong</Text>;
   }
 
-  return <BarChart data={data?.data} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
+  const dataNormalized =
+    data?.data?.map(d => {
+      return {
+        y: d.doc_count,
+        x: d.key,
+      };
+    }) || [];
+
+  dataNormalized.shift();
+
+  return <BarChart data={dataNormalized} loading={isLoading} name="Posts" dateFormat="dd MMM yyyy" />;
 };
 
 const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ username, type }) => {
@@ -653,7 +663,14 @@ const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ usernam
     return <Text>Something went wrong</Text>;
   }
 
-  return <BarChart data={data?.data} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
+  const dataNormalized = data?.data?.dates.map(d => {
+    return {
+      y: d.total_sum,
+      x: d.key,
+    };
+  });
+
+  return <BarChart data={dataNormalized} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
 };
 
 const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, type }) => {
@@ -1093,7 +1110,7 @@ const User: React.FC = () => {
                     </Col>
                     <Col span={24}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Title level={3}>Latest Merit Transactions</Title>
+                        <Title level={3}>Latest merit transactions</Title>
                         <Select
                           placeholder="Type"
                           defaultValue={meritType}

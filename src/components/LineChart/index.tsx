@@ -76,7 +76,7 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
     xaxis: {
       type: 'datetime',
       labels: {
-        datetimeUTC: true,
+        datetimeUTC: false,
       },
     },
     yaxis: {

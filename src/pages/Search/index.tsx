@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from 'antd';
 import { SearchOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { format } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { autorun } from 'mobx';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -222,9 +222,8 @@ const Search: React.FC = () => {
   };
 
   const handleChangeDateRange = e => {
-    const from = e && e[0] ? zonedTimeToUtc(new Date(e[0]), 'UTC').toISOString() : '';
-
-    const to = e && e[1] ? zonedTimeToUtc(new Date(e[1]), 'UTC').toISOString() : '';
+    const from = e && e[0] ? format(new Date(e[0]), "yyyy-MM-dd'T'HH:mm:ss") : '';
+    const to = e && e[1] ? format(new Date(e[1]), "yyyy-MM-dd'T'HH:mm:ss") : '';
 
     setValue('after_date', from);
     setValue('before_date', to);
