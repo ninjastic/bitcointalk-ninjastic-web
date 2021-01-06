@@ -54,7 +54,7 @@ const AddressTransactionsETH: React.FC<Params> = ({ address }) => {
   }
 
   if (isError) {
-    return <Text>Something went wrong...</Text>;
+    return <Text type="secondary">Something went wrong</Text>;
   }
 
   if (!data.data.operations.length) {

@@ -15,7 +15,7 @@ import Header from '../../components/Header';
 // import CompactPostCard from '../../components/CompactPostCard';
 import LineChart from '../../components/LineChart';
 import BarChart from '../../components/BarChart';
-import BoardsPieChart from '../../components/BoardsPieChart';
+import PieChart from '../../components/PieChart';
 // import TreeMap from '../../components/TreeMap';
 import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
 
@@ -716,7 +716,7 @@ const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, t
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      render: text => <Text>{format(new Date(text), 'dd/MM/yyyy HH:mm:ss')}</Text>,
+      render: text => <Text>{format(new Date(text), 'dd MMM yyyy HH:mm:ss')}</Text>,
     },
   ];
 
@@ -725,15 +725,15 @@ const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, t
   );
 };
 
-const MeritFriendsTable: React.FC<{ username: string }> = ({ username }) => {
+const MeritFriendsTable: React.FC<{ username: string; type: string }> = ({ username, type }) => {
   const { data, isLoading } = useQuery(
-    `userMeritsFriends:${username}`,
+    `userMeritsFriends:${username}:${type}`,
     async () => {
       const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/merits/fans', {
         params: {
-          receiver: username,
+          [type]: username,
           after_date: fromDate,
           limit: 5,
         },
@@ -777,20 +777,21 @@ const MeritFriendsTable: React.FC<{ username: string }> = ({ username }) => {
       loading={isLoading}
       dataSource={data?.data}
       pagination={false}
+      style={{ height: '100%' }}
       rowKey="key"
     />
   );
 };
 
-const MeritBoardsTable: React.FC<{ username: string }> = ({ username }) => {
+const MeritBoardsTable: React.FC<{ username: string; type: string }> = ({ username, type }) => {
   const { data, isLoading } = useQuery(
-    `userMeritsBoards:${username}`,
+    `userMeritsBoards:${username}:${type}`,
     async () => {
       const fromDate = format(sub(new Date(), { months: 3 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get('/merits/boards', {
         params: {
-          receiver: username,
+          [type]: username,
           after_date: fromDate,
           limit: 5,
         },
@@ -834,7 +835,7 @@ const MeritBoardsTable: React.FC<{ username: string }> = ({ username }) => {
       loading={isLoading}
       dataSource={data?.data}
       pagination={false}
-      rowKey="key"
+      rowKey="board_id"
     />
   );
 };
@@ -974,7 +975,7 @@ const BoardsActivityRow: React.FC<{ username: string }> = ({ username }) => {
         </Radio.Group>
       </Col>
       <Col xs={24} lg={12}>
-        <BoardsPieChart data={data?.data?.boards} loading={isLoading || isFetching} />
+        <PieChart data={data?.data?.boards} loading={isLoading || isFetching} />
       </Col>
       <Col xs={24} lg={12}>
         <BoardsTable username={username} data={data?.data} loading={isLoading || isFetching} from={from} to={to} />
@@ -1024,7 +1025,7 @@ const User: React.FC = () => {
       {isLoading || isError || !data?.data ? (
         <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
           {!isLoading && !isError && !data?.data ? <Text>This user could not be found on our database.</Text> : null}
-          {!isLoading && isError ? <Text>Something went wrong...</Text> : null}
+          {!isLoading && isError ? <Text type="secondary">Something went wrong</Text> : null}
           {isLoading ? <LoadingOutlined style={{ fontSize: 50 }} /> : null}
         </div>
       ) : (
@@ -1108,6 +1109,14 @@ const User: React.FC = () => {
                       <Title level={3}>Merits sent (last 3 months)</Title>
                       <MeritsLineChart username={data.data.author} type="sender" />
                     </Col>
+                    <Col span={12}>
+                      <Title level={3}>Top merit fans (last 3 months)</Title>
+                      <MeritFriendsTable username={data.data.author} type="receiver" />
+                    </Col>
+                    <Col lg={12}>
+                      <Title level={3}>Top merited boards (last 3 months)</Title>
+                      <MeritBoardsTable username={data.data.author} type="receiver" />
+                    </Col>
                     <Col span={24}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Title level={3}>Latest merit transactions</Title>
@@ -1122,14 +1131,6 @@ const User: React.FC = () => {
                         </Select>
                       </div>
                       <MeritsTable username={data.data.author} type={meritType} />
-                    </Col>
-                    <Col span={12}>
-                      <Title level={3}>Top merit fans (last 3 months)</Title>
-                      <MeritFriendsTable username={data.data.author} />
-                    </Col>
-                    <Col span={12}>
-                      <Title level={3}>Top merited boards (last 3 months)</Title>
-                      <MeritBoardsTable username={data.data.author} />
                     </Col>
                   </Row>
                 </Tabs.TabPane>

@@ -34,7 +34,7 @@ const AddressAuthorsCard: React.FC<Props> = ({ address }) => {
   }
 
   if (isError) {
-    return <Text>Something went wrong...</Text>;
+    return <Text type="secondary">Something went wrong</Text>;
   }
 
   const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {

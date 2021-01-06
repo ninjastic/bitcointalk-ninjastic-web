@@ -15,7 +15,7 @@ interface BoardsChartProps {
   loading?: boolean;
 }
 
-const BoardsPieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
+const PieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
   const colors = [
     '#ED213A',
     '#F1BF98',
@@ -44,6 +44,7 @@ const BoardsPieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
       </div>
     );
   }
+
   const series = data.map(d => d.count);
   const labels = data.map(d => d.name);
 
@@ -56,6 +57,9 @@ const BoardsPieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
     dataLabels: {
       dropShadow: {
         enabled: false,
+      },
+      formatter: (_, opts) => {
+        return series[opts.seriesIndex];
       },
     },
     plotOptions: {
@@ -93,4 +97,4 @@ const BoardsPieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
 
   return <ReactApexChart options={options} series={series} type="donut" />;
 };
-export default BoardsPieChart;
+export default PieChart;

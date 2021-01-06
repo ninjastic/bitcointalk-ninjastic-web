@@ -89,7 +89,7 @@ const PostHistoryCard: React.FC<Props> = ({ id, postTitle, postContent, postBoar
   return (
     <Collapse activeKey={`edit-${id}`} style={{ marginTop: 15 }} className="collapse-format">
       <Collapse.Panel header="Post Changes History" key={`edit-${id}`} showArrow={false}>
-        {isError ? <Text>Something went wrong...</Text> : null}
+        {isError ? <Text type="secondary">Something went wrong</Text> : null}
         {!data.data.post_history.length ? <Text>No edit history was found for this post.</Text> : null}
         {data.data.next_check ? (
           <div>

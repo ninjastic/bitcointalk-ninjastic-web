@@ -36,7 +36,7 @@ import BoardSelect from '../../components/BoardSelect';
 
 import { PageContent } from './styles';
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 interface Post {
   post_id: number;
@@ -66,15 +66,17 @@ const AuthorsTab: React.FC = () => {
   const store = useSearchStore();
   const { searchQuery } = store;
 
-  const [showCount, setShowCount] = useState(false);
-  const [showBBCode, setShowBBCode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [generated, setGenerated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [resultFormat, setResultFormat] = useState('{number}. {username} [{count}]');
+  const [limit, setLimit] = useState('1000');
 
-  const { data, isError } = useQuery(
+  const { data, refetch, isError } = useQuery(
     'posts:Authors',
     async () => {
       const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery;
 
+      setGenerated(true);
       setIsLoading(true);
 
       const { data: responseData } = await api.get('posts/authors', {
@@ -86,6 +88,7 @@ const AuthorsTab: React.FC = () => {
           child_boards,
           after_date,
           before_date,
+          limit,
         },
       });
 
@@ -93,47 +96,65 @@ const AuthorsTab: React.FC = () => {
 
       return responseData;
     },
-    { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+    { enabled: false, refetchOnMount: false, refetchOnWindowFocus: false },
   );
 
-  if (isLoading) {
-    return (
-      <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
-        <LoadingOutlined style={{ fontSize: 24 }} />
-      </div>
-    );
-  }
+  const resultText =
+    !isLoading &&
+    !isError &&
+    data?.data.authors?.reduce((prev, curr, i, array) => {
+      const resultFormatted = resultFormat
+        .replace(/{username}/, curr.author)
+        .replace(/{count}/, curr.count)
+        .replace(/{uid}/, curr.author_uid)
+        .replace(/{number}/, i + 1);
+      let text = `${prev}${resultFormatted}`;
 
-  if (isError) {
-    return <Text>Something wrong happened...</Text>;
-  }
-
-  const authorsText = data?.data.authors?.reduce((prev, curr, i, array) => {
-    if (showBBCode) {
-      const forumProfileURL = '/index.php?action=profile;u=';
-
-      let text = '';
-      text += `${prev}`;
-      text += `[url=${forumProfileURL}${curr.author_uid}]${curr.author}[/url]`;
-      text += showCount ? ` ${curr.count})` : '';
-      text += i !== array.length - 1 ? '\n' : '';
+      if (i !== array.length - 1) {
+        text += '\n';
+      }
 
       return text;
-    }
-
-    return `${prev}${curr.author}${showCount ? ` (${curr.count})` : ''}${i !== array.length - 1 ? '\n' : ''}`;
-  }, '');
+    }, '');
 
   return (
     <div>
-      <Title level={3}>List of users ({data?.data.authors?.length || '0'})</Title>
-      <Checkbox onChange={e => setShowCount(e.target.checked)} style={{ marginBottom: 10 }}>
-        Include count
-      </Checkbox>
-      <Checkbox onChange={e => setShowBBCode(e.target.checked)} style={{ marginBottom: 10 }}>
-        BBCode
-      </Checkbox>
-      <Input.TextArea value={authorsText} contentEditable={false} autoSize={{ minRows: 3, maxRows: 10 }} />
+      <Card title="Generate list of users from the result">
+        <Col span={24} style={{ textAlign: 'right' }}>
+          <Form.Item label="Format">
+            <Input
+              placeholder="{number}. {username} [{count}]"
+              value={resultFormat}
+              onChange={e => setResultFormat(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Limit">
+            <Input placeholder="1000" value={limit} onChange={e => setLimit(e.target.value)} type="number" min={1} />
+          </Form.Item>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <Text style={{ fontWeight: 400 }}>Variables available: </Text>
+              <Text type="secondary">{'{number} {username} {uid} {count}'}</Text>
+            </div>
+            <Button onClick={() => refetch()} disabled={!resultFormat}>
+              Generate
+            </Button>
+          </div>
+        </Col>
+      </Card>
+      {generated ? (
+        <Card title={`Results (${data?.data?.total_results || 0})`} style={{ marginTop: 15 }}>
+          {isLoading && !isError ? (
+            <div style={{ width: '100%', marginTop: 15, textAlign: 'center' }}>
+              <LoadingOutlined style={{ fontSize: 24 }} />
+            </div>
+          ) : null}
+          {!isLoading && !isError ? (
+            <Input.TextArea value={resultText} contentEditable={false} autoSize={{ minRows: 3, maxRows: 10 }} />
+          ) : null}
+          {isError ? <Text type="secondary">Something went wrong</Text> : null}
+        </Card>
+      ) : null}
     </div>
   );
 };

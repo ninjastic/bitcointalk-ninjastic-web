@@ -131,7 +131,7 @@ const Topic: React.FC = () => {
         ) : null}
         {isError ? (
           <Card style={{ marginTop: 15, textAlign: 'center' }} key={1}>
-            <Text>Something went wrong...</Text>
+            <Text type="secondary">Something went wrong</Text>
           </Card>
         ) : null}
         {!isLoading && !isError ? (

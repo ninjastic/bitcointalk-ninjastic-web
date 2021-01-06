@@ -100,7 +100,7 @@ const Address: React.FC = () => {
         ) : null}
         {isError ? (
           <Card style={{ display: 'flex', justifyContent: 'center' }}>
-            <Text>Something went wrong...</Text>
+            <Text type="secondary">Something went wrong</Text>
           </Card>
         ) : null}
         {!isLoading && !isError && !data?.data.total_results ? (
