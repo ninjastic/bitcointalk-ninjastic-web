@@ -33,6 +33,7 @@ import HeaderPostCard from '../../components/HeaderPostCard';
 import CompactPostCard from '../../components/CompactPostCard';
 import DatePicker from '../../components/DatePicker';
 import BoardSelect from '../../components/BoardSelect';
+import TopicId from '../../components/Input/TopicId';
 
 import { PageContent } from './styles';
 
@@ -172,9 +173,14 @@ const Search: React.FC = () => {
   autorun(() => {
     const query = queryString.parse(search);
 
+    const topicRegex = new RegExp(/https:\/\/bitcointalk\.org\/index\.php\?topic=(\d+)/, 'i');
+    const topicMatch = String(query.topic_id)?.match(topicRegex);
+
+    const topicId = topicMatch ? topicMatch[1] : query.topic_id;
+
     setValue('author', query.author);
     setValue('content', query.content);
-    setValue('topic_id', query.topic_id);
+    setValue('topic_id', topicId);
     setValue('after_date', query.after_date);
     setValue('before_date', query.before_date);
     setValue('board', query.board);
@@ -306,14 +312,7 @@ const Search: React.FC = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item label="Topic ID">
-                      <Input
-                        placeholder="5248878"
-                        type="number"
-                        min={1}
-                        defaultValue={searchQuery.topic_id}
-                        onKeyDown={handleKeyDown}
-                        onChange={e => setValue('topic_id', e.target.value)}
-                      />
+                      <TopicId searchPosts={searchPosts} />
                     </Form.Item>
                   </Col>
                   <Col span={24}>
