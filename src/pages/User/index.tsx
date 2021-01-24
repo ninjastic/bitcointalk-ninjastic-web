@@ -567,7 +567,13 @@ const PostsWeekChart: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading, isError } = useQuery(
     `user:${username}:posts:week`,
     async () => {
-      const { data: responseData } = await api.get(`/users/${username}/posts`);
+      const fromDate = format(sub(startOfDay(new Date()), { weeks: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+
+      const { data: responseData } = await api.get(`/users/${username}/posts`, {
+        params: {
+          from: fromDate,
+        },
+      });
 
       return responseData;
     },
@@ -585,7 +591,7 @@ const PostsMonthChart: React.FC<{ username: string }> = ({ username }) => {
   const { data, isLoading, isError } = useQuery(
     `userPostsMonth:${username}`,
     async () => {
-      const fromDate = format(sub(new Date(), { months: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
+      const fromDate = format(sub(startOfDay(new Date()), { months: 1 }), "yyyy-MM-dd'T'HH:mm:ss");
 
       const { data: responseData } = await api.get(`/users/${username}/posts`, {
         params: {
