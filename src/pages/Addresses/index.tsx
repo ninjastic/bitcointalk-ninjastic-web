@@ -100,10 +100,10 @@ const AuthorsTab: React.FC = () => {
     !isError &&
     data?.data.authors?.reduce((prev, curr, i, array) => {
       const resultFormatted = resultFormat
-        .replace(/{username}/, curr.author)
-        .replace(/{count}/, curr.count)
-        .replace(/{uid}/, curr.author_uid)
-        .replace(/{number}/, i + 1);
+        .replace(/{username}/g, curr.author)
+        .replace(/{count}/g, curr.count)
+        .replace(/{uid}/g, curr.author_uid)
+        .replace(/{number}/g, i + 1);
       let text = `${prev}${resultFormatted}`;
 
       if (i !== array.length - 1) {
