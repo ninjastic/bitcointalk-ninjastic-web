@@ -449,7 +449,7 @@ const Search: React.FC = () => {
                           defaultValue="normal"
                         >
                           <Radio.Button value="normal">Normal</Radio.Button>
-                          <Radio.Button value="header">Header Only</Radio.Button>
+                          <Radio.Button value="collapsed">Collapsed</Radio.Button>
                           <Radio.Button value="compact">Compact</Radio.Button>
                         </Radio.Group>
                       </div>
@@ -480,7 +480,7 @@ const Search: React.FC = () => {
                               {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
                             </div>
                           );
-                        case 'header':
+                        case 'collapsed':
                           return (
                             <div key={post.post_id}>
                               <HeaderPostCard
