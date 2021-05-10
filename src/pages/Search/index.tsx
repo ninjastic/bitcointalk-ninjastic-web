@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Form,
@@ -75,7 +75,7 @@ const AuthorsTab: React.FC = () => {
   const { data, refetch, isError } = useQuery(
     'posts:Authors',
     async () => {
-      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery;
+      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
 
       setGenerated(true);
       setIsLoading(true);
@@ -170,27 +170,10 @@ const Search: React.FC = () => {
   const store = useSearchStore();
   const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
 
-  autorun(() => {
-    const query = queryString.parse(search);
-
-    const topicRegex = new RegExp(/https:\/\/bitcointalk\.org\/index\.php\?topic=(\d+)/, 'i');
-    const topicMatch = String(query.topic_id)?.match(topicRegex);
-
-    const topicId = topicMatch ? topicMatch[1] : query.topic_id;
-
-    setValue('author', query.author);
-    setValue('content', query.content);
-    setValue('topic_id', topicId);
-    setValue('after_date', query.after_date);
-    setValue('before_date', query.before_date);
-    setValue('board', query.board);
-    setValue('child_boards', query.child_boards);
-  });
-
   const { isLoading, isFetching, isError, refetch, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     'posts',
     async (key, lastId = null) => {
-      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery;
+      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
 
       const { data: responseData } = await api.get('posts', {
         params: {
@@ -222,28 +205,54 @@ const Search: React.FC = () => {
     },
   );
 
-  const searchPosts = () => {
+  const redirectToQuery = () => {
     const queryStringified = queryString.stringify(
       {
-        author: searchQuery.author,
-        topic_id: searchQuery.topic_id,
-        content: searchQuery.content,
-        after_date: searchQuery.after_date,
-        before_date: searchQuery.before_date,
-        board: searchQuery.board,
-        child_boards: searchQuery.child_boards,
+        author: searchQuery.posts.author,
+        topic_id: searchQuery.posts.topic_id,
+        content: searchQuery.posts.content,
+        after_date: searchQuery.posts.after_date,
+        before_date: searchQuery.posts.before_date,
+        board: searchQuery.posts.board,
+        child_boards: searchQuery.posts.child_boards,
       },
       { skipEmptyString: true, skipNull: true },
     );
 
     history.push(`/search?${queryStringified}`);
+  };
 
+  const searchPosts = () => {
     setIsLoadingSearch(true);
     refetch();
   };
 
+  autorun(() => {
+    const query = queryString.parse(search);
+
+    const topicRegex = new RegExp(/https:\/\/bitcointalk\.org\/index\.php\?topic=(\d+)/, 'i');
+    const topicMatch = String(query.topic_id)?.match(topicRegex);
+
+    const topicId = topicMatch ? topicMatch[1] : query.topic_id;
+
+    setValue('posts', 'author', query.author);
+    setValue('posts', 'content', query.content);
+    setValue('posts', 'topic_id', topicId);
+    setValue('posts', 'after_date', query.after_date);
+    setValue('posts', 'before_date', query.before_date);
+    setValue('posts', 'board', query.board);
+    setValue('posts', 'child_boards', query.child_boards);
+  });
+
+  useEffect(() => {
+    if (Object.keys(searchQuery.posts).filter(key => searchQuery.posts[key]).length) {
+      searchPosts();
+    }
+  }, []);
+
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
+      redirectToQuery();
       searchPosts();
     }
   };
@@ -252,8 +261,8 @@ const Search: React.FC = () => {
     const from = e && e[0] ? format(new Date(e[0]), "yyyy-MM-dd'T'HH:mm:ss") : '';
     const to = e && e[1] ? format(new Date(e[1]), "yyyy-MM-dd'T'HH:mm:ss") : '';
 
-    setValue('after_date', from);
-    setValue('before_date', to);
+    setValue('posts', 'after_date', from);
+    setValue('posts', 'before_date', to);
   };
 
   useBottomScrollListener(() => {
@@ -283,12 +292,12 @@ const Search: React.FC = () => {
     return null;
   };
 
-  const afterDate = searchQuery.after_date
-    ? addMinutes(new Date(searchQuery.after_date), new Date(searchQuery.after_date).getTimezoneOffset())
+  const afterDate = searchQuery.posts.after_date
+    ? addMinutes(new Date(searchQuery.posts.after_date), new Date(searchQuery.posts.after_date).getTimezoneOffset())
     : null;
 
-  const beforeDate = searchQuery.before_date
-    ? addMinutes(new Date(searchQuery.before_date), new Date(searchQuery.before_date).getTimezoneOffset())
+  const beforeDate = searchQuery.posts.before_date
+    ? addMinutes(new Date(searchQuery.posts.before_date), new Date(searchQuery.posts.before_date).getTimezoneOffset())
     : null;
 
   return (
@@ -304,15 +313,15 @@ const Search: React.FC = () => {
                     <Form.Item label="Author">
                       <Input
                         placeholder="TryNinja"
-                        defaultValue={searchQuery.author}
+                        defaultValue={searchQuery.posts.author}
                         onKeyDown={handleKeyDown}
-                        onChange={e => setValue('author', e.target.value.trim())}
+                        onChange={e => setValue('posts', 'author', e.target.value.trim())}
                       />
                     </Form.Item>
                   </Col>
                   <Col span={12}>
                     <Form.Item label="Topic ID">
-                      <TopicId searchPosts={searchPosts} />
+                      <TopicId searchPosts={searchPosts} redirectToQuery={redirectToQuery} />
                     </Form.Item>
                   </Col>
                   <Col span={24}>
@@ -340,9 +349,9 @@ const Search: React.FC = () => {
                       <Input
                         placeholder="Bitcoin"
                         maxLength={550}
-                        defaultValue={searchQuery.content}
+                        defaultValue={searchQuery.posts.content}
                         onKeyDown={handleKeyDown}
-                        onChange={e => setValue('content', e.target.value)}
+                        onChange={e => setValue('posts', 'content', e.target.value)}
                       />
                     </Form.Item>
                   </Col>
@@ -360,11 +369,11 @@ const Search: React.FC = () => {
 
                   <Col span={24}>
                     <Form.Item label="Board">
-                      <BoardSelect searchQueryField="board" />
+                      <BoardSelect searchQueryField="board" type="posts" />
                       <Checkbox
                         style={{ marginTop: 15 }}
-                        defaultChecked={searchQuery.child_boards}
-                        onChange={e => setValue('child_boards', e.target.checked)}
+                        defaultChecked={searchQuery.posts.child_boards}
+                        onChange={e => setValue('posts', 'child_boards', e.target.checked)}
                       >
                         Include child boards
                       </Checkbox>
@@ -383,7 +392,10 @@ const Search: React.FC = () => {
                           )
                         }
                         disabled={isFetching || isLoading || (isLoadingSearch && !isError)}
-                        onClick={searchPosts}
+                        onClick={() => {
+                          searchPosts();
+                          redirectToQuery();
+                        }}
                       >
                         Search
                       </Button>
@@ -474,7 +486,7 @@ const Search: React.FC = () => {
                               <PostCard
                                 data={post}
                                 number={groupIndex * 100 + i + 1}
-                                hightlight={hightlight ? searchQuery.content : null}
+                                hightlight={hightlight ? searchQuery.posts.content : null}
                               />
                               <Divider />
                               {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}

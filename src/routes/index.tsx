@@ -11,7 +11,7 @@ import Addresses from '../pages/Addresses';
 import Address from '../pages/Address';
 import NotFoundPage from '../pages/NotFoundPage';
 import User from '../pages/User';
-import Patrol from '../pages/Patrol';
+import Compare from '../pages/Compare';
 
 const Routes: React.FC = () => {
   const { status } = useThemeSwitcher();
@@ -41,7 +41,7 @@ const Routes: React.FC = () => {
         <Route path="/addresses" component={Addresses} />
         <Route path="/address/:address" component={Address} />
         <Route path={['/user/id/:author_uid', '/user/:username']} component={User} />
-        <Route path="/patrol" component={Patrol} />
+        <Route path="/compare" component={Compare} />
         <Route path="*" component={NotFoundPage} />
       </Switch>
     </Router>

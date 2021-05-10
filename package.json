@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@types/autoprefixer": "^9.7.2",
+    "@types/caniuse-lite": "^1.0.0",
     "@types/direction": "^1.0.0",
     "@types/dompurify": "^2.0.3",
     "@types/eslint-plugin-prettier": "^3.1.0",

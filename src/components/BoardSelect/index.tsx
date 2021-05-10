@@ -8,9 +8,10 @@ import { useSearchStore } from '../../stores/SearchStore';
 
 interface Props {
   searchQueryField: string;
+  type: string;
 }
 
-const BoardSelect: React.FC<Props> = ({ searchQueryField }) => {
+const BoardSelect: React.FC<Props> = ({ searchQueryField, type }) => {
   const [search, setSearch] = useState('');
   const [boardTitle, setBoardTitle] = useState('');
 
@@ -50,7 +51,7 @@ const BoardSelect: React.FC<Props> = ({ searchQueryField }) => {
 
   const handleOnChange = (selectedValue: string, selectedTitle) => {
     setBoardTitle(selectedTitle[0]);
-    setValue(searchQueryField, selectedValue || '');
+    setValue(type, searchQueryField, selectedValue || '');
   };
 
   return (

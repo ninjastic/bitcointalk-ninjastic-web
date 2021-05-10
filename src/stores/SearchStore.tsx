@@ -1,26 +1,34 @@
 import React from 'react';
 import { useLocalStore } from 'mobx-react';
 
-interface Board {
+type Board = {
   board_id: number;
   name: string;
   parent_id: number;
-}
+};
+
+type SearchPostsQuery = {
+  author: string;
+  content: string;
+  topic_id: string;
+  after_date: string;
+  before_date: string;
+  board: string;
+  child_boards: boolean;
+};
+
+type SearchAddressesQuery = {
+  address: string;
+  author: string;
+  coin: string;
+  board: string;
+  child_boards: boolean;
+};
 
 interface SearchStoreState {
   searchQuery: {
-    author: string;
-    content: string;
-    topic_id: string;
-    address: string;
-    address_author: string;
-    address_coin: string;
-    address_board: string;
-    address_child_boards: boolean;
-    after_date: string;
-    before_date: string;
-    board: string;
-    child_boards: boolean;
+    posts: SearchPostsQuery;
+    addresses: SearchAddressesQuery;
   };
   boards: Board[];
   isLoadingSearch: boolean;
@@ -29,7 +37,7 @@ interface SearchStoreState {
   setIsDarkMode: (value: boolean) => void;
   setIsLoadingSearch: (value: boolean) => void;
   setIsLoadingAddress: (value: boolean) => void;
-  setValue: (type: string, value: any) => void;
+  setValue: (type: string, name: string, value: any) => void;
   setBoards: (boards: Board[]) => void;
 }
 
@@ -38,23 +46,28 @@ const StoreContext = React.createContext<SearchStoreState>({} as SearchStoreStat
 const StoreProvider = ({ children }) => {
   const store = useLocalStore(() => ({
     searchQuery: {
-      author: '',
-      content: '',
-      topic_id: '',
-      address: '',
-      address_author: '',
-      address_coin: '',
-      address_board: '',
-      address_child_boards: false,
-      after_date: '',
-      before_date: '',
-      board: '',
-      child_boards: false,
+      posts: {
+        author: '',
+        content: '',
+        topic_id: '',
+        after_date: '',
+        before_date: '',
+        board: '',
+        child_boards: false,
+      },
+      addresses: {
+        address: '',
+        author: '',
+        coin: '',
+        board: '',
+        child_boards: false,
+      },
     },
     boards: [],
     isLoadingSearch: false,
     isLoadingAddress: false,
     isDarkMode: localStorage.getItem('ninjastic:isDarkMode') === 'true',
+
     setIsDarkMode: value => {
       store.isDarkMode = value;
       localStorage.setItem('ninjastic:isDarkMode', value);
@@ -65,8 +78,8 @@ const StoreProvider = ({ children }) => {
     setIsLoadingAddress: value => {
       store.isLoadingAddress = value;
     },
-    setValue: (type, value) => {
-      store.searchQuery[type] = value || null;
+    setValue: (type, name, value) => {
+      store.searchQuery[type][name] = value || null;
     },
     setBoards: (data: Board[]) => {
       store.boards = data;

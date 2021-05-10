@@ -5,23 +5,25 @@ import { useSearchStore } from '../../../stores/SearchStore';
 
 interface Params {
   searchPosts: () => any;
+  redirectToQuery: () => any;
 }
 
-const TopicId: React.FC<Params> = ({ searchPosts }) => {
+const TopicId: React.FC<Params> = ({ searchPosts, redirectToQuery }) => {
   const store = useSearchStore();
 
   const { setValue, searchQuery } = store;
 
-  const [topicId, setTopicId] = useState(searchQuery.topic_id);
+  const [topicId, setTopicId] = useState(searchQuery.posts.topic_id);
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
+      redirectToQuery();
       searchPosts();
     }
   };
 
   const handleChange = (e: any) => {
-    setValue('topic_id', e.target.value);
+    setValue('posts', 'topic_id', e.target.value);
     setTopicId(e.target.value);
   };
 
@@ -33,7 +35,7 @@ const TopicId: React.FC<Params> = ({ searchPosts }) => {
 
     if (matchRegex && matchRegex[1]) {
       e.preventDefault();
-      setValue('topic_id', matchRegex[1]);
+      setValue('posts', 'topic_id', matchRegex[1]);
       setTopicId(matchRegex[1]);
     }
   };
@@ -43,7 +45,7 @@ const TopicId: React.FC<Params> = ({ searchPosts }) => {
       placeholder="5248878"
       type="number"
       min={1}
-      defaultValue={searchQuery.topic_id}
+      defaultValue={searchQuery.posts.topic_id}
       value={topicId}
       onKeyDown={handleKeyDown}
       onPaste={e => handlePaste(e)}

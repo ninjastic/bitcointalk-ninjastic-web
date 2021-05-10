@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInfiniteQuery, useQuery } from 'react-query';
 import {
   Form,
@@ -72,7 +72,7 @@ const AuthorsTab: React.FC = () => {
   const { data, refetch, isError } = useQuery(
     'addresses:Authors',
     async () => {
-      const { address, address_author, address_coin, address_board, address_child_boards } = searchQuery;
+      const { address, author, coin, board, child_boards } = searchQuery.addresses;
 
       setGenerated(true);
       setIsLoading(true);
@@ -80,10 +80,10 @@ const AuthorsTab: React.FC = () => {
       const { data: responseData } = await api.get('addresses/authors', {
         params: {
           address,
-          author: address_author,
-          coin: address_coin,
-          board: address_board,
-          child_boards: address_child_boards,
+          author,
+          coin,
+          board,
+          child_boards,
           limit,
         },
       });
@@ -167,25 +167,25 @@ const Addresses: React.FC = () => {
   autorun(() => {
     const query = queryString.parse(search);
 
-    setValue('address', query.address);
-    setValue('address_author', query.author);
-    setValue('address_coin', query.coin);
-    setValue('address_board', query.board);
-    setValue('address_child_boards', query.child_boards);
+    setValue('addresses', 'address', query.address);
+    setValue('addresses', 'author', query.author);
+    setValue('addresses', 'coin', query.coin);
+    setValue('addresses', 'board', query.board);
+    setValue('addresses', 'child_boards', query.child_boards);
   });
 
   const { isLoading, isFetching, refetch, fetchMore, canFetchMore, data, isError } = useInfiniteQuery<Response>(
     `addresses`,
     async (key, last = null) => {
-      const { address, address_author, address_coin, address_board, address_child_boards } = searchQuery;
+      const { address, author, coin, board, child_boards } = searchQuery.addresses;
 
       const { data: responseData } = await api.get('addresses', {
         params: {
           address,
-          author: address_author,
-          coin: address_coin,
-          board: address_board,
-          child_boards: address_child_boards,
+          author,
+          coin,
+          board,
+          child_boards,
           last,
           limit: 50,
         },
@@ -212,11 +212,11 @@ const Addresses: React.FC = () => {
   const searchAddresses = () => {
     const queryStringified = queryString.stringify(
       {
-        address: searchQuery.address,
-        author: searchQuery.address_author,
-        coin: searchQuery.address_coin,
-        board: searchQuery.address_board,
-        child_boards: searchQuery.address_child_boards,
+        address: searchQuery.addresses.address,
+        author: searchQuery.addresses.author,
+        coin: searchQuery.addresses.coin,
+        board: searchQuery.addresses.board,
+        child_boards: searchQuery.addresses.child_boards,
       },
       { skipEmptyString: true, skipNull: true },
     );
@@ -226,6 +226,12 @@ const Addresses: React.FC = () => {
     setIsLoadingAddress(true);
     refetch();
   };
+
+  useEffect(() => {
+    if (Object.keys(searchQuery.addresses).filter(key => searchQuery.addresses[key]).length) {
+      searchAddresses();
+    }
+  }, []);
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
@@ -287,8 +293,8 @@ const Addresses: React.FC = () => {
                             allowClear
                             placeholder="1NinjabXd5znM5zgTcmxDVzH4w3nbaY16L"
                             onKeyDown={handleKeyDown}
-                            defaultValue={searchQuery.address}
-                            onChange={e => setValue('address', e.target.value.trim())}
+                            defaultValue={searchQuery.addresses.address}
+                            onChange={e => setValue('addresses', 'address', e.target.value.trim())}
                           />
                         )}
                       </Observer>
@@ -300,16 +306,16 @@ const Addresses: React.FC = () => {
                         allowClear
                         placeholder="TryNinja"
                         onKeyDown={handleKeyDown}
-                        defaultValue={searchQuery.address_author}
-                        onChange={e => setValue('address_author', e.target.value.trim())}
+                        defaultValue={searchQuery.addresses.author}
+                        onChange={e => setValue('addresses', 'author', e.target.value.trim())}
                       />
                     </Form.Item>
                   </Col>
                   <Col span={24}>
                     <Form.Item label="Coin">
                       <Select
-                        defaultValue={searchQuery.address_coin || 'Any'}
-                        onChange={value => setValue('address_coin', value)}
+                        defaultValue={searchQuery.addresses.coin || 'Any'}
+                        onChange={value => setValue('addresses', 'coin', value)}
                       >
                         <Option value="">Any</Option>
                         <Option value="BTC">BTC</Option>
@@ -319,11 +325,11 @@ const Addresses: React.FC = () => {
                   </Col>
                   <Col span={24}>
                     <Form.Item label="Board">
-                      <BoardSelect searchQueryField="address_board" />
+                      <BoardSelect searchQueryField="board" type="addresses" />
                       <Checkbox
                         style={{ marginTop: 15 }}
-                        defaultChecked={searchQuery.address_child_boards}
-                        onChange={e => setValue('address_child_boards', e.target.checked)}
+                        defaultChecked={searchQuery.addresses.child_boards}
+                        onChange={e => setValue('addresses', 'child_boards', e.target.checked)}
                       >
                         Include child boards
                       </Checkbox>

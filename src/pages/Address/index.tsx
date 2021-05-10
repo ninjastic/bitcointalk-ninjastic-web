@@ -57,7 +57,6 @@ const Address: React.FC = () => {
           address,
         },
       });
-
       return responseData;
     },
     { retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
