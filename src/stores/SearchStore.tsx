@@ -10,6 +10,7 @@ type Board = {
 type SearchPostsQuery = {
   author: string;
   content: string;
+  title: string;
   topic_id: string;
   after_date: string;
   before_date: string;
@@ -49,6 +50,7 @@ const StoreProvider = ({ children }) => {
       posts: {
         author: '',
         content: '',
+        title: '',
         topic_id: '',
         after_date: '',
         before_date: '',

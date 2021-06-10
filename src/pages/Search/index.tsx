@@ -75,7 +75,7 @@ const AuthorsTab: React.FC = () => {
   const { data, refetch, isError } = useQuery(
     'posts:Authors',
     async () => {
-      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
+      const { author, content, title, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
 
       setGenerated(true);
       setIsLoading(true);
@@ -84,6 +84,7 @@ const AuthorsTab: React.FC = () => {
         params: {
           author,
           content,
+          title,
           topic_id,
           board,
           child_boards,
@@ -173,12 +174,13 @@ const Search: React.FC = () => {
   const { isLoading, isFetching, isError, refetch, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     'posts',
     async (key, lastId = null) => {
-      const { author, content, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
+      const { author, content, title, topic_id, after_date, before_date, board, child_boards } = searchQuery.posts;
 
       const { data: responseData } = await api.get('posts', {
         params: {
           author,
           content,
+          title,
           topic_id,
           board,
           child_boards,
@@ -319,16 +321,30 @@ const Search: React.FC = () => {
                       />
                     </Form.Item>
                   </Col>
+
                   <Col span={12}>
                     <Form.Item label="Topic ID">
                       <TopicId searchPosts={searchPosts} redirectToQuery={redirectToQuery} />
                     </Form.Item>
                   </Col>
+
+                  <Col span={24}>
+                    <Form.Item label="Post Title">
+                      <Input
+                        placeholder="Scam accusation"
+                        maxLength={550}
+                        defaultValue={searchQuery.posts.title}
+                        onKeyDown={handleKeyDown}
+                        onChange={e => setValue('posts', 'title', e.target.value)}
+                      />
+                    </Form.Item>
+                  </Col>
+
                   <Col span={24}>
                     <Form.Item
                       label={
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography style={{ marginRight: 5 }}>Content</Typography>
+                          <Typography style={{ marginRight: 5 }}>Post Content</Typography>
                           <Tooltip
                             title={
                               <div>
