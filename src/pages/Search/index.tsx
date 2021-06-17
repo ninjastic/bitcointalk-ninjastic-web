@@ -331,7 +331,27 @@ const Search: React.FC = () => {
                   </Col>
 
                   <Col span={24}>
-                    <Form.Item label="Post Title">
+                    <Form.Item
+                      label={
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography style={{ marginRight: 5 }}>Post Title</Typography>
+                          <Tooltip
+                            title={
+                              <div>
+                                <article style={{ fontWeight: 500 }}>Advanced search:</article>
+                                <article>+ for AND operations</article>
+                                <article>| for OR operations</article>
+                                <article>- to negate a word/phrase/precedence</article>
+                                <article>&quot; wraps a phrase (for exact matches)</article>
+                                <article>( and ) for precedence</article>
+                              </div>
+                            }
+                          >
+                            <InfoCircleOutlined />
+                          </Tooltip>
+                        </div>
+                      }
+                    >
                       <Input
                         placeholder="Scam accusation"
                         maxLength={550}
