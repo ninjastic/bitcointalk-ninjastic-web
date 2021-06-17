@@ -212,6 +212,7 @@ const Search: React.FC = () => {
       {
         author: searchQuery.posts.author,
         topic_id: searchQuery.posts.topic_id,
+        title: searchQuery.posts.title,
         content: searchQuery.posts.content,
         after_date: searchQuery.posts.after_date,
         before_date: searchQuery.posts.before_date,
@@ -238,6 +239,7 @@ const Search: React.FC = () => {
     const topicId = topicMatch ? topicMatch[1] : query.topic_id;
 
     setValue('posts', 'author', query.author);
+    setValue('posts', 'title', query.title);
     setValue('posts', 'content', query.content);
     setValue('posts', 'topic_id', topicId);
     setValue('posts', 'after_date', query.after_date);
