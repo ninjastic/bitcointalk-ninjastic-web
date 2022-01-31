@@ -51,17 +51,18 @@ interface MatchParams {
 const Topic: React.FC = () => {
   const history = useHistory();
   const [postsViewType, setPostsViewType] = useState('normal');
+  const [order, setOrder] = useState('ASC');
 
   const { id } = useRouteMatch().params as MatchParams;
 
   const { isLoading, isFetching, isError, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
-    `posts:topic:${id}`,
+    ['posts:topic', id, order],
     async (key, lastId = null) => {
       const { data: responseData } = await api.get('posts', {
         params: {
           topic_id: id,
-          after: lastId,
-          order: 'ASC',
+          [order === 'asc' ? 'before' : 'after']: lastId,
+          order,
           limit: 100,
         },
       });
@@ -148,15 +149,28 @@ const Topic: React.FC = () => {
                   <Text>
                     <Text strong>Posts:</Text> {numeral(data[0].data.total_results || 0).format('0,0')}
                   </Text>
-                  <Radio.Group
-                    onChange={e => setPostsViewType(e.target.value)}
-                    value={postsViewType}
-                    defaultValue="normal"
-                  >
-                    <Radio.Button value="normal">Normal</Radio.Button>
-                    <Radio.Button value="header">Header Only</Radio.Button>
-                    <Radio.Button value="compact">Compact</Radio.Button>
-                  </Radio.Group>
+
+                  <div>
+                    <Radio.Group
+                      onChange={e => setOrder(e.target.value)}
+                      value={order}
+                      defaultValue="ASC"
+                      style={{ marginRight: 15 }}
+                    >
+                      <Radio.Button value="ASC">ASC</Radio.Button>
+                      <Radio.Button value="DESC">DESC</Radio.Button>
+                    </Radio.Group>
+
+                    <Radio.Group
+                      onChange={e => setPostsViewType(e.target.value)}
+                      value={postsViewType}
+                      defaultValue="normal"
+                    >
+                      <Radio.Button value="normal">Normal</Radio.Button>
+                      <Radio.Button value="header">Header Only</Radio.Button>
+                      <Radio.Button value="compact">Compact</Radio.Button>
+                    </Radio.Group>
+                  </div>
                 </div>
               </div>
               {data.map((group, groupIndex) => {
