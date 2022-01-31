@@ -61,7 +61,7 @@ const Topic: React.FC = () => {
       const { data: responseData } = await api.get('posts', {
         params: {
           topic_id: id,
-          [order === 'asc' ? 'before' : 'after']: lastId,
+          [order === 'asc' ? 'last' : 'after']: lastId,
           order,
           limit: 100,
         },
