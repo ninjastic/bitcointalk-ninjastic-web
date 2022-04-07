@@ -1828,11 +1828,6 @@
   resolved "https://registry.yarnpkg.com/@types/browserslist/-/browserslist-4.8.0.tgz#60489aefdf0fcb56c2d8eb65267ff08dad7a526d"
   integrity sha512-4PyO9OM08APvxxo1NmQyQKlJdowPCOQIy5D/NLO3aO0vGC57wsMptvGp3b8IbYnupFZr92l1dlVief1JvS6STQ==
 
-"@types/caniuse-lite@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/caniuse-lite/-/caniuse-lite-1.0.0.tgz#6506ed4b3f8d19def130d19419062960e86cc3bc"
-  integrity sha512-g28510gzJpFL0xqvuGAlI+dfIr3qvUcZQVFc7f7u2VlWVqI1oBkWhGLYh3fXfoflR7HRnU4w0NRux0pPJQ7VVg==
-
 "@types/d3-path@^1":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@types/d3-path/-/d3-path-1.0.9.tgz#73526b150d14cd96e701597cbf346cfd1fd4a58c"
