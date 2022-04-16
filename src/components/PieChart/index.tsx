@@ -2,6 +2,7 @@ import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
+import { ApexOptions } from 'apexcharts';
 
 const { Text } = Typography;
 
@@ -48,7 +49,7 @@ const PieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
   const series = data.map(d => d.count);
   const labels = data.map(d => d.name);
 
-  const options = {
+  const options: ApexOptions = {
     chart: {
       type: 'donut',
     },

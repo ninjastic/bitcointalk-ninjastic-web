@@ -5,6 +5,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { renderToString } from 'react-dom/server';
 import { fromUnixTime, format } from 'date-fns';
 import { Card } from 'antd';
+import { ApexOptions } from 'apexcharts';
 
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -42,7 +43,7 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
     },
   ];
 
-  const options = {
+  const options: ApexOptions = {
     chart: {
       type: 'area',
       stacked: false,
@@ -101,7 +102,10 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
 
         return renderToString(
           <Card size="small" title={dateString}>
-            {name}: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
+            {name}
+            :
+            {' '}
+            {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
           </Card>,
         );
       },

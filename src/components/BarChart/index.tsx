@@ -6,6 +6,7 @@ import { renderToString } from 'react-dom/server';
 import { fromUnixTime } from 'date-fns';
 import { format } from 'date-fns-tz';
 import { Card } from 'antd';
+import { ApexOptions } from 'apexcharts';
 
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -35,7 +36,7 @@ const BarChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
     },
   ];
 
-  const options = {
+  const options: ApexOptions = {
     chart: {
       type: 'bar',
       stacked: false,

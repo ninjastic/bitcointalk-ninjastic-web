@@ -57,7 +57,7 @@ const Topic: React.FC = () => {
 
   const { isLoading, isFetching, isError, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     ['posts:topic', id, order],
-    async (key, lastId = null) => {
+    async (key, _topic, _order, lastId = null) => {
       const { data: responseData } = await api.get('posts', {
         params: {
           topic_id: id,
@@ -75,8 +75,7 @@ const Topic: React.FC = () => {
       refetchOnWindowFocus: false,
       getFetchMore: lastGroup => {
         if (lastGroup.data.posts.length < 100) return false;
-
-        return lastGroup.data.posts[lastGroup.data.posts.length - 1].post_id;
+        return lastGroup.data.posts.at(-1).post_id;
       },
     },
   );

@@ -15,7 +15,7 @@ import {
   Checkbox,
   Tooltip,
 } from 'antd';
-import { SearchOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, LoadingOutlined, InfoCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import { format } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { autorun } from 'mobx';
@@ -24,6 +24,7 @@ import queryString from 'query-string';
 import numeral from 'numeral';
 import { addMinutes } from 'date-fns';
 
+import { Observer } from 'mobx-react';
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -161,15 +162,119 @@ const AuthorsTab: React.FC = () => {
   );
 };
 
+const SearchResults = ({
+  data,
+  canFetchMore,
+  postsViewType,
+}: {
+  data: Response[];
+  canFetchMore: boolean;
+  postsViewType: string;
+}) => {
+  const store = useSearchStore();
+  const { ignoredThreads, addIgnoredThread } = store;
+
+  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
+    if (groupIndex === data.length - 1) {
+      if (!canFetchMore) {
+        return (
+          <div style={{ textAlign: 'center', marginTop: 25 }}>
+            <Text type="secondary">You reached the end!</Text>
+          </div>
+        );
+      }
+
+      return onlyIcon ? (
+        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+          <LoadingOutlined style={{ fontSize: 30 }} />
+        </div>
+      ) : (
+        <Card loading style={{ marginTop: 30 }} />
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Observer>
+      {() => (
+        <div>
+          {data.map((group, groupIndex) => {
+            if (!group.data.posts.length) {
+              return (
+                <Card key={groupIndex}>
+                  <Text strong key={1}>
+                    No results...
+                  </Text>
+                </Card>
+              );
+            }
+
+            return group.data.posts
+              .filter(post => !ignoredThreads.find(ignoredThread => ignoredThread.id === post.topic_id))
+              .map((post, i, array) => {
+                switch (postsViewType) {
+                  case 'normal':
+                    return (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard data={post} number={groupIndex * 100 + i + 1} hightlight={null} />
+                        <Button
+                          style={{ marginTop: 5 }}
+                          size="small"
+                          onClick={() => addIgnoredThread({ id: post.topic_id, title: post.title })}
+                        >
+                          Ignore Topic
+                        </Button>
+                        <Divider />
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
+                      </div>
+                    );
+                  case 'collapsed':
+                    return (
+                      <div key={post.post_id}>
+                        <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} />
+                        <Button
+                          style={{ marginTop: 5, marginBottom: 15 }}
+                          size="small"
+                          onClick={() => addIgnoredThread({ id: post.topic_id, title: post.title })}
+                        >
+                          Ignore Topic
+                        </Button>
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
+                      </div>
+                    );
+                  case 'compact':
+                    return (
+                      <ul
+                        key={post.post_id}
+                        style={{
+                          paddingInlineStart: 20,
+                          marginBottom: 0,
+                        }}
+                      >
+                        <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
+                      </ul>
+                    );
+                  default:
+                    return null;
+                }
+              });
+          })}
+        </div>
+      )}
+    </Observer>
+  );
+};
+
 const Search: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
 
-  const [hightlight] = useState(false);
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const store = useSearchStore();
-  const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
+  const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch, ignoredThreads, removeIgnoredThread } = store;
 
   const { isLoading, isFetching, isError, refetch, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     'posts',
@@ -275,27 +380,6 @@ const Search: React.FC = () => {
     fetchMore();
   }, 500);
 
-  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
-    if (groupIndex === data.length - 1) {
-      if (!canFetchMore) {
-        return (
-          <div style={{ textAlign: 'center', marginTop: 25 }}>
-            <Text type="secondary">You reached the end!</Text>
-          </div>
-        );
-      }
-
-      return onlyIcon ? (
-        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          <LoadingOutlined style={{ fontSize: 30 }} />
-        </div>
-      ) : (
-        <Card loading style={{ marginTop: 30 }} />
-      );
-    }
-    return null;
-  };
-
   const afterDate = searchQuery.posts.after_date
     ? addMinutes(new Date(searchQuery.posts.after_date), new Date(searchQuery.posts.after_date).getTimezoneOffset())
     : null;
@@ -332,11 +416,11 @@ const Search: React.FC = () => {
 
                   <Col span={24}>
                     <Form.Item
-                      label={
+                      label={(
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <Typography style={{ marginRight: 5 }}>Post Title</Typography>
                           <Tooltip
-                            title={
+                            title={(
                               <div>
                                 <article style={{ fontWeight: 500 }}>Advanced search:</article>
                                 <article>+ for AND operations</article>
@@ -345,12 +429,12 @@ const Search: React.FC = () => {
                                 <article>&quot; wraps a phrase (for exact matches)</article>
                                 <article>( and ) for precedence</article>
                               </div>
-                            }
+                            )}
                           >
                             <InfoCircleOutlined />
                           </Tooltip>
                         </div>
-                      }
+                      )}
                     >
                       <Input
                         placeholder="Scam accusation"
@@ -368,7 +452,7 @@ const Search: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <Typography style={{ marginRight: 5 }}>Post Content</Typography>
                           <Tooltip
-                            title={
+                            title={(
                               <div>
                                 <article style={{ fontWeight: 500 }}>Advanced search:</article>
                                 <article>+ for AND operations</article>
@@ -377,7 +461,7 @@ const Search: React.FC = () => {
                                 <article>&quot; wraps a phrase (for exact matches)</article>
                                 <article>( and ) for precedence</article>
                               </div>
-                            }
+                            )}
                           >
                             <InfoCircleOutlined />
                           </Tooltip>
@@ -442,6 +526,31 @@ const Search: React.FC = () => {
                 </Row>
               </Form>
             </Card>
+
+            <Observer>
+              {() =>
+                ignoredThreads.length > 0 ? (
+                  <Card style={{ marginTop: 10 }} title="Ignored Topics">
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {ignoredThreads.map((ignoredThread, index, array) => (
+                        <div key={ignoredThread.id}>
+                          <Text style={{ fontSize: 12 }}>
+                            <b>{ignoredThread.id}</b> -{ignoredThread.title}
+                            <Button
+                              icon={<DeleteOutlined />}
+                              style={{ marginLeft: 10 }}
+                              size="small"
+                              onClick={() => removeIgnoredThread(ignoredThread.id)}
+                            />
+                          </Text>
+                          {index < array.length ? <Divider style={{ marginTop: 5, marginBottom: 5 }} /> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ) : null
+              }
+            </Observer>
           </Col>
           <Col xs={24} md={24} lg={16}>
             {(!data || isLoading || isLoadingSearch) && !isError ? (
@@ -477,7 +586,8 @@ const Search: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       {data && !isLoading && !isLoadingSearch ? (
                         <div>
-                          <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
+                          <Text style={{ fontWeight: 500 }}>Total results:</Text>
+{' '}
                           <Text>{numeral(data[0].data.total_results || 0).format('0,0')}</Text>
                         </div>
                       ) : null}
@@ -505,60 +615,7 @@ const Search: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {data.map((group, groupIndex) => {
-                    if (!group.data.posts.length) {
-                      return (
-                        <Card key={groupIndex}>
-                          <Text strong key={1}>
-                            No results...
-                          </Text>
-                        </Card>
-                      );
-                    }
-
-                    return group.data.posts.map((post, i, array) => {
-                      switch (postsViewType) {
-                        case 'normal':
-                          return (
-                            <div style={{ marginBottom: 30 }} key={post.post_id}>
-                              <PostCard
-                                data={post}
-                                number={groupIndex * 100 + i + 1}
-                                hightlight={hightlight ? searchQuery.posts.content : null}
-                              />
-                              <Divider />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
-                            </div>
-                          );
-                        case 'collapsed':
-                          return (
-                            <div key={post.post_id}>
-                              <HeaderPostCard
-                                data={post}
-                                number={groupIndex * 100 + i + 1}
-                                style={{ marginBottom: 15 }}
-                              />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
-                            </div>
-                          );
-                        case 'compact':
-                          return (
-                            <ul
-                              key={post.post_id}
-                              style={{
-                                paddingInlineStart: 20,
-                                marginBottom: 0,
-                              }}
-                            >
-                              <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
-                            </ul>
-                          );
-                        default:
-                          return null;
-                      }
-                    });
-                  })}
+                  <SearchResults data={data} canFetchMore={canFetchMore} postsViewType={postsViewType} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Users" key="2">
                   <AuthorsTab />
