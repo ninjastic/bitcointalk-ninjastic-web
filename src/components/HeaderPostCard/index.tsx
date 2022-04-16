@@ -23,7 +23,7 @@ interface Post {
 interface Props {
   data: Post;
   number?: number;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 }
 
 const CompactPostCard: React.FC<Props> = ({ data, number, style }) => {

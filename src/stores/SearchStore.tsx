@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocalStore } from 'mobx-react';
+import { useLocalObservable } from 'mobx-react';
 
 type Board = {
   board_id: number;
@@ -35,17 +35,19 @@ interface SearchStoreState {
   isLoadingSearch: boolean;
   isLoadingAddress: boolean;
   isDarkMode: boolean;
+  ignoredThreads: number[];
   setIsDarkMode: (value: boolean) => void;
   setIsLoadingSearch: (value: boolean) => void;
   setIsLoadingAddress: (value: boolean) => void;
   setValue: (type: string, name: string, value: any) => void;
   setBoards: (boards: Board[]) => void;
+  addIgnoredThread: (id: number) => void;
 }
 
 const StoreContext = React.createContext<SearchStoreState>({} as SearchStoreState);
 
 const StoreProvider = ({ children }) => {
-  const store = useLocalStore(() => ({
+  const store = useLocalObservable(() => ({
     searchQuery: {
       posts: {
         author: '',
@@ -69,6 +71,7 @@ const StoreProvider = ({ children }) => {
     isLoadingSearch: false,
     isLoadingAddress: false,
     isDarkMode: localStorage.getItem('ninjastic:isDarkMode') === 'true',
+    ignoredThreads: [],
 
     setIsDarkMode: value => {
       store.isDarkMode = value;
@@ -85,6 +88,9 @@ const StoreProvider = ({ children }) => {
     },
     setBoards: (data: Board[]) => {
       store.boards = data;
+    },
+    addIgnoredThread: (id: number) => {
+      store.ignoredThreads.push(id);
     },
   }));
 

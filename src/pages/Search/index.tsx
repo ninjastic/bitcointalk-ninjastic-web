@@ -24,6 +24,7 @@ import queryString from 'query-string';
 import numeral from 'numeral';
 import { addMinutes } from 'date-fns';
 
+import { Observer } from 'mobx-react';
 import api from '../../services/api';
 import { useSearchStore } from '../../stores/SearchStore';
 
@@ -161,11 +162,111 @@ const AuthorsTab: React.FC = () => {
   );
 };
 
+const SearchResults = ({
+  data,
+  canFetchMore,
+  postsViewType,
+}: {
+  data: Response[];
+  canFetchMore: boolean;
+  postsViewType: string;
+}) => {
+  const store = useSearchStore();
+  const { ignoredThreads, addIgnoredThread } = store;
+
+  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
+    if (groupIndex === data.length - 1) {
+      if (!canFetchMore) {
+        return (
+          <div style={{ textAlign: 'center', marginTop: 25 }}>
+            <Text type="secondary">You reached the end!</Text>
+          </div>
+        );
+      }
+
+      return onlyIcon ? (
+        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
+          <LoadingOutlined style={{ fontSize: 30 }} />
+        </div>
+      ) : (
+        <Card loading style={{ marginTop: 30 }} />
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Observer>
+      {() => (
+        <div>
+          {data.map((group, groupIndex) => {
+            if (!group.data.posts.length) {
+              return (
+                <Card key={groupIndex}>
+                  <Text strong key={1}>
+                    No results...
+                  </Text>
+                </Card>
+              );
+            }
+
+            return group.data.posts
+              .filter(post => !ignoredThreads.includes(post.topic_id))
+              .map((post, i, array) => {
+                switch (postsViewType) {
+                  case 'normal':
+                    return (
+                      <div style={{ marginBottom: 30 }} key={post.post_id}>
+                        <PostCard data={post} number={groupIndex * 100 + i + 1} hightlight={null} />
+                        <Button style={{ marginTop: 5 }} size="small" onClick={() => addIgnoredThread(post.topic_id)}>
+                          Ignore Topic
+                        </Button>
+                        <Divider />
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
+                      </div>
+                    );
+                  case 'collapsed':
+                    return (
+                      <div key={post.post_id}>
+                        <HeaderPostCard data={post} number={groupIndex * 100 + i + 1} />
+                        <Button
+                          style={{ marginTop: 5, marginBottom: 15 }}
+                          size="small"
+                          onClick={() => addIgnoredThread(post.topic_id)}
+                        >
+                          Ignore Topic
+                        </Button>
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
+                      </div>
+                    );
+                  case 'compact':
+                    return (
+                      <ul
+                        key={post.post_id}
+                        style={{
+                          paddingInlineStart: 20,
+                          marginBottom: 0,
+                        }}
+                      >
+                        <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
+                        {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
+                      </ul>
+                    );
+                  default:
+                    return null;
+                }
+              });
+          })}
+        </div>
+      )}
+    </Observer>
+  );
+};
+
 const Search: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
 
-  const [hightlight] = useState(false);
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const store = useSearchStore();
@@ -274,27 +375,6 @@ const Search: React.FC = () => {
 
     fetchMore();
   }, 500);
-
-  const LoadingMore = ({ groupIndex, onlyIcon = false }) => {
-    if (groupIndex === data.length - 1) {
-      if (!canFetchMore) {
-        return (
-          <div style={{ textAlign: 'center', marginTop: 25 }}>
-            <Text type="secondary">You reached the end!</Text>
-          </div>
-        );
-      }
-
-      return onlyIcon ? (
-        <div style={{ width: '100%', marginTop: 30, textAlign: 'center' }}>
-          <LoadingOutlined style={{ fontSize: 30 }} />
-        </div>
-      ) : (
-        <Card loading style={{ marginTop: 30 }} />
-      );
-    }
-    return null;
-  };
 
   const afterDate = searchQuery.posts.after_date
     ? addMinutes(new Date(searchQuery.posts.after_date), new Date(searchQuery.posts.after_date).getTimezoneOffset())
@@ -505,60 +585,7 @@ const Search: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {data.map((group, groupIndex) => {
-                    if (!group.data.posts.length) {
-                      return (
-                        <Card key={groupIndex}>
-                          <Text strong key={1}>
-                            No results...
-                          </Text>
-                        </Card>
-                      );
-                    }
-
-                    return group.data.posts.map((post, i, array) => {
-                      switch (postsViewType) {
-                        case 'normal':
-                          return (
-                            <div style={{ marginBottom: 30 }} key={post.post_id}>
-                              <PostCard
-                                data={post}
-                                number={groupIndex * 100 + i + 1}
-                                hightlight={hightlight ? searchQuery.posts.content : null}
-                              />
-                              <Divider />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
-                            </div>
-                          );
-                        case 'collapsed':
-                          return (
-                            <div key={post.post_id}>
-                              <HeaderPostCard
-                                data={post}
-                                number={groupIndex * 100 + i + 1}
-                                style={{ marginBottom: 15 }}
-                              />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} /> : null}
-                            </div>
-                          );
-                        case 'compact':
-                          return (
-                            <ul
-                              key={post.post_id}
-                              style={{
-                                paddingInlineStart: 20,
-                                marginBottom: 0,
-                              }}
-                            >
-                              <CompactPostCard data={post} number={groupIndex * 100 + i + 1} />
-                              {i === array.length - 1 ? <LoadingMore groupIndex={groupIndex} onlyIcon /> : null}
-                            </ul>
-                          );
-                        default:
-                          return null;
-                      }
-                    });
-                  })}
+                  <SearchResults data={data} canFetchMore={canFetchMore} postsViewType={postsViewType} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Users" key="2">
                   <AuthorsTab />
