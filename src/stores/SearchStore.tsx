@@ -7,6 +7,11 @@ type Board = {
   parent_id: number;
 };
 
+type IgnoredThread = {
+  id: number;
+  title: string;
+};
+
 type SearchPostsQuery = {
   author: string;
   content: string;
@@ -35,13 +40,14 @@ interface SearchStoreState {
   isLoadingSearch: boolean;
   isLoadingAddress: boolean;
   isDarkMode: boolean;
-  ignoredThreads: number[];
+  ignoredThreads: IgnoredThread[];
   setIsDarkMode: (value: boolean) => void;
   setIsLoadingSearch: (value: boolean) => void;
   setIsLoadingAddress: (value: boolean) => void;
   setValue: (type: string, name: string, value: any) => void;
   setBoards: (boards: Board[]) => void;
-  addIgnoredThread: (id: number) => void;
+  addIgnoredThread: (ignoredThread: IgnoredThread) => void;
+  removeIgnoredThread: (id: number) => void;
 }
 
 const StoreContext = React.createContext<SearchStoreState>({} as SearchStoreState);
@@ -71,7 +77,7 @@ const StoreProvider = ({ children }) => {
     isLoadingSearch: false,
     isLoadingAddress: false,
     isDarkMode: localStorage.getItem('ninjastic:isDarkMode') === 'true',
-    ignoredThreads: [],
+    ignoredThreads: [] as IgnoredThread[],
 
     setIsDarkMode: value => {
       store.isDarkMode = value;
@@ -89,8 +95,14 @@ const StoreProvider = ({ children }) => {
     setBoards: (data: Board[]) => {
       store.boards = data;
     },
-    addIgnoredThread: (id: number) => {
-      store.ignoredThreads.push(id);
+    addIgnoredThread: (ignoredThread: IgnoredThread) => {
+      store.ignoredThreads.push(ignoredThread);
+    },
+    removeIgnoredThread: (id: number) => {
+      const index = store.ignoredThreads.findIndex(ignoredThread => ignoredThread.id === id);
+      if (index !== -1) {
+        store.ignoredThreads.splice(index, 1);
+      }
     },
   }));
 

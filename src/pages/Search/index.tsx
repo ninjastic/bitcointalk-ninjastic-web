@@ -15,7 +15,7 @@ import {
   Checkbox,
   Tooltip,
 } from 'antd';
-import { SearchOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, LoadingOutlined, InfoCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import { format } from 'date-fns-tz';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { autorun } from 'mobx';
@@ -211,14 +211,18 @@ const SearchResults = ({
             }
 
             return group.data.posts
-              .filter(post => !ignoredThreads.includes(post.topic_id))
+              .filter(post => !ignoredThreads.find(ignoredThread => ignoredThread.id === post.topic_id))
               .map((post, i, array) => {
                 switch (postsViewType) {
                   case 'normal':
                     return (
                       <div style={{ marginBottom: 30 }} key={post.post_id}>
                         <PostCard data={post} number={groupIndex * 100 + i + 1} hightlight={null} />
-                        <Button style={{ marginTop: 5 }} size="small" onClick={() => addIgnoredThread(post.topic_id)}>
+                        <Button
+                          style={{ marginTop: 5 }}
+                          size="small"
+                          onClick={() => addIgnoredThread({ id: post.topic_id, title: post.title })}
+                        >
                           Ignore Topic
                         </Button>
                         <Divider />
@@ -232,7 +236,7 @@ const SearchResults = ({
                         <Button
                           style={{ marginTop: 5, marginBottom: 15 }}
                           size="small"
-                          onClick={() => addIgnoredThread(post.topic_id)}
+                          onClick={() => addIgnoredThread({ id: post.topic_id, title: post.title })}
                         >
                           Ignore Topic
                         </Button>
@@ -270,7 +274,7 @@ const Search: React.FC = () => {
   const [postsViewType, setPostsViewType] = useState('normal');
 
   const store = useSearchStore();
-  const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch } = store;
+  const { setValue, searchQuery, isLoadingSearch, setIsLoadingSearch, ignoredThreads, removeIgnoredThread } = store;
 
   const { isLoading, isFetching, isError, refetch, fetchMore, canFetchMore, data } = useInfiniteQuery<Response>(
     'posts',
@@ -522,6 +526,31 @@ const Search: React.FC = () => {
                 </Row>
               </Form>
             </Card>
+
+            <Observer>
+              {() =>
+                ignoredThreads.length > 0 ? (
+                  <Card style={{ marginTop: 10 }} title="Ignored Topics">
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {ignoredThreads.map((ignoredThread, index, array) => (
+                        <div key={ignoredThread.id}>
+                          <Text style={{ fontSize: 12 }}>
+                            <b>{ignoredThread.id}</b> - {ignoredThread.title}
+                            <Button
+                              icon={<DeleteOutlined />}
+                              style={{ marginLeft: 10 }}
+                              size="small"
+                              onClick={() => removeIgnoredThread(ignoredThread.id)}
+                            />
+                          </Text>
+                          {index < array.length ? <Divider style={{ marginTop: 5, marginBottom: 5 }} /> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ) : null
+              }
+            </Observer>
           </Col>
           <Col xs={24} md={24} lg={16}>
             {(!data || isLoading || isLoadingSearch) && !isError ? (
