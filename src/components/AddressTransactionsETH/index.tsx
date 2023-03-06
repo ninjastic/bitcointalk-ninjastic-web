@@ -63,9 +63,9 @@ const AddressTransactionsETH: React.FC<Params> = ({ address }) => {
 
   return (
     <div>
-      {data.data.operations.map(operation => {
-        return <TransactionCard key={operation.transactionHash} rootAddress={address} transaction={operation} />;
-      })}
+      {data.data.operations.map(operation => (
+        <TransactionCard key={operation.transactionHash} rootAddress={address} transaction={operation} />
+      ))}
       {data.data.operations.length >= 10 ? (
         <a
           href={`https://etherscan.io/address/${address}#tokentxns`}

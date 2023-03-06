@@ -10,13 +10,10 @@ import queryString from 'query-string';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
-// import PostCard from '../../components/PostCard';
-// import HeaderPostCard from '../../components/HeaderPostCard';
-// import CompactPostCard from '../../components/CompactPostCard';
+
 import LineChart from '../../components/LineChart';
 import BarChart from '../../components/BarChart';
 import PieChart from '../../components/PieChart';
-// import TreeMap from '../../components/TreeMap';
 import AddressAggregatorCard from '../../components/AddressAggregatorCard/indes';
 
 import { PageContent } from './styles';
@@ -396,9 +393,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
       dataIndex: 'topic_id',
       key: 'view-posts',
       width: 130,
-      render: (_, record) => {
-        return <Link to={`/topic/${record.topic_id}`}>View</Link>;
-      },
+      render: (_, record) => <Link to={`/topic/${record.topic_id}`}>View</Link>,
     },
   ];
 
@@ -486,34 +481,30 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
 
   return (
     <div>
-      {data.map((group, groupIndex, array) => {
-        return (
-          <div key={groupIndex}>
-            {group.data.addresses.map(address => {
-              return (
-                <AddressAggregatorCard
-                  key={address.address}
-                  address={address.address}
-                  coin={address.coin}
-                  count={address.count}
-                  author={username}
-                />
-              );
-            })}
-            {groupIndex === array.length - 1 ? (
-              <div style={{ marginTop: 15, textAlign: 'center' }}>
-                {canFetchMore ? (
-                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
-                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                  </Button>
-                ) : (
-                  <Text type="secondary">You reached the end!</Text>
-                )}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
+      {data.map((group, groupIndex, array) => (
+        <div key={groupIndex}>
+          {group.data.addresses.map(address => (
+            <AddressAggregatorCard
+              key={address.address}
+              address={address.address}
+              coin={address.coin}
+              count={address.count}
+              author={username}
+            />
+          ))}
+          {groupIndex === array.length - 1 ? (
+            <div style={{ marginTop: 15, textAlign: 'center' }}>
+              {canFetchMore ? (
+                <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
+                  {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                </Button>
+              ) : (
+                <Text type="secondary">You reached the end!</Text>
+              )}
+            </div>
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 };
@@ -548,17 +539,15 @@ const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
 
   return (
     <div>
-      {data.data.addresses.map(address => {
-        return (
-          <AddressAggregatorCard
-            address={address.address}
-            coin={address.coin}
-            key={address.address}
-            count={address.count}
-            author={username}
-          />
-        );
-      })}
+      {data.data.addresses.map(address => (
+        <AddressAggregatorCard
+          address={address.address}
+          coin={address.coin}
+          key={address.address}
+          count={address.count}
+          author={username}
+        />
+      ))}
     </div>
   );
 };
@@ -634,12 +623,10 @@ const PostsYearChart: React.FC<{ username: string }> = ({ username }) => {
   }
 
   const dataNormalized =
-    data?.data?.map(d => {
-      return {
-        y: d.doc_count,
-        x: d.key,
-      };
-    }) || [];
+    data?.data?.map(d => ({
+      y: d.doc_count,
+      x: d.key,
+    })) || [];
 
   dataNormalized.shift();
 
@@ -669,12 +656,10 @@ const MeritsLineChart: React.FC<{ username: string; type: string }> = ({ usernam
     return <Text>Something went wrong</Text>;
   }
 
-  const dataNormalized = data?.data?.dates.map(d => {
-    return {
-      y: d.total_sum,
-      x: d.key,
-    };
-  });
+  const dataNormalized = data?.data?.dates.map(d => ({
+    y: d.total_sum,
+    x: d.key,
+  }));
 
   return <BarChart data={dataNormalized} loading={isLoading} name="Merits" dateFormat="dd MMM yyyy" />;
 };
@@ -714,9 +699,7 @@ const MeritsTable: React.FC<{ username: string; type: string }> = ({ username, t
       title: 'Post',
       dataIndex: 'post_id',
       key: 'post_id',
-      render: (text, record) => {
-        return <Link to={`/post/${text}`}>{record.title}</Link>;
-      },
+      render: (text, record) => <Link to={`/post/${text}`}>{record.title}</Link>,
     },
     {
       title: 'Date',
@@ -756,17 +739,13 @@ const MeritFriendsTable: React.FC<{ username: string; type: string }> = ({ usern
       dataIndex: 'number',
       key: 'number',
       width: 50,
-      render: (_, r, i) => {
-        return <Text>{i + 1}</Text>;
-      },
+      render: (_, r, i) => <Text>{i + 1}</Text>,
     },
     {
       title: 'Username',
       dataIndex: 'key',
       key: 'key',
-      render: text => {
-        return <Link to={`/user/${text}`}>{text}</Link>;
-      },
+      render: text => <Link to={`/user/${text}`}>{text}</Link>,
     },
     {
       title: 'Amount',
@@ -814,17 +793,13 @@ const MeritBoardsTable: React.FC<{ username: string; type: string }> = ({ userna
       dataIndex: 'number',
       key: 'number',
       width: 50,
-      render: (_, r, i) => {
-        return <Text>{i + 1}</Text>;
-      },
+      render: (_, r, i) => <Text>{i + 1}</Text>,
     },
     {
       title: 'Board',
       dataIndex: 'board_id',
       key: 'board_id',
-      render: (text, record) => {
-        return <Link to={`https://bitcointalk.org/index.php?board=${text}`}>{record.board_name}</Link>;
-      },
+      render: (text, record) => <Link to={`https://bitcointalk.org/index.php?board=${text}`}>{record.board_name}</Link>,
     },
     {
       title: 'Amount',
@@ -1066,9 +1041,7 @@ const User: React.FC = () => {
               <Statistic
                 title="Scraped Posts"
                 value={data.data.posts_count}
-                valueRender={value => {
-                  return isLoading ? <LoadingOutlined /> : value;
-                }}
+                valueRender={value => (isLoading ? <LoadingOutlined /> : value)}
               />
             </Col>
             <Col xs={12} md={6} lg={6}>

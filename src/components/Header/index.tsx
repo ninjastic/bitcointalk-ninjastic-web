@@ -62,9 +62,9 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
       {/* <Menu.Item key="/patrol">
         <Link to="/patrol">Patrol</Link>
       </Menu.Item> */}
-      <div
+      <Menu.Item
+        disabled
         style={{
-          position: 'relative',
           marginTop: 6,
           marginBottom: 5,
           marginLeft: mode === 'horizontal' ? 'auto' : '5px',
@@ -111,7 +111,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
             />
           </Input.Group>
         </div>
-      </div>
+      </Menu.Item>
     </Menu>
   );
 };
@@ -134,7 +134,7 @@ const Header: React.FC = () => {
       {isSmallScreen && showMenu ? (
         <Drawer
           placement="left"
-          visible={showMenu}
+          open={showMenu}
           onClose={() => setShowMenu(false)}
           bodyStyle={{ padding: 0, background: 'var(--body-background)' }}
         >

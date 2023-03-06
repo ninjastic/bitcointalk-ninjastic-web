@@ -35,9 +35,7 @@ const PostsTodayCard: React.FC = () => {
     { refetchOnMount: false, refetchOnWindowFocus: false, retry: false },
   );
 
-  const totalCount = data?.data?.reduce((prev, current) => {
-    return prev + current.doc_count;
-  }, 0);
+  const totalCount = data?.data?.reduce((prev, current) => prev + current.doc_count, 0);
 
   return (
     <Statistic title="Posts 24h" value={totalCount} valueRender={value => (isLoading ? <LoadingOutlined /> : value)} />
@@ -94,12 +92,10 @@ const PostsLast24HoursGraph: React.FC = () => {
     return <Text>Something went wrong</Text>;
   }
 
-  const dataNormalized = data?.data?.map(d => {
-    return {
-      y: d.doc_count,
-      x: d.key,
-    };
-  });
+  const dataNormalized = data?.data?.map(d => ({
+    y: d.doc_count,
+    x: d.key,
+  }));
 
   return <BarChart data={dataNormalized} loading={isLoading} name="Posts" dateFormat="HH:mm" />;
 };
@@ -158,40 +154,38 @@ const PostsPerMonthGraph: React.FC = () => {
   return <LineChart data={data?.data} loading={isLoading} name="Posts" dateFormat="MMM yyyy" />;
 };
 
-const Dashboard: React.FC = () => {
-  return (
-    <>
-      <Header />
-      <PageContent>
-        <AlertMessage />
-        <Row gutter={[24, 24]}>
-          <Col xs={12} lg={8}>
-            <PostsTodayCard />
-          </Col>
-          <Col xs={12} lg={8}>
-            <MeritsTodayCard />
-          </Col>
-        </Row>
-        <Divider />
-        <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
-          <Col xs={24} lg={12}>
-            <Title level={3}>Posts per day</Title>
-            <PostsPerDayGraph />
-          </Col>
-          <Col xs={24} lg={12}>
-            <Title level={3}>Posts per month</Title>
-            <PostsPerMonthGraph />
-          </Col>
-        </Row>
-        <Row gutter={[24, 24]}>
-          <Col xs={24}>
-            <Title level={3}>Posts in the last 24 hours</Title>
-            <PostsLast24HoursGraph />
-          </Col>
-        </Row>
-      </PageContent>
-    </>
-  );
-};
+const Dashboard: React.FC = () => (
+  <>
+    <Header />
+    <PageContent>
+      <AlertMessage />
+      <Row gutter={[24, 24]}>
+        <Col xs={12} lg={8}>
+          <PostsTodayCard />
+        </Col>
+        <Col xs={12} lg={8}>
+          <MeritsTodayCard />
+        </Col>
+      </Row>
+      <Divider />
+      <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
+        <Col xs={24} lg={12}>
+          <Title level={3}>Posts per day</Title>
+          <PostsPerDayGraph />
+        </Col>
+        <Col xs={24} lg={12}>
+          <Title level={3}>Posts per month</Title>
+          <PostsPerMonthGraph />
+        </Col>
+      </Row>
+      <Row gutter={[24, 24]}>
+        <Col xs={24}>
+          <Title level={3}>Posts in the last 24 hours</Title>
+          <PostsLast24HoursGraph />
+        </Col>
+      </Row>
+    </PageContent>
+  </>
+);
 
 export default Dashboard;

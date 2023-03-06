@@ -359,8 +359,8 @@ const Addresses: React.FC = () => {
           </Col>
           <Col xs={24} md={24} lg={16}>
             <Observer>
-              {() => {
-                return (!data || isLoading || isLoadingAddress) && !isError ? (
+              {() =>
+                (!data || isLoading || isLoadingAddress) && !isError ? (
                   <Card
                     title="What do you want to find today?"
                     loading={isLoading || isFetching || isLoadingAddress}
@@ -378,8 +378,8 @@ const Addresses: React.FC = () => {
                       <Text style={{ textAlign: 'center' }}>Just click the button and get the latest addresses.</Text>
                     </div>
                   </Card>
-                ) : null;
-              }}
+                ) : null
+              }
             </Observer>
             {!isLoading && isError ? (
               <Card>

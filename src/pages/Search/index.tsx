@@ -416,11 +416,11 @@ const Search: React.FC = () => {
 
                   <Col span={24}>
                     <Form.Item
-                      label={(
+                      label={
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <Typography style={{ marginRight: 5 }}>Post Title</Typography>
                           <Tooltip
-                            title={(
+                            title={
                               <div>
                                 <article style={{ fontWeight: 500 }}>Advanced search:</article>
                                 <article>+ for AND operations</article>
@@ -429,12 +429,12 @@ const Search: React.FC = () => {
                                 <article>&quot; wraps a phrase (for exact matches)</article>
                                 <article>( and ) for precedence</article>
                               </div>
-                            )}
+                            }
                           >
                             <InfoCircleOutlined />
                           </Tooltip>
                         </div>
-                      )}
+                      }
                     >
                       <Input
                         placeholder="Scam accusation"
@@ -452,7 +452,7 @@ const Search: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <Typography style={{ marginRight: 5 }}>Post Content</Typography>
                           <Tooltip
-                            title={(
+                            title={
                               <div>
                                 <article style={{ fontWeight: 500 }}>Advanced search:</article>
                                 <article>+ for AND operations</article>
@@ -461,7 +461,7 @@ const Search: React.FC = () => {
                                 <article>&quot; wraps a phrase (for exact matches)</article>
                                 <article>( and ) for precedence</article>
                               </div>
-                            )}
+                            }
                           >
                             <InfoCircleOutlined />
                           </Tooltip>
@@ -586,8 +586,7 @@ const Search: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       {data && !isLoading && !isLoadingSearch ? (
                         <div>
-                          <Text style={{ fontWeight: 500 }}>Total results:</Text>
-{' '}
+                          <Text style={{ fontWeight: 500 }}>Total results:</Text>{' '}
                           <Text>{numeral(data[0].data.total_results || 0).format('0,0')}</Text>
                         </div>
                       ) : null}

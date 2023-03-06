@@ -59,9 +59,7 @@ const PieChart: React.FC<BoardsChartProps> = ({ data, loading }) => {
       dropShadow: {
         enabled: false,
       },
-      formatter: (_, opts) => {
-        return series[opts.seriesIndex];
-      },
+      formatter: (_, opts) => series[opts.seriesIndex],
     },
     plotOptions: {
       pie: {

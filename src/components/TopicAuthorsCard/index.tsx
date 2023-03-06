@@ -38,14 +38,12 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
     );
   }
 
-  const tableData = data?.data?.authors.map(r => {
-    return {
-      key: r.author,
-      author: r.author,
-      author_uid: r.author_uid,
-      count: r.count,
-    };
-  });
+  const tableData = data?.data?.authors.map(r => ({
+    key: r.author,
+    author: r.author,
+    author_uid: r.author_uid,
+    count: r.count,
+  }));
 
   const columns = [
     {
@@ -53,17 +51,15 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       dataIndex: 'author',
       key: 'number',
       width: 25,
-      render: (text, record, index) => {
-        return <span>{index + 1}</span>;
-      },
+      render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: 'Author',
       dataIndex: 'author',
       key: 'author',
-      render: (text, record) => {
-        return <a href={`https://bitcointalk.org/index.php?action=profile;u=${record.author_uid}`}>{text}</a>;
-      },
+      render: (text, record) => (
+        <a href={`https://bitcointalk.org/index.php?action=profile;u=${record.author_uid}`}>{text}</a>
+      ),
     },
     {
       title: 'Posts',
@@ -74,17 +70,13 @@ const TopicAuthorsCard: React.FC<{ topicId: number }> = ({ topicId }) => {
       title: 'User Page',
       dataIndex: 'author',
       key: 'stats',
-      render: text => {
-        return <Link to={`/user/${text}`}>View</Link>;
-      },
+      render: text => <Link to={`/user/${text}`}>View</Link>,
     },
     {
       title: 'View Posts',
       dataIndex: 'author',
       key: 'view-posts',
-      render: text => {
-        return <Link to={`/search?author=${text}&topic_id=${topicId}`}>View</Link>;
-      },
+      render: text => <Link to={`/search?author=${text}&topic_id=${topicId}`}>View</Link>,
     },
   ];
 

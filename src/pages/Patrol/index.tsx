@@ -91,15 +91,13 @@ const LastDeletedPosts: React.FC = () => {
             );
           }
 
-          return group.data.posts_history.map((post, i, array) => {
-            return (
-              <div style={{ marginBottom: 30 }} key={post.post_id}>
-                <PostCard data={post} number={groupIndex * 100 + i + 1} />
-                <Divider />
-                {i === array.length - 1 ? <LoadingMoreCard groupIndex={groupIndex} /> : null}
-              </div>
-            );
-          });
+          return group.data.posts_history.map((post, i, array) => (
+            <div style={{ marginBottom: 30 }} key={post.post_id}>
+              <PostCard data={post} number={groupIndex * 100 + i + 1} />
+              <Divider />
+              {i === array.length - 1 ? <LoadingMoreCard groupIndex={groupIndex} /> : null}
+            </div>
+          ));
         })}
     </>
   );

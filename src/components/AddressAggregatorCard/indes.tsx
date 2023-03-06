@@ -85,11 +85,9 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, author }
           </div>
         ) : null}
         {isError ? 'Something went wrong...' : null}
-        {data?.data?.addresses.map((record, index) => {
-          return (
-            <AddressCard data={record} number={index} key={`${record.address}_${record.post_id}`} showAddress={false} />
-          );
-        })}
+        {data?.data?.addresses.map((record, index) => (
+          <AddressCard data={record} number={index} key={`${record.address}_${record.post_id}`} showAddress={false} />
+        ))}
       </Collapse.Panel>
     </Collapse>
   );

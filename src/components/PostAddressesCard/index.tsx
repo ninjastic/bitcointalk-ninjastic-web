@@ -66,35 +66,31 @@ const PostAddressesCard: React.FC<{ id: number }> = ({ id }) => {
   return (
     <Collapse style={{ marginTop: 15, marginBottom: 25 }}>
       <Collapse.Panel header="Addresses" key={`addresses:post-${id}`}>
-        {data.map((group, groupIndex, array) => {
-          return (
-            <div key={groupIndex}>
-              {group.data.addresses.map(address => {
-                return (
-                  <div key={address.address}>
-                    <AddressAggregatorCard
-                      key={address.address}
-                      coin={address.coin}
-                      address={address.address}
-                      count={address.count}
-                    />
-                  </div>
-                );
-              })}
-              {groupIndex === array.length - 1 ? (
-                <div style={{ marginTop: 15, textAlign: 'center' }}>
-                  {canFetchMore ? (
-                    <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
-                      {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
-                    </Button>
-                  ) : (
-                    <Text type="secondary">You reached the end!</Text>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
+        {data.map((group, groupIndex, array) => (
+          <div key={groupIndex}>
+            {group.data.addresses.map(address => (
+              <div key={address.address}>
+                <AddressAggregatorCard
+                  key={address.address}
+                  coin={address.coin}
+                  address={address.address}
+                  count={address.count}
+                />
+              </div>
+            ))}
+            {groupIndex === array.length - 1 ? (
+              <div style={{ marginTop: 15, textAlign: 'center' }}>
+                {canFetchMore ? (
+                  <Button size="large" onClick={() => fetchMore()} disabled={!!isFetchingMore} style={{ width: 110 }}>
+                    {isFetchingMore ? <LoadingOutlined /> : 'Load more'}
+                  </Button>
+                ) : (
+                  <Text type="secondary">You reached the end!</Text>
+                )}
+              </div>
+            ) : null}
+          </div>
+        ))}
       </Collapse.Panel>
     </Collapse>
   );

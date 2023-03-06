@@ -34,9 +34,10 @@ const AddressDetailsETH: React.FC<Params> = ({ address }) => {
     );
   }
 
-  const tokensFiltered = data?.data?.tokens?.filter((token, index, array) => {
-    return array.map(mapObj => mapObj.tokenInfo.owner).indexOf(token.tokenInfo.owner) === index && token.tokenInfo.name;
-  });
+  const tokensFiltered = data?.data?.tokens?.filter(
+    (token, index, array) =>
+      array.map(mapObj => mapObj.tokenInfo.owner).indexOf(token.tokenInfo.owner) === index && token.tokenInfo.name,
+  );
 
   return (
     <div>

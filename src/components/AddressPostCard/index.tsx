@@ -68,22 +68,18 @@ const AddressPostCard: React.FC<Props> = ({ postsId }) => {
           key={ids}
         >
           <Row gutter={[4, 4]}>
-            {postsId.map(postId => {
-              return (
-                <Col span={4}>
-                  <Link to={`/post/${postId}`}>{postId}</Link>
-                </Col>
-              );
-            })}
+            {postsId.map(postId => (
+              <Col span={4}>
+                <Link to={`/post/${postId}`}>{postId}</Link>
+              </Col>
+            ))}
           </Row>
         </Collapse.Panel>
       </Collapse>
     );
   }
 
-  return data.data.map(post => {
-    return <AddressPostCollapse data={post} key={post.post_id} />;
-  });
+  return data.data.map(post => <AddressPostCollapse data={post} key={post.post_id} />);
 };
 
 export default AddressPostCard;

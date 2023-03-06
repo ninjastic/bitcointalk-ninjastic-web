@@ -29,12 +29,10 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
     return <LoadingOutlined style={{ fontSize: 42, margin: '42px 0 20px 0', textAlign: 'center', width: '100%' }} />;
   }
 
-  const dataNormalized = data.map(d => {
-    return {
-      y: d.doc_count,
-      x: d.key,
-    };
-  });
+  const dataNormalized = data.map(d => ({
+    y: d.doc_count,
+    x: d.key,
+  }));
 
   const series = [
     {
@@ -102,10 +100,7 @@ const LineChart: React.FC<Params> = ({ data, loading, name, dateFormat }) => {
 
         return renderToString(
           <Card size="small" title={dateString}>
-            {name}
-            :
-            {' '}
-            {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
+            {name}: {numeral(s[seriesIndex][dataPointIndex]).format('0,0')}
           </Card>,
         );
       },

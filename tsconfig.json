@@ -21,6 +21,8 @@
     "noEmit": true
   },
   "include": [
-    "src"
+    "src",
+    "prettier.config.js",
+    "gulpfile.js"
   ]
 }

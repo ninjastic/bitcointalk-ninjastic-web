@@ -45,7 +45,7 @@ interface Response {
   data: Data;
 }
 
-const Address: React.FC = () => {
+const AddressPage: React.FC = () => {
   const history = useHistory();
   const { address } = useRouteMatch().params as MatchParams;
 
@@ -144,13 +144,11 @@ const Address: React.FC = () => {
               <Col xs={24} md={17} lg={17}>
                 <Tabs defaultActiveKey="1">
                   <Tabs.TabPane key="1" tab="Mentions">
-                    {data.data.addresses.map((entry, index) => {
-                      return (
-                        <div style={{ marginBottom: 10 }}>
-                          <AddressCard key={entry.address} data={entry} number={index} showAddress={false} />
-                        </div>
-                      );
-                    })}
+                    {data.data.addresses.map((entry, index) => (
+                      <div style={{ marginBottom: 10 }}>
+                        <AddressCard key={entry.address} data={entry} number={index} showAddress={false} />
+                      </div>
+                    ))}
                   </Tabs.TabPane>
                   <Tabs.TabPane key="2" tab="Authors">
                     <AddressAuthorsCard address={data.data.addresses[0].address} />
@@ -170,4 +168,4 @@ const Address: React.FC = () => {
   );
 };
 
-export default Address;
+export default AddressPage;

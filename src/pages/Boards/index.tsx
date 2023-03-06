@@ -74,13 +74,11 @@ const Boards: React.FC = () => {
     },
   ];
 
-  const tableData = data?.boards?.map(r => {
-    return {
-      key: r.key,
-      name: r.name,
-      count: r.count,
-    };
-  });
+  const tableData = data?.boards?.map(r => ({
+    key: r.key,
+    name: r.name,
+    count: r.count,
+  }));
 
   return (
     <div>

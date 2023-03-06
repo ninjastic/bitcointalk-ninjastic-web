@@ -99,15 +99,13 @@ const AddressTransactionCardETH: React.FC<Params> = ({ rootAddress, transaction 
       {isLoading ? <LoadingOutlined /> : null}
       {!isLoading && !isError && data.data?.addresses?.length ? (
         <div>
-          {data.data.addresses[0].authors?.map(({ key, doc_count }) => {
-            return (
-              <span key={key} style={{ marginRight: 10 }}>
-                <Link to={`/user/${key}`}>
-                  {key} ({doc_count})
-                </Link>
-              </span>
-            );
-          })}
+          {data.data.addresses[0].authors?.map(({ key, doc_count }) => (
+            <span key={key} style={{ marginRight: 10 }}>
+              <Link to={`/user/${key}`}>
+                {key} ({doc_count})
+              </Link>
+            </span>
+          ))}
         </div>
       ) : null}
     </Card>

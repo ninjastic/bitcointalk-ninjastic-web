@@ -16,7 +16,6 @@ interface Props {
   id: number;
   postTitle: string;
   postContent: string;
-  postDate: string;
   postBoardId: number;
 }
 
