@@ -48,6 +48,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
         marginTop: mode === 'horizontal' ? '0' : '40px',
         maxWidth: mode === 'horizontal' ? '1300px' : '100%',
         display: mode === 'horizontal' ? 'flex' : 'block',
+        background: 'var(--body-background)',
       }}
     >
       <Menu.Item key="/">
@@ -70,6 +71,7 @@ const HeaderMenu: React.FC<MenuItemsProps> = ({ mode }) => {
           marginLeft: mode === 'horizontal' ? 'auto' : '5px',
           marginRight: mode === 'horizontal' ? '0' : '5px',
           left: mode === 'horizontal' ? '-105px' : '0',
+          height: '100%',
         }}
       >
         <div
@@ -122,7 +124,10 @@ const Header: React.FC = () => {
   const isSmallScreen = useMediaQuery({ query: '(max-width: 850px)' });
 
   return (
-    <div className="ant-menu ant-menu-horizontal" style={{ marginBottom: 20, height: 48 }}>
+    <div
+      className="ant-menu ant-menu-horizontal"
+      style={{ marginBottom: 20, height: 48, background: 'var(--body-background)' }}
+    >
       {!isSmallScreen ? <HeaderMenu mode="horizontal" /> : null}
       {isSmallScreen ? (
         <div style={{ marginLeft: 5, marginTop: 5 }}>
