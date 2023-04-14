@@ -9,11 +9,12 @@ import api from '../../services/api';
 import Header from '../../components/Header';
 import AddressCard from '../../components/AddressCard';
 import AddressDetailsETH from '../../components/AddressDetailsETH';
+import AddressDetailsBTC from '../../components/AddressDetailsBTC';
+import AddressDetailsTRX from '../../components/AddressDetailsTRX';
 import AddressTransactionsETH from '../../components/AddressTransactionsETH';
 import AddressAuthorsCard from '../../components/AddressAuthorsCard';
 
 import { PageContent } from './styles';
-import AddressDetailsBTC from '../../components/AddressDetailsBTC';
 
 const { Text, Title } = Typography;
 
@@ -23,7 +24,7 @@ interface MatchParams {
 
 interface Address {
   address: string;
-  coin: 'BTC' | 'ETH';
+  coin: 'BTC' | 'ETH' | 'TRX';
   post_id: number;
   topic_id: number;
   author: string;
@@ -135,10 +136,14 @@ const AddressPage: React.FC = () => {
           >
             <Row gutter={[24, 24]}>
               <Col xs={24} md={7} lg={7}>
-                {data.data.addresses[0].coin === 'ETH' ? (
+                {data.data.addresses[0].coin === 'ETH' && (
                   <AddressDetailsETH address={data.data.addresses[0].address} />
-                ) : (
+                )}
+                {data.data.addresses[0].coin === 'BTC' && (
                   <AddressDetailsBTC address={data.data.addresses[0].address} />
+                )}
+                {data.data.addresses[0].coin === 'TRX' && (
+                  <AddressDetailsTRX address={data.data.addresses[0].address} />
                 )}
               </Col>
               <Col xs={24} md={17} lg={17}>

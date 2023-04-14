@@ -38,7 +38,7 @@ const { Option } = Select;
 
 interface Address {
   address: string;
-  coin: 'BTC' | 'ETH';
+  coin: 'BTC' | 'ETH' | 'TRX';
   post_id: number;
   topic_id: number;
   author: string;
@@ -320,6 +320,7 @@ const Addresses: React.FC = () => {
                         <Option value="">Any</Option>
                         <Option value="BTC">BTC</Option>
                         <Option value="ETH">ETH</Option>
+                        <Option value="TRX">TRX</Option>
                       </Select>
                     </Form.Item>
                   </Col>

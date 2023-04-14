@@ -429,7 +429,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
 const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   interface Address {
     address: string;
-    coin: 'BTC' | 'ETH';
+    coin: 'BTC' | 'ETH' | 'TRX';
     count: number;
   }
 

@@ -8,12 +8,13 @@ import api from '../../services/api';
 
 import imageBTC from '../../assets/images/btc.png';
 import imageETH from '../../assets/images/eth.png';
+import imageTRX from '../../assets/images/trx.png';
 
 import AddressCard from '../AddressCard';
 
 interface Props {
   address: string;
-  coin: 'BTC' | 'ETH';
+  coin: 'BTC' | 'ETH' | 'TRX';
   count?: number;
   author?: string;
 }
@@ -27,6 +28,10 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, author }
     {
       coin: 'BTC',
       image: imageBTC,
+    },
+    {
+      coin: 'TRX',
+      image: imageTRX,
     },
   ];
 

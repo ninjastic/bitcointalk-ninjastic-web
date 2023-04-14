@@ -10,6 +10,7 @@ import api from '../../services/api';
 
 import imageBTC from '../../assets/images/btc.png';
 import imageETH from '../../assets/images/eth.png';
+import imageTRX from '../../assets/images/trx.png';
 
 import Header from '../../components/Header';
 
@@ -30,6 +31,10 @@ const Compare: React.FC = () => {
     {
       coin: 'BTC',
       image: imageBTC,
+    },
+    {
+      coin: 'TRX',
+      image: imageTRX,
     },
   ];
 
@@ -90,7 +95,7 @@ const Compare: React.FC = () => {
             <Col span={24}>
               <Typography.Title level={5}>Available Data:</Typography.Title>
               <Typography.Paragraph>
-                - BTC and ETH addresses posted outside of quotes on the &quot;Stake Bitcoin address here&quot; topic, on
+                - BTC/TRX/ETH addresses posted outside of quotes on the &quot;Stake Bitcoin address here&quot; topic, on
                 the &quot;Bounties (Altcoin)&quot; and &quot;Services&quot; board.
               </Typography.Paragraph>
               <Typography.Paragraph>
@@ -133,6 +138,9 @@ const Compare: React.FC = () => {
                             ) : null}
                             {address.coin === 'ETH' ? (
                               <a href={`https://etherscan.io/address/${address.address}`}>(Explorer)</a>
+                            ) : null}
+                            {address.coin === 'TRX' ? (
+                              <a href={`https://tronscan.io/#/address/${address.address}`}>(Explorer)</a>
                             ) : null}
                           </div>
                         </div>

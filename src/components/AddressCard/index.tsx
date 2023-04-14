@@ -7,6 +7,7 @@ import { addMinutes, format } from 'date-fns';
 
 import imageBTC from '../../assets/images/btc.png';
 import imageETH from '../../assets/images/eth.png';
+import imageTRX from '../../assets/images/trx.png';
 
 const { Text } = Typography;
 
@@ -39,6 +40,10 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
     {
       coin: 'BTC',
       image: imageBTC,
+    },
+    {
+      coin: 'TRX',
+      image: imageTRX,
     },
   ];
 
