@@ -426,7 +426,7 @@ const FavoriteTopics: React.FC<{ username: string }> = ({ username }) => {
   );
 };
 
-const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
+const MentionedAddresses: React.FC<{ authorUid: number }> = ({ authorUid }) => {
   interface Address {
     address: string;
     coin: 'BTC' | 'ETH' | 'TRX';
@@ -443,11 +443,11 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   }
 
   const { data, isLoading, fetchMore, isFetchingMore, canFetchMore, isError } = useInfiniteQuery<Response>(
-    `userAddresses:${username}`,
+    `userAddresses:${authorUid}`,
     async (key, last = null) => {
       const { data: responseData } = await api.get(`/addresses/unique`, {
         params: {
-          author: username,
+          author_uid: authorUid,
           last,
           limit: 20,
         },
@@ -489,7 +489,7 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
               address={address.address}
               coin={address.coin}
               count={address.count}
-              author={username}
+              authorUid={authorUid}
             />
           ))}
           {groupIndex === array.length - 1 ? (
@@ -509,13 +509,13 @@ const MentionedAddresses: React.FC<{ username: string }> = ({ username }) => {
   );
 };
 
-const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
+const FavoriteAddresses: React.FC<{ authorUid: number }> = ({ authorUid }) => {
   const { data, isLoading, isError } = useQuery(
-    `favoriteAddresses:${username}`,
+    `favoriteAddresses:${authorUid}`,
     async () => {
       const { data: responseData } = await api.get(`/addresses/unique/top`, {
         params: {
-          author: username,
+          author_uid: authorUid,
           limit: 5,
         },
       });
@@ -545,7 +545,7 @@ const FavoriteAddresses: React.FC<{ username: string }> = ({ username }) => {
           coin={address.coin}
           key={address.address}
           count={address.count}
-          author={username}
+          authorUid={authorUid}
         />
       ))}
     </div>
@@ -1118,10 +1118,10 @@ const User: React.FC = () => {
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Addresses" key="addresses">
                   <Title level={5}>Top 5 Favorite Addresses</Title>
-                  <FavoriteAddresses username={data.data.author} />
+                  <FavoriteAddresses authorUid={data.data.author_uid} />
                   <Divider />
                   <Title level={5}>All Mentioned Addresses</Title>
-                  <MentionedAddresses username={data.data.author} />
+                  <MentionedAddresses authorUid={data.data.author_uid} />
                 </Tabs.TabPane>
                 {/* <Tabs.TabPane tab="Deleted Posts" key="5">
                   <DeletedPosts username={data.data.author} />

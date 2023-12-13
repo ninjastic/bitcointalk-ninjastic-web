@@ -16,10 +16,10 @@ interface Props {
   address: string;
   coin: 'BTC' | 'ETH' | 'TRX';
   count?: number;
-  author?: string;
+  authorUid?: number;
 }
 
-const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, author }) => {
+const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, authorUid }) => {
   const icons = [
     {
       coin: 'ETH',
@@ -41,7 +41,7 @@ const AddressAggregatorCard: React.FC<Props> = ({ address, coin, count, author }
       const { data: responseData } = await api.get(`/addresses`, {
         params: {
           address,
-          author,
+          author_uid: authorUid,
         },
       });
 
