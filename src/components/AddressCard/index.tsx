@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Collapse, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import parse from 'html-react-parser';
 import DOMPurity from 'dompurify';
 import { addMinutes, format } from 'date-fns';
+import { LoadingOutlined } from '@ant-design/icons';
+import { useQuery } from 'react-query';
 
+import api from '../../services/api';
 import imageBTC from '../../assets/images/btc.png';
 import imageETH from '../../assets/images/eth.png';
 import imageTRX from '../../assets/images/trx.png';
@@ -50,8 +53,20 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
   const date = new Date(data.date);
   const formattedDate = format(addMinutes(date, date.getTimezoneOffset()), "yyyy-MM-dd HH:mm:ss 'UTC'");
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { data: postData, isLoading } = useQuery(
+    `addressesPostsData:${data.post_id}`,
+    async () => {
+      const { data: responseData } = await api.get(`posts/${data.post_id}`);
+
+      return responseData.data[0];
+    },
+    { enabled: isOpen, retry: false, refetchOnMount: false, refetchOnWindowFocus: false },
+  );
+
   return (
-    <Collapse>
+    <Collapse onChange={state => setIsOpen(state as unknown as boolean)}>
       <Collapse.Panel
         key={`${data.address}_${data.post_id}`}
         header={
@@ -117,7 +132,7 @@ const AddressCard: React.FC<Props> = ({ data, number, showAddress = true }) => {
           </div>
         }
       >
-        {parse(DOMPurity.sanitize(data.content))}
+        {isLoading ? <LoadingOutlined style={{ fontSize: 16 }} /> : parse(DOMPurity.sanitize(postData?.content))}
       </Collapse.Panel>
     </Collapse>
   );
